@@ -8,6 +8,10 @@ module.exports = {
       "views/global.css",
       // Pages
       "pages/default.js",
+      // Custom views
+      "views/highcharts.css",
+      "views/highcharts.js",
+      "views/foamtree.js",
     ],
   },
 };
