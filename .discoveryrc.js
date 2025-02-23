@@ -1,6 +1,6 @@
 module.exports = {
   name: "react-native-bundle-discovery",
-  data: () => require("./tmp/rn-stats.json"),
+  data: () => require("./tmp/new_rn-stats.json"),
   setup: "./setup.js",
   view: {
     assets: [
@@ -8,6 +8,7 @@ module.exports = {
       "views/global.css",
       // Pages
       "pages/default.js",
+      "pages/module.js",
       // Custom views
       "views/highcharts.css",
       "views/highcharts.js",

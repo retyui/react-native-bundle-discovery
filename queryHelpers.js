@@ -1,6 +1,10 @@
 const Highcharts = require("highcharts");
 
 const helpers = {
+  getFileExtension(filename) {
+    const idx = filename.lastIndexOf(".");
+    return idx === -1 ? "js*" : filename.slice(idx + 1);
+  },
   toFixed(value, fractionDigits = 2) {
     return Number(value).toFixed(fractionDigits);
   },
