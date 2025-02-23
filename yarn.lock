@@ -1292,6 +1292,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash@npm:^4.17.21":
+  version: 4.17.21
+  resolution: "lodash@npm:4.17.21"
+  checksum: 10c0/d8cbea072bb08655bb4c989da418994b073a608dffa608b09ac04b43a791b12aeae7cd7ad919aa4c925f33b48490b5cfe6c1f71d827956071dae2e7bb3a6b74c
+  languageName: node
+  linkType: hard
+
 "luxon@npm:^3.2.1":
   version: 3.5.0
   resolution: "luxon@npm:3.5.0"
@@ -1634,6 +1641,7 @@ __metadata:
     "@discoveryjs/cli": "npm:^2.13.1"
     "@discoveryjs/discovery": "npm:^1.0.0-beta.93"
     highcharts: "npm:^12.1.2"
+    lodash: "npm:^4.17.21"
     patch-package: "npm:^8.0.0"
     prettier: "npm:^3.5.1"
   peerDependencies:

@@ -37,7 +37,7 @@ discovery.page.define("module", {
               content: [
                 {
                   view: "block",
-                  className: "foo",
+                  className: "width-50p",
                   content: [
                     "h5: 'Source'",
                     {
@@ -49,7 +49,7 @@ discovery.page.define("module", {
                 },
                 {
                   view: "block",
-                  className: "foo",
+                  className: "width-50p",
                   content: [
                     "h5: 'Output'",
                     {

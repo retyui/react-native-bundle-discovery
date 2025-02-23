@@ -83,9 +83,19 @@ discovery.view.define("foamtree", function (el, config, rawData, context) {
 
           const { group } = event;
 
-          tooltip.innerHTML = group
-            ? `<b>${group.label}</b>: ${group.size}`
-            : "";
+          if (group) {
+            const htmlContent = [
+              `<b class="tooltip-name">${group.type}</b>: ${group.label}`,
+              `<b>Size</b>: ${group.size}`,
+              group.type === "folder" ? `<b>Files</b>: ${group.files}` : null,
+            ]
+              .filter((e) => !!e)
+              .join("<br/>");
+
+            tooltip.innerHTML = htmlContent;
+          } else {
+            tooltip.innerHTML = "";
+          }
 
           // if (group) {
           //   this.setState({

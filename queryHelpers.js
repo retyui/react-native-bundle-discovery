@@ -1,3 +1,4 @@
+const isEmpty = require("lodash/isEmpty");
 const Highcharts = require("highcharts");
 
 const helpers = {
@@ -143,26 +144,40 @@ function flattenTree(
 }
 
 function sumSizes(node) {
+  const isFile = isEmpty(node.children);
+  let totalFiles = isFile ? 1 : 0;
   let totalSize = node.size || 0;
   for (const key in node.children) {
-    totalSize += sumSizes(node.children[key]);
+    const result = sumSizes(node.children[key]);
+    totalSize += result.totalSize;
+    totalFiles += result.totalFiles;
   }
+  node.type = isFile ? "file" : "folder";
   node.size = totalSize;
-  return totalSize;
+  node.files = totalFiles;
+  return { totalSize, totalFiles };
 }
 
 function toGroups(node, label) {
   const keys = Object.keys(node.children);
-  if (keys.length === 0) {
-    return { label, weight: node.size, size: helpers.formatBytes(node.size) };
-  }
 
-  return {
+  const common = {
     label,
     weight: node.size,
+    files: node.files,
+    type: node.type,
     size: helpers.formatBytes(node.size),
-    groups: keys.map((key) => toGroups(node.children[key], key)),
   };
+
+  if (keys.length === 0) {
+    // File
+    return common;
+  }
+
+  // Folder
+  return Object.assign(common, {
+    groups: keys.map((key) => toGroups(node.children[key], key)),
+  });
 }
 
 function randomInt(min, max) {

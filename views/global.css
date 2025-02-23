@@ -37,6 +37,12 @@
     border-radius: 5px;
     box-shadow: 0 0 5px #ccc;
 }
+.tooltip-name{
+    text-transform: capitalize;
+}
 .flex-no-wrap{
     flex-wrap: nowrap;
+}
+.width-50p{
+    width: 50%;
 }
