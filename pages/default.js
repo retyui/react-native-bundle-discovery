@@ -37,11 +37,11 @@ discovery.page.define("default", [
     view: "tabs",
     name: "mainTabs",
     className: "main-tabs",
-    value: "modules", // change to your tab for development
+    value: "duplicates", // TODO: change to your tab for development
     tabs: [
       {
         value: "treemap-foamtree",
-        text: "Treemap (#1)",
+        text: "Treemap graph",
       },
       {
         value: "treemap-highcharts",
@@ -50,11 +50,14 @@ discovery.page.define("default", [
       },
       {
         value: "modules",
-        text: "Modules",
+        content: ["text:'Modules '", "pill-badge: modules.size()"],
       },
       {
         value: "duplicates",
-        text: "Duplicate modules",
+        content: [
+          "text:'Duplicate modules '",
+          "pill-badge: modules.filter(=> duplicates).size()",
+        ],
       },
     ],
     content: {
@@ -181,7 +184,81 @@ discovery.page.define("default", [
         },
         {
           when: '#.mainTabs="duplicates"',
-          content: 'text:"TODO..."',
+          content: {
+            view: "content-filter",
+            data: `
+              // values
+              $duplicatesOnly: modules.filter(=> duplicates);
+              $totalSize: $duplicatesOnly.output.sizeInBytes.sum();
+              $toModule: => {
+                ext:  $.path.getFileExtension(),
+                name: $.path, 
+                size: $.output.sizeInBytes.formatBytes(), 
+                percent: ($.output.sizeInBytes / $totalSize).percent(3),
+              };
+              // return
+              $duplicatesOnly.map(=> { 
+                ...$.$toModule(),
+                reasons: $.dependents.map(=> $.$toModule()),
+                duplicates: $.duplicates.map(=> $.$toModule()),
+              })
+            `,
+            name: "filterByPathStr",
+            content: {
+              view: "list",
+              data: ".[name ~= #.filterByPathStr]",
+              item: {
+                view: "tree",
+                expanded: false,
+                itemConfig: {
+                  content: getTreeModule({ hasTextMatch: true }),
+                  children: `
+                    [
+                       {
+                         title:'Dependents',
+                         data: $.reasons,
+                         type: 'reasons',
+                       },
+                       {
+                         title:'Similar copies',
+                         data: $.duplicates,
+                         type: 'duplicates',
+                       }
+                    ].filter(=> $.data.size() > 0)
+                  `,
+                  itemConfig: {
+                    view: "switch",
+                    content: [
+                      {
+                        when: 'type="reasons"',
+                        content: {
+                          view: "tree-leaf",
+                          content: "text:title",
+                          children: `$.data`,
+                          itemConfig: {
+                            view: "tree-leaf",
+                            content: getTreeModule(),
+                          },
+                        },
+                      },
+                      {
+                        when: 'type="duplicates"',
+                        content: {
+                          view: "tree-leaf",
+                          content: "text:title",
+                          children: `$.data`,
+                          itemConfig: {
+                            view: "tree-leaf",
+                            content: getTreeModule(),
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
         },
       ],
     },

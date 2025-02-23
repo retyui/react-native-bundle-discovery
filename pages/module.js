@@ -12,37 +12,65 @@ discovery.page.define("module", {
         "text: $.currentModule.path",
       ],
     },
-
-    "h4: 'Module content'",
     {
-      view: "hstack",
-      className: "flex-no-wrap",
-      content: [
+      view: "tabs",
+      name: "tabs",
+      tabs: [
         {
-          view: "block",
-          className: "foo",
-          content: [
-            "h5: 'Source'",
-            {
-              view: "source",
-              syntax: "ts",
-              source: "=$.currentModule.source.code",
-            },
-          ],
+          value: "mcontent",
+          text: "Module content",
         },
         {
-          view: "block",
-          className: "foo",
-          content: [
-            "h5: 'Output'",
-            {
-              view: "source",
-              syntax: "ts",
-              source: "=$.currentModule.output.code",
-            },
-          ],
+          value: "mduplicates",
+          when: "currentModule.duplicates",
+          text: "Duplicates",
         },
       ],
+      content: {
+        view: "switch",
+        content: [
+          {
+            when: '#.tabs="mcontent"',
+            content: {
+              view: "hstack",
+              className: "flex-no-wrap",
+              content: [
+                {
+                  view: "block",
+                  className: "foo",
+                  content: [
+                    "h5: 'Source'",
+                    {
+                      view: "source",
+                      syntax: "ts",
+                      source: "=$.currentModule.source.code",
+                    },
+                  ],
+                },
+                {
+                  view: "block",
+                  className: "foo",
+                  content: [
+                    "h5: 'Output'",
+                    {
+                      view: "source",
+                      syntax: "ts",
+                      source: "=$.currentModule.output.code",
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          {
+            when: '#.tabs="mduplicates"',
+            content: {
+              view: "table", // TODO
+              data: "currentModule.duplicates",
+            },
+          },
+        ],
+      },
     },
   ],
 });
