@@ -3,12 +3,22 @@
 > [!WARNING]
 > Currently, everything is in a very early stage. The project is not yet ready for use.
 
+
+
+**Similar projects:**
+- https://github.com/expo/atlas
+- https://github.com/v3ron/expo-atlas-without-expo
+- https://github.com/callstack/react-native-bundle-visualizer
+- https://github.com/webpack-contrib/webpack-bundle-analyzer
+
 **Links:**
 - Build blocks for pages: https://discoveryjs.github.io/discovery/#views-showcase
 - Jora syntax: https://discoveryjs.github.io/jora/#article:jora-syntax-operators
 
+
+
 **TODO:**
-- [ ] Search/filters
+- [x] Search/filters
 - [ ] bug: Code size is diff. treemap != badge info
 - [ ] Diff page (to compare two versions bundle)
 - [ ] Map based on the coverage (https://x.com/chromedevtools/status/1095411723161354240?lang=en)

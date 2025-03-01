@@ -6,10 +6,10 @@ const getTreeModule = ({ hasTextMatch = false } = {}) => [
         view: "link",
         content: hasTextMatch ? "text-match" : "text",
         data: `{
-                        href: name.pageLink("module", {}),
-                        text: name,
-                        match: #.filterByPathStr
-                      }`,
+          href: name.pageLink("module", {}),
+          text: name,
+          match: #.filterByPathStr
+        }`,
       }
     : {
         view: "link",
@@ -18,7 +18,7 @@ const getTreeModule = ({ hasTextMatch = false } = {}) => [
   "text:' '",
   "pill-badge:{ text: size, color: 'rgba(120, 177, 9, 0.35)' }",
   "pill-badge:{ text: percent, color: 'rgba(120, 177, 9, 0.35)' }",
-  "pill-badge:{ text: ext, color: 'rgba(237, 177, 9, 0.35)' }",
+  "pill-badge:{ text: ext, color: ext.getExtColor() }",
 ];
 function getModulesTree({ data }) {
   if (!data) {
@@ -38,6 +38,7 @@ function getModulesTree({ data }) {
     content: {
       view: "list",
       data: ".[name ~= #.filterByPathStr]",
+      emptyText: "⚠️ No modules found",
       item: {
         view: "tree",
         expanded: false,

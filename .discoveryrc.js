@@ -1,6 +1,6 @@
 module.exports = {
   name: "react-native-bundle-discovery",
-  data: () => require("./tmp/th-rn-stats.json"),
+  data: () => require("./tmp/rn-stats_ex.json"),
   setup: "./setup.js",
   view: {
     assets: [

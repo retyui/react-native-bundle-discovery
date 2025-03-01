@@ -2,9 +2,21 @@ const isEmpty = require("lodash/isEmpty");
 const Highcharts = require("highcharts");
 
 const helpers = {
+  getExtColor(extName) {
+    const colors = {
+      js: "#f1e05a50",
+      ts: "#2b748950",
+      tsx: "#2b748950",
+      json: "#e34c2650",
+      svg: "#e69f0d50",
+      css: "#563d7c50",
+      png: "#e44b2350",
+    };
+    return colors[extName] ?? colors["js"];
+  },
   getFileExtension(filename) {
     const idx = filename.lastIndexOf(".");
-    return idx === -1 ? "js*" : filename.slice(idx + 1);
+    return idx === -1 ? "js" : filename.slice(idx + 1);
   },
   toFixed(value, fractionDigits = 2) {
     return Number(value).toFixed(fractionDigits);
@@ -65,19 +77,25 @@ const helpers = {
       sumSizes(nodeModulesMap);
       sumSizes(sourceCodeMap);
 
-      const groups = {
-        groups: [
-          toGroups(sourceCodeMap, "Source Code"),
-          toGroups(nodeModulesMap.children.node_modules, "node_modules"),
-        ],
-      };
+      const sourceCodeGroup = toGroups(sourceCodeMap, "Source Code");
+      const nodeModulesGroup = nodeModulesMap?.children?.node_modules
+        ? toGroups(nodeModulesMap.children.node_modules, "node_modules")
+        : {};
 
-      groups.weight = groups.groups.reduce(
+      if (!sourceCodeGroup.groups) {
+        return nodeModulesGroup;
+      }
+      if (!nodeModulesGroup.groups) {
+        return nodeModulesGroup;
+      }
+
+      const topLevelNode = { groups: [sourceCodeGroup, nodeModulesGroup] };
+      topLevelNode.weight = topLevelNode.groups.reduce(
         (acc, group) => acc + group.weight,
         0,
       );
 
-      return groups;
+      return topLevelNode;
     }
 
     if (type === "highcharts-treemap") {

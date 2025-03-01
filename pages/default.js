@@ -16,7 +16,7 @@ discovery.page.define("default", [
     view: "tabs",
     name: "mainTabs",
     className: "main-tabs",
-    value: "treemap-foamtree", // TODO: change to your tab for development
+    value: "modules", // TODO: change to your tab for development
     tabs: [
       {
         value: "treemap-foamtree",
@@ -45,14 +45,19 @@ discovery.page.define("default", [
         {
           when: '#.mainTabs="treemap-foamtree"',
           content: {
-            view: "foamtree",
-            data: `
+            view: "content-filter",
+            name: "filterByPathStr",
+            // debounce: 300, TODO: https://github.com/discoveryjs/discovery/pull/108
+            className: "foamtree-filter",
+            content: {
+              view: "foamtree",
+              data: `
               $root: $.rootFolder;
-              $dataObject: modules
-                //.slice(0,9999999)
+              $applyFilter: => #.filterByPathStr ? $.modules.filter(=> $.path ~= #.filterByPathStr) : $.modules;
+              $dataObject: $.$applyFilter()
                 .map(=> {path, size: $.output.sizeInBytes})
                 .transformFilesList($root, "foamtree");
-          
+
               {
                 options: { 
                   dataObject: $dataObject,
@@ -61,6 +66,7 @@ discovery.page.define("default", [
                 }
               }
               `,
+            },
           },
         },
         {

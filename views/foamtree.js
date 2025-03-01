@@ -34,6 +34,8 @@ discovery.view.define("foamtree", function (el, config, rawData, context) {
       const root = el.closest(".discovery-root");
       const tooltip = injectTooltip(root);
 
+      window.addEventListener("resize", () => ft.resize(), { passive: true });
+
       root.addEventListener(
         "mousemove",
         (event) => {
