@@ -398,8 +398,8 @@ g.highcharts-series,
 
 /* Default colors */
 .my-light .highcharts-color-0 {
-    fill: var(--highcharts-color-0);
-    stroke: var(--highcharts-color-0);
+    /*fill: var(--highcharts-color-0);*/
+    /*stroke: var(--highcharts-color-0);*/
 }
 
 .my-light .highcharts-color-1 {

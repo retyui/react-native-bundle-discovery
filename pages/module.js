@@ -12,6 +12,7 @@ discovery.page.define("module", {
         "text: $.currentModule.path",
       ],
     },
+
     {
       view: "tabs",
       name: "tabs",
@@ -19,6 +20,10 @@ discovery.page.define("module", {
         {
           value: "mcontent",
           text: "Module content",
+        },
+        {
+          value: "networkGraph",
+          text: "Dependent modules",
         },
         {
           value: "mduplicates",
@@ -60,6 +65,71 @@ discovery.page.define("module", {
                   ],
                 },
               ],
+            },
+          },
+          {
+            when: '#.tabs="networkGraph"',
+            content: {
+              view: "context",
+              data: `{
+                $tmp: $.currentModule.getNetworkGraph();
+                // 
+                currentModulePath: $.currentModule.path,
+                entryPointPath: $tmp.entryPointPath,
+                data: $tmp.data,
+              }`,
+              content: {
+                when: "$.data.size() < 100",
+                view: "highcharts",
+                data: `{
+                  options: {
+                    chart: {
+                      type: "networkgraph",
+                      height: "600px",
+                    },
+                    title: {
+                      text: "Import Dependency Graph",
+                      align: "left",
+                    },
+                    subtitle: {
+                      text: "It shows which modules import this file (Red - current module, Gold - entry point)",
+                      align: "left",
+                    },
+                    plotOptions: {
+                      networkgraph: {
+                        keys: ["to", "from"],
+                        //keys: ["from", "to"],
+                        layoutAlgorithm: {
+                          enableSimulation: true,
+                          friction: -0.9,
+                          gravitationalConstant: 0.06,
+                        },
+                      },
+                    },
+                    series: [
+                      {
+                        accessibility: {
+                          enabled: false,
+                        },
+                        dataLabels: {
+                          enabled: true,
+                          linkFormat: "",
+                          style: {
+                            fontSize: "0.8em",
+                            fontWeight: "normal",
+                          },
+                        },
+                        id: "lang-tree",
+                        data: $.data,
+                        nodes:[
+                          { id: $.currentModulePath, marker: { radius: 15, fillColor: 'red' }, },
+                          { id: $.entryPointPath, marker: { radius: 15, fillColor: 'gold' } }
+                        ],
+                      },
+                    ],
+                  },
+                }`,
+              },
             },
           },
           {

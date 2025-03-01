@@ -9,6 +9,14 @@ const topMetaData = [
   metadata.is_minified,
 ];
 
+const TABS = {
+  TREEMAP_FOAMTREE: "treemap-foamtree",
+  TREEMAP_HIGHCHARTS: "treemap-highcharts",
+  MODULES: "modules",
+  PACKAGES: "packages",
+  DUPLICATES: "duplicates",
+};
+
 discovery.page.define("default", [
   ...topMetaData,
 
@@ -16,26 +24,33 @@ discovery.page.define("default", [
     view: "tabs",
     name: "mainTabs",
     className: "main-tabs",
-    value: "modules", // TODO: change to your tab for development
+    value: TABS.PACKAGES, // TODO: change to your tab for development
     tabs: [
       {
-        value: "treemap-foamtree",
+        value: TABS.TREEMAP_FOAMTREE,
         text: "Treemap chart",
       },
       {
-        value: "treemap-highcharts",
+        value: TABS.TREEMAP_HIGHCHARTS,
         text: "Treemap (#2)",
         when: false,
       },
       {
-        value: "modules",
-        content: ["text:'Modules '", "pill-badge: modules.size()"],
+        value: TABS.MODULES,
+        content: ["text:'Moules '", "pill-badge: modules.size()"],
       },
       {
-        value: "duplicates",
+        value: TABS.DUPLICATES,
         content: [
           "text:'Duplicate modules '",
           "pill-badge: modules.filter(=> duplicates).size()",
+        ],
+      },
+      {
+        value: TABS.PACKAGES,
+        content: [
+          "text:'Packages '",
+          `pill-badge: modules.filter(=> path has "node_modules").group(=> path.getModulesName(), => 0).size()`,
         ],
       },
     ],
@@ -43,7 +58,7 @@ discovery.page.define("default", [
       view: "switch",
       content: [
         {
-          when: '#.mainTabs="treemap-foamtree"',
+          when: `#.mainTabs="${TABS.TREEMAP_FOAMTREE}"`,
           content: {
             view: "content-filter",
             name: "filterByPathStr",
@@ -70,7 +85,7 @@ discovery.page.define("default", [
           },
         },
         {
-          when: '#.mainTabs="treemap-highcharts"',
+          when: `#.mainTabs="${TABS.TREEMAP_HIGHCHARTS}"`,
           content: {
             view: "highcharts",
             data: `
@@ -111,7 +126,7 @@ discovery.page.define("default", [
           },
         },
         {
-          when: '#.mainTabs="modules"',
+          when: `#.mainTabs="${TABS.MODULES}"`,
           content: getModulesTree({
             data: `
               $totalSize: modules.output.sizeInBytes.sum();
@@ -130,7 +145,17 @@ discovery.page.define("default", [
           }),
         },
         {
-          when: '#.mainTabs="duplicates"',
+          when: `#.mainTabs="${TABS.PACKAGES}"`,
+          content: [
+            {
+              view: "struct",
+              expanded: 3,
+              data: `modules.filter(=> path has "node_modules").group(=> path.getModulesName())`,
+            },
+          ],
+        },
+        {
+          when: `#.mainTabs="${TABS.DUPLICATES}"`,
           content: getModulesTree({
             data: `
               // values

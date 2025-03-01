@@ -2,6 +2,7 @@ const Highcharts = require("highcharts");
 
 require("highcharts/modules/heatmap");
 require("highcharts/modules/treemap");
+require("highcharts/modules/networkgraph");
 require("highcharts/modules/exporting");
 
 const { doTheming } = require("./_theme");

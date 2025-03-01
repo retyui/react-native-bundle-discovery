@@ -1,7 +1,77 @@
 const isEmpty = require("lodash/isEmpty");
-const Highcharts = require("highcharts");
 
 const helpers = {
+  getHighchartsColors() {
+    const Highcharts = require("highcharts");
+    return Highcharts.getOptions().colors;
+  },
+  getModulesName(path) {
+    const modules = path.split("node_modules/");
+    const lastModule = modules[modules.length - 1];
+    const [folder, subFolder] = lastModule.split("/");
+    if (folder.startsWith("@")) {
+      return `${folder}/${subFolder}`;
+    }
+    return folder;
+  },
+  getNetworkGraph(
+    module,
+    { maxParentDepth = 3, omitVisitedModules = true } = {},
+  ) {
+    const queue = [{ module, parentId: "", level: 0 }];
+    const visited = new Set();
+    const result = [];
+    let entryPointPath = null;
+    const data = [];
+
+    while (queue.length > 0) {
+      const { module: currentModule, parentId, level } = queue.shift();
+
+      if (level >= maxParentDepth) {
+        break;
+      }
+
+      const id = currentModule.path;
+
+      if (omitVisitedModules) {
+        if (visited.has(id)) {
+          continue;
+        }
+        visited.add(id);
+      }
+
+      if (parentId) {
+        const isEntryPoint = currentModule.dependents.length === 0;
+        result.push({ isEntryPoint, id, parentId });
+        data.push([id, parentId]);
+        if (isEntryPoint) {
+          entryPointPath = id;
+        }
+      }
+
+      if (Array.isArray(currentModule.dependents)) {
+        for (const dependentModule of currentModule.dependents) {
+          queue.push({
+            module: dependentModule,
+            parentId: id,
+            level: level + 1,
+          });
+        }
+      }
+    }
+
+    if (!entryPointPath) {
+      for (const item of result) {
+        if (item.isEntryPoint) {
+          entryPointPath = item.id;
+          break;
+        }
+      }
+    }
+
+    return { entryPointPath, data };
+  },
+
   getExtColor(extName) {
     const colors = {
       js: "#f1e05a50",
