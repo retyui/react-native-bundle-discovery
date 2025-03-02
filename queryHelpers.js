@@ -1,5 +1,3 @@
-const isEmpty = require("lodash/isEmpty");
-
 const helpers = {
   getHighchartsColors() {
     const Highcharts = require("highcharts");
@@ -27,7 +25,7 @@ const helpers = {
     while (queue.length > 0) {
       const { module: currentModule, parentId, level } = queue.shift();
 
-      if (level >= maxParentDepth) {
+      if (level >= Number(maxParentDepth)) {
         break;
       }
 
@@ -43,7 +41,7 @@ const helpers = {
       if (parentId) {
         const isEntryPoint = currentModule.dependents.length === 0;
         result.push({ isEntryPoint, id, parentId });
-        data.push([id, parentId]);
+        data.push([parentId, id]);
         if (isEntryPoint) {
           entryPointPath = id;
         }
@@ -232,6 +230,8 @@ function flattenTree(
 }
 
 function sumSizes(node) {
+  const isEmpty = require("lodash/isEmpty");
+
   const isFile = isEmpty(node.children);
   let totalFiles = isFile ? 1 : 0;
   let totalSize = node.size || 0;

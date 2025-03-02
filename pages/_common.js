@@ -1,25 +1,27 @@
 const platformColor = `transformOptions.platform = 'android' ? 'rgba(194, 239, 116, .4)' : 'rgba(119, 31, 218, .4)'`;
 
-const getTreeModule = ({ hasTextMatch = false } = {}) => [
-  hasTextMatch
-    ? {
-        view: "link",
-        content: hasTextMatch ? "text-match" : "text",
-        data: `{
+function getTreeModule({ hasTextMatch = false } = {}) {
+  return [
+    "pill-badge:{ text: ext, color: ext.getExtColor() }",
+    hasTextMatch
+      ? {
+          view: "link",
+          content: hasTextMatch ? "text-match" : "text",
+          data: `{
           href: name.pageLink("module", {}),
           text: name,
           match: #.filterByPathStr
         }`,
-      }
-    : {
-        view: "link",
-        data: `{ href: $.name.pageLink("module", {}), text: $.name }`,
-      },
-  "text:' '",
-  "pill-badge:{ text: size, color: 'rgba(120, 177, 9, 0.35)' }",
-  "pill-badge:{ text: percent, color: 'rgba(120, 177, 9, 0.35)' }",
-  "pill-badge:{ text: ext, color: ext.getExtColor() }",
-];
+        }
+      : {
+          view: "link",
+          data: `{ href: $.name.pageLink("module", {}), text: $.name }`,
+        },
+    "text:' '",
+    "pill-badge:{ text: size, color: 'rgba(120, 177, 9, 0.35)' }",
+    "pill-badge:{ text: percent, color: 'rgba(120, 177, 9, 0.35)' }",
+  ];
+}
 function getModulesTree({ data }) {
   if (!data) {
     throw new Error("[getModulesTree]: data is required");
@@ -28,13 +30,6 @@ function getModulesTree({ data }) {
     view: "content-filter",
     data,
     name: "filterByPathStr",
-    modifiers: [
-      'h2:"Modifiers"',
-      {
-        view: "input",
-        name: "inputValue",
-      },
-    ],
     content: {
       view: "list",
       data: ".[name ~= #.filterByPathStr]",
@@ -132,6 +127,7 @@ const metadata = {
 };
 
 module.exports = {
+  getTreeModule,
   getModulesTree,
   metadata,
 };

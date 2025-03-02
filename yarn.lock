@@ -12,7 +12,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discoveryjs/cli@npm:^2.13.1":
+"@discoveryjs/cli@npm:2.13.1":
   version: 2.13.1
   resolution: "@discoveryjs/cli@npm:2.13.1"
   dependencies:
@@ -38,7 +38,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discoveryjs/discovery@npm:^1.0.0-beta.93":
+"@discoveryjs/discovery@npm:1.0.0-beta.93":
   version: 1.0.0-beta.93
   resolution: "@discoveryjs/discovery@npm:1.0.0-beta.93"
   dependencies:
@@ -1082,7 +1082,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"highcharts@npm:^12.1.2":
+"highcharts@npm:12.1.2":
   version: 12.1.2
   resolution: "highcharts@npm:12.1.2"
   checksum: 10c0/dfbacab6ce0091053f438561832e8f97c6ed387ba50b1898afeada12e9ef2b0f1a6461e078565c1302e09b28cf1e45816d4ff38033a1b9555729862ee31611dc
@@ -1292,7 +1292,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.21":
+"lodash@npm:4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: 10c0/d8cbea072bb08655bb4c989da418994b073a608dffa608b09ac04b43a791b12aeae7cd7ad919aa4c925f33b48490b5cfe6c1f71d827956071dae2e7bb3a6b74c
@@ -1517,7 +1517,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"patch-package@npm:^8.0.0":
+"patch-package@npm:8.0.0":
   version: 8.0.0
   resolution: "patch-package@npm:8.0.0"
   dependencies:
@@ -1570,12 +1570,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.5.1":
-  version: 3.5.1
-  resolution: "prettier@npm:3.5.1"
+"prettier@npm:3.5.2":
+  version: 3.5.2
+  resolution: "prettier@npm:3.5.2"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 10c0/9f6f810eae455d6e4213845151a484a2338f2e0d6a8b84ee8e13a83af8a2421ef6c1e31e61e4b135671fb57b9541f6624648880cc2061ac803e243ac898c0123
+  checksum: 10c0/d7b597ed33f39c32ace675896ad187f06a3e48dc8a1e80051b5c5f0dae3586d53981704b8fda5ac3b080e6c2e0e197d239131b953702674f044351621ca5e1ac
   languageName: node
   linkType: hard
 
@@ -1638,12 +1638,12 @@ __metadata:
   resolution: "react-native-bundle-discovery@workspace:."
   dependencies:
     "@carrotsearch/foamtree": "npm:3.5.1"
-    "@discoveryjs/cli": "npm:^2.13.1"
-    "@discoveryjs/discovery": "npm:^1.0.0-beta.93"
-    highcharts: "npm:^12.1.2"
-    lodash: "npm:^4.17.21"
-    patch-package: "npm:^8.0.0"
-    prettier: "npm:^3.5.1"
+    "@discoveryjs/cli": "npm:2.13.1"
+    "@discoveryjs/discovery": "npm:1.0.0-beta.93"
+    highcharts: "npm:12.1.2"
+    lodash: "npm:4.17.21"
+    patch-package: "npm:8.0.0"
+    prettier: "npm:3.5.2"
   peerDependencies:
     metro: "*"
   peerDependenciesMeta:

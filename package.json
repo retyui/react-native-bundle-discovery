@@ -10,7 +10,8 @@
     "start": "NODE_ENV=development npx discovery --config .discoveryrc.js",
     "build": "npx discovery-build --config .discoveryrc.js --output build --serve-only-assets --single-file",
     "postbuild": "yarn print-size",
-    "print-size": "npx @delucis/filesize-cli build/index.html"
+    "print-size": "npx @delucis/filesize-cli build/index.html",
+    "postinstall": "yarn patch-package"
   },
   "peerDependencies": {
     "metro": "*"
@@ -20,16 +21,14 @@
       "optional": true
     }
   },
-  "dependencies": {
-    "@carrotsearch/foamtree": "3.5.1",
-    "@discoveryjs/discovery": "1.0.0-beta.93",
-    "highcharts": "^12.1.2",
-    "lodash": "^4.17.21",
-    "patch-package": "^8.0.0"
-  },
   "devDependencies": {
+    "@carrotsearch/foamtree": "3.5.1",
     "@discoveryjs/cli": "2.13.1",
-    "prettier": "^3.5.1"
+    "@discoveryjs/discovery": "1.0.0-beta.93",
+    "highcharts": "12.1.2",
+    "lodash": "4.17.21",
+    "patch-package": "8.0.0",
+    "prettier": "3.5.2"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -9,6 +9,7 @@ module.exports = {
       // Pages
       "pages/default.js",
       "pages/module.js",
+      "pages/package.js",
       // Custom views
       "views/highcharts.css",
       "views/highcharts.js",

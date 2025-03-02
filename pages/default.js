@@ -1,4 +1,4 @@
-const { metadata, getModulesTree } = require("./_common");
+const { metadata, getModulesTree, getTreeModule } = require("./_common");
 
 const topMetaData = [
   metadata.platform,
@@ -24,7 +24,7 @@ discovery.page.define("default", [
     view: "tabs",
     name: "mainTabs",
     className: "main-tabs",
-    value: TABS.PACKAGES, // TODO: change to your tab for development
+    value: TABS.TREEMAP_FOAMTREE, // TODO: change to your tab for development
     tabs: [
       {
         value: TABS.TREEMAP_FOAMTREE,
@@ -37,7 +37,7 @@ discovery.page.define("default", [
       },
       {
         value: TABS.MODULES,
-        content: ["text:'Moules '", "pill-badge: modules.size()"],
+        content: ["text:'Modules '", "pill-badge: modules.size()"],
       },
       {
         value: TABS.DUPLICATES,
@@ -148,9 +148,78 @@ discovery.page.define("default", [
           when: `#.mainTabs="${TABS.PACKAGES}"`,
           content: [
             {
-              view: "struct",
-              expanded: 3,
-              data: `modules.filter(=> path has "node_modules").group(=> path.getModulesName())`,
+              view: "content-filter",
+              data: `
+                $totalSize: modules.output.sizeInBytes.sum();
+                $toModule: => {
+                  ext:  $.path.getFileExtension(),
+                  name: $.path, 
+                  size: $.output.sizeInBytes.formatBytes(), 
+                  percent: ($.output.sizeInBytes / $totalSize).percent(3),
+                };
+                modules
+                   .filter(=> path has "node_modules")
+                   .group(=> path.getModulesName())
+                   .map(=> ({ 
+                      $pkgName: $.key;
+                      pkgName: $pkgName,
+                      size: $.value.map(=> output.sizeInBytes).sum(),
+                      pkgInstances: $.value
+                        .group(=> path.split($pkgName).pick(0) + $pkgName)
+                        .map(=> {
+                           pkgName: $.key,
+                           size: $.value.map(=> output.sizeInBytes).sum(),
+                           modules: $.value.map(=> $.$toModule()),
+                        }),
+                   }))
+                   .sort(size desc)
+              `,
+              name: "filterByPathStr",
+              content: {
+                view: "list",
+                data: ".[pkgName ~= #.filterByPathStr]",
+                emptyText: "⚠️ No packages found",
+                item: {
+                  view: "tree",
+                  expanded: false,
+                  itemConfig: {
+                    content: [
+                      {
+                        view: "link",
+                        content: "text-match",
+                        data: `{
+                          href: pkgName.pageLink("package", {}),
+                          text: pkgName,
+                          match: #.filterByPathStr
+                        }`,
+                      },
+                      "text: ' '",
+                      "pill-badge:{ text: size.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
+                      {
+                        view: "pill-badge",
+                        when: "pkgInstances.size() > 1",
+                        text: "has duplicates",
+                        color: "rgba(255, 0, 0, 0.35)",
+                      },
+                    ],
+                    children: `$.pkgInstances`,
+                    itemConfig: {
+                      view: "tree-leaf",
+                      content: [
+                        //
+                        "text:pkgName",
+                        "text:' '",
+                        "pill-badge:{ text: size.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
+                      ],
+                      children: `$.modules`,
+                      itemConfig: {
+                        view: "tree-leaf",
+                        content: getTreeModule(),
+                      },
+                    },
+                  },
+                },
+              },
             },
           ],
         },
