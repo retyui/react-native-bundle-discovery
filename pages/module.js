@@ -110,7 +110,7 @@ discovery.page.define("module", {
                         "html: '<br/>'",
                         {
                           view: "alert-warning",
-                          data: '"Amount of dependencies ("+$.data.size()+") is too big to display :("',
+                          data: '"Amount of dependencies ("+$.data.size()+") are too big to display :("',
                         },
                       ],
                     },

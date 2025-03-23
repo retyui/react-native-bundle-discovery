@@ -18,7 +18,9 @@ const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 +const {createSerializer} = require('react-native-bundle-discovery');
 
 +const mySerializer = createSerializer({  
-+  projectRoot: __dirname, // ⚠️ Warn : use monorepo root if you use it
++  projectRoot: __dirname, 
+   //^^^ ⚠️ WARNING: In a monorepo setup, this should point to the monorepo root,
+   //                not the individual package directory.
 +})
 
 
