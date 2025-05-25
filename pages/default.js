@@ -17,6 +17,10 @@ const TABS = {
   DUPLICATES: "duplicates",
 };
 
+function parseHashRef(url = window.location.href) {
+  return new URL(url).hash.split(":")?.[1];
+}
+
 discovery.page.define("default", [
   ...topMetaData,
 
@@ -24,23 +28,27 @@ discovery.page.define("default", [
     view: "tabs",
     name: "mainTabs",
     className: "main-tabs",
-    value: TABS.TREEMAP_FOAMTREE, // TODO: change to your tab for development
+    value: parseHashRef() ?? TABS.TREEMAP_FOAMTREE,
     tabs: [
       {
         value: TABS.TREEMAP_FOAMTREE,
         text: "Treemap chart",
+        className: `main-tabs-${TABS.TREEMAP_FOAMTREE}`,
       },
       {
         value: TABS.TREEMAP_HIGHCHARTS,
+        className: `main-tabs-${TABS.TREEMAP_HIGHCHARTS}`,
         text: "Treemap (#2)",
         when: false,
       },
       {
         value: TABS.MODULES,
+        className: `main-tabs-${TABS.MODULES}`,
         content: ["text:'Modules '", "pill-badge: modules.size()"],
       },
       {
         value: TABS.DUPLICATES,
+        className: `main-tabs-${TABS.DUPLICATES}`,
         content: [
           "text:'Duplicate modules '",
           "pill-badge: modules.filter(=> duplicates).size()",
@@ -48,6 +56,7 @@ discovery.page.define("default", [
       },
       {
         value: TABS.PACKAGES,
+        className: `main-tabs-${TABS.PACKAGES}`,
         content: [
           "text:'Packages '",
           `pill-badge: modules.filter(=> path has "node_modules").group(=> path.getModulesName(), => 0).size()`,
@@ -56,13 +65,36 @@ discovery.page.define("default", [
     ],
     content: {
       view: "switch",
+      context(data, context) {
+        // FIXME
+        const isHashChangeEvent = new Error("").stack.includes("Promise.all");
+        discovery.overridePageHashStateWithAnchor({
+          id: "default",
+          ref: isHashChangeEvent ? discovery.pageRef : context.mainTabs,
+        });
+        discovery.cancelScheduledRender();
+
+        setTimeout(() => {
+          discovery.dom.root
+            .querySelectorAll(".main-tabs>div>.onclick")
+            .forEach((e) => e.classList.remove("active"));
+          discovery.dom.root
+            .querySelectorAll(`.main-tabs .main-tabs-${discovery.pageRef}`)
+            .forEach((e) => e.classList.add("active"));
+        }, 50);
+
+        return {
+          ...context,
+          id: discovery.pageRef,
+        };
+      },
       content: [
         {
-          when: `#.mainTabs="${TABS.TREEMAP_FOAMTREE}"`,
+          when: `#.id="${TABS.TREEMAP_FOAMTREE}"`,
           content: {
             view: "content-filter",
             name: "filterByPathStr",
-            // debounce: 300, TODO: https://github.com/discoveryjs/discovery/pull/108
+            debounce: 300,
             className: "foamtree-filter",
             content: {
               view: "foamtree",
@@ -85,7 +117,7 @@ discovery.page.define("default", [
           },
         },
         {
-          when: `#.mainTabs="${TABS.TREEMAP_HIGHCHARTS}"`,
+          when: `#.id="${TABS.TREEMAP_HIGHCHARTS}"`,
           content: {
             view: "highcharts",
             data: `
@@ -126,7 +158,7 @@ discovery.page.define("default", [
           },
         },
         {
-          when: `#.mainTabs="${TABS.MODULES}"`,
+          when: `#.id="${TABS.MODULES}"`,
           content: getModulesTree({
             data: `
               $totalSize: modules.output.sizeInBytes.sum();
@@ -145,7 +177,7 @@ discovery.page.define("default", [
           }),
         },
         {
-          when: `#.mainTabs="${TABS.PACKAGES}"`,
+          when: `#.id="${TABS.PACKAGES}"`,
           content: [
             {
               view: "content-filter",
@@ -224,7 +256,7 @@ discovery.page.define("default", [
           ],
         },
         {
-          when: `#.mainTabs="${TABS.DUPLICATES}"`,
+          when: `#.id="${TABS.DUPLICATES}"`,
           content: getModulesTree({
             data: `
               // values
