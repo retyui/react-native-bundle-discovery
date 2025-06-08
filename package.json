@@ -1,6 +1,6 @@
 {
   "name": "react-native-bundle-discovery",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.2",
   "main": "index.js",
   "repository": "git@github.com:retyui/react-native-bundle-discovery.git",
   "author": "David <4661784+retyui@users.noreply.github.com>",
@@ -22,19 +22,17 @@
     }
   },
   "files": [
-    "lib"
+    "lib",
+    "index.js"
   ],
   "devDependencies": {
     "@carrotsearch/foamtree": "3.5.2",
     "@discoveryjs/cli": "2.14.2",
-    "@discoveryjs/discovery": "1.0.0-beta.97",
+    "@discoveryjs/discovery": "1.0.0-beta.93",
     "highcharts": "12.2.0",
     "lodash": "4.17.21",
     "patch-package": "8.0.0",
     "prettier": "3.5.3"
-  },
-  "engines": {
-    "node": ">=22.0.0"
   },
   "packageManager": "yarn@4.6.0"
 }

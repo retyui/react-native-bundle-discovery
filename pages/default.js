@@ -66,7 +66,7 @@ discovery.page.define("default", [
     content: {
       view: "switch",
       context(data, context) {
-        // FIXME
+        // FIXME - common nobody handle navigation in such way :(
         const isHashChangeEvent = new Error("").stack.includes("Promise.all");
         discovery.overridePageHashStateWithAnchor({
           id: "default",
@@ -74,18 +74,20 @@ discovery.page.define("default", [
         });
         discovery.cancelScheduledRender();
 
+        const id = discovery.pageRef ?? TABS.TREEMAP_FOAMTREE;
+
         setTimeout(() => {
           discovery.dom.root
             .querySelectorAll(".main-tabs>div>.onclick")
             .forEach((e) => e.classList.remove("active"));
           discovery.dom.root
-            .querySelectorAll(`.main-tabs .main-tabs-${discovery.pageRef}`)
+            .querySelectorAll(`.main-tabs .main-tabs-${id}`)
             .forEach((e) => e.classList.add("active"));
         }, 50);
 
         return {
           ...context,
-          id: discovery.pageRef,
+          id,
         };
       },
       content: [
