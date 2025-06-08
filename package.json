@@ -1,7 +1,8 @@
 {
   "name": "react-native-bundle-discovery",
-  "version": "1.0.0-rc.5",
+  "version": "1.0.0-rc.6",
   "main": "index.js",
+  "bin": "lib/bin.js",
   "repository": "git@github.com:retyui/react-native-bundle-discovery.git",
   "author": "David <4661784+retyui@users.noreply.github.com>",
   "license": "MIT",

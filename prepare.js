@@ -32,6 +32,9 @@ function prepare(data) {
   data.modules.forEach((m) => {
     // 0. Data transformation
     m.absolutePath = m.path;
+    if (m.absolutePath === data.entryPoint) {
+      m.isEntry = true;
+    }
     m.path = m.path.replace(data.rootFolder + "/", "");
     m.dependencies.forEach((d) => {
       d.path = d.absolutePath.replace(data.rootFolder + "/", "");

@@ -11,6 +11,13 @@ function injectTooltip(root) {
   return tooltip;
 }
 
+function prependDuplicateTo(label) {
+  if (label.includes(" ~ ")) {
+    return "<b class='i-duplicate'>Duplicate</b> " + label.split(" ~ ")[1];
+  }
+  return label;
+}
+
 // Based on https://github.com/webpack-contrib/webpack-bundle-analyzer/blob/master/client/components/Treemap.jsx
 discovery.view.define("foamtree", function (el, config, rawData, context) {
   if (Array.isArray(rawData?.options?.series)) {
@@ -85,17 +92,19 @@ discovery.view.define("foamtree", function (el, config, rawData, context) {
 
           const { group } = event;
 
-          if (group) {
+          if (group && group.type) {
             const htmlContent = [
-              `<b class="tooltip-name">${group.type}</b>: ${group.label}`,
+              `<b class="tooltip-name">${group.type}</b>: ${prependDuplicateTo(group.label)}`,
               `<b>Size</b>: ${group.size}`,
               group.type === "folder" ? `<b>Files</b>: ${group.files}` : null,
             ]
               .filter((e) => !!e)
               .join("<br/>");
 
+            tooltip.style.display = "block";
             tooltip.innerHTML = htmlContent;
           } else {
+            tooltip.style.display = "none";
             tooltip.innerHTML = "";
           }
 

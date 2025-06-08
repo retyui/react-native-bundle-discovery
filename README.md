@@ -1,9 +1,10 @@
 # react-native-bundle-discovery
 
-<img width="800" src="https://github.com/user-attachments/assets/211145d4-8fe7-499b-a372-9d752e878772" />
-
 > [!WARNING]
 > Currently, everything is in a very early stage. The project is not yet ready for use.
+
+
+<img width="800" src="https://github.com/user-attachments/assets/211145d4-8fe7-499b-a372-9d752e878772" />
 
 ### Setup:
 
@@ -20,18 +21,12 @@ const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 +const {createSerializer} = require('react-native-bundle-discovery');
 
 +const mySerializer = createSerializer({  
++  includeCode: true, // Useful if you want to compare source/bundle code (but a report file will be larger)
 +  projectRoot: __dirname, 
-   //^^^ ⚠️ WARNING: In a monorepo setup, this should point to the monorepo root,
-   //                not the individual package directory.
++   //^^^ ⚠️ WARNING: In a monorepo setup, this should point to the monorepo root,
++   //                not the individual package directory.
 +})
 
-
-/**
- * Metro configuration
- * https://reactnative.dev/docs/metro
- *
- * @type {import('metro-config').MetroConfig}
- */
 -const config = {};
 +const config = {
 +  serializer: {

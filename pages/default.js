@@ -1,4 +1,9 @@
-const { metadata, getModulesTree, getTreeModule } = require("./_common");
+const {
+  metadata,
+  getModulesTree,
+  getPackage,
+  getPackageList,
+} = require("./_common");
 
 const topMetaData = [
   metadata.platform,
@@ -114,7 +119,9 @@ discovery.page.define("default", [
         {
           when: `#.id="${TABS.MODULES}"`,
           content: getModulesTree({
+            limit: 200,
             data: `
+              $entryPoint: $.entryPointPath;
               $totalSize: modules.sum(=>output.sizeInBytes);
               $toModule: => {
                 ext:  $.path.getFileExtension(),
@@ -124,6 +131,7 @@ discovery.page.define("default", [
               };
               modules.map(=> { 
                 ...$.$toModule(),
+                isEntry: $.isEntry,
                 reasons: $.dependents.map(=> $.$toModule()),
                 duplicates: $.duplicates.map(=> $.$toModule()),
               })
@@ -135,81 +143,24 @@ discovery.page.define("default", [
           content: [
             {
               view: "content-filter",
-              data: `
-                $packages: $.packages;
-                $totalSize: modules.sum(=>output.sizeInBytes);
-                $toModule: => {
-                  ext:  $.path.getFileExtension(),
-                  name: $.path, 
-                  size: $.output.sizeInBytes.formatBytes(), 
-                  percent: ($.output.sizeInBytes / $totalSize).percent(3),
-                };
-                modules
-                   .filter(=> path has "node_modules")
-                   .group(=> path.getModulesName())
-                   .map(=> ({ 
-                      $pkgName: $.key;
-                      pkgName: $pkgName, // example: lodash
-                      size: $.value.sum(=>output.sizeInBytes),
-                      pkgInstances: $.value
-                        .group(=> path.split($pkgName).pick(0) + $pkgName)
-                        .map(=> {
-                           $pkgNameWithPath: $.key;
-                           pkgName: $pkgNameWithPath, // example: node_modules/lodash
-                           version: $packages.[path = $pkgNameWithPath][0].version,
-                           size: $.value.sum(=> output.sizeInBytes),
-                           modules: $.value.map(=> $.$toModule()),
-                        }),
-                   }))
-                   .sort(pkgInstances desc, size desc)
-              `,
+              data: `${getPackage(`modules.filter(=> path has "node_modules")`)}.sort(pkgInstances desc, size desc)`,
               name: "filterByPathStr",
-              content: {
-                view: "list",
+              content: getPackageList({
+                showCopiesBadge: true,
+                expanded: false,
+                limit: 200,
+                subLimit: 50,
                 data: ".[pkgName ~= #.filterByPathStr]",
-                emptyText: "⚠️ No packages found",
-                item: {
-                  view: "tree",
-                  expanded: false,
-                  itemConfig: {
-                    content: [
-                      {
-                        view: "link",
-                        content: "text-match",
-                        data: `{
+                itemPkgName: {
+                  view: "link",
+                  content: "text-match",
+                  data: `{
                           href: pkgName.pageLink("package", {}),
                           text: pkgName,
                           match: #.filterByPathStr
                         }`,
-                      },
-                      "text: ' '",
-                      "pill-badge:{ text: size.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
-                      {
-                        view: "pill-badge",
-                        when: "pkgInstances.size() > 1",
-                        data: "{text: '+' + (pkgInstances.size() - 1), postfix: (pkgInstances.size() - 1) = 1 ? 'copy' : 'copies' }",
-                        color: "rgba(255, 0, 0, 0.35)",
-                      },
-                    ],
-                    children: `$.pkgInstances`,
-                    itemConfig: {
-                      view: "tree-leaf",
-                      content: [
-                        //
-                        "text:pkgName",
-                        "text:' '",
-                        "pill-badge:{ text: 'v' + version, color: '#0af' }",
-                        "pill-badge:{ text: size.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
-                      ],
-                      children: `$.modules`,
-                      itemConfig: {
-                        view: "tree-leaf",
-                        content: getTreeModule({ hasPercent: true }),
-                      },
-                    },
-                  },
                 },
-              },
+              }),
             },
           ],
         },

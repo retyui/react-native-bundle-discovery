@@ -1,46 +1,31 @@
 const { externalLinkHtml } = require("./_common.js");
-const { getTreeModule } = require("./_common");
+const {
+  getTreeModule,
+  getPackage,
+  getPackageList,
+  getCopyToClipboardButton,
+} = require("./_common");
 
 discovery.page.define("package", {
   view: "context",
   data: `
     // Tmp variables
     $currentPkgName: #.id;
-    $packages: $.packages;
-    $toModule: => {
-      ext:  $.path.getFileExtension(),
-      name: $.path, 
-      size: $.output.sizeInBytes.formatBytes(),
-    };
-    $pkg: modules
-       .filter(=> path has "node_modules" and path has $currentPkgName)
-       .group(=> path.getModulesName())
-       .map(=> ({ 
-          $pkgName: $.key;
-          pkgName: $pkgName, // example: lodash
-          size: $.value.sum(=> output.sizeInBytes),
-          pkgInstances: $.value
-            .group(=> path.split($pkgName).pick(0) + $pkgName)
-            .map(=> {
-               $pkgNameWithPath: $.key;
-               pkgName: $pkgNameWithPath, // example: node_modules/lodash
-               version: $packages.[path = $pkgNameWithPath][0].version,
-               size: $.value.sum(=> output.sizeInBytes),
-               modules: $.value.map(=> $.$toModule()),
-            }),
-       }))[0];
-   
+    ${getPackage(`$pkg: modules.filter(=> path has "node_modules" and path has $currentPkgName)`)}[0];
+    $copies: $pkg.pkgInstances.size() - 1;
+    $ver: $pkg.pkgInstances[0].version;
+
     // Return value
     { 
-    ...$, 
-    currentPkgHasCopies: $pkg.pkgInstances.size() > 1,
-    currentPkgCopiesCount: $pkg.pkgInstances.size() - 1,
-    currentPkgVersion: $pkg.pkgInstances[0].version,
-    currentPkgWithUniqVer: $pkg.pkgName + ($pkg.pkgInstances.size() = 1 ? '@' + $pkg.pkgInstances[0].version : ''),
-    currentPkgWithUniqVerNpm: $pkg.pkgName + ($pkg.pkgInstances.size() = 1 ? '/v/' + $pkg.pkgInstances[0].version : ''),
-    
-    currentPkg: $pkg,
-  }`,
+      ...$, 
+      currentPkgHasCopies: $copies > 0,
+      currentPkgCopiesCount: $copies,
+      currentPkgVersion: $ver,
+      currentPkgWithUniqVer: $pkg.pkgName + ($copies = 0 ? '@' + $ver : ''),
+      currentPkgWithUniqVerNpm: $pkg.pkgName + ($copies = 0 ? '/v/' + $ver : ''),
+      currentPkg: $pkg,
+    }
+  `,
   content: [
     // TODO uncomment for debugging
     // {
@@ -54,12 +39,10 @@ discovery.page.define("package", {
         {
           view: "h1",
           className: "inline-block no-margin",
-          content: [
-            `badge: {
-              text: $.currentPkgWithUniqVer,
-              color: "#fffb5a",
-            }`,
-          ],
+          content: `badge: {
+            text: $.currentPkgWithUniqVer,
+            color: "#fffb5a",
+          }`,
         },
         {
           when: "$.currentPkgCopiesCount > 0",
@@ -73,6 +56,10 @@ discovery.page.define("package", {
             }`,
           ],
         },
+        getCopyToClipboardButton({
+          textToCopy: `$.currentPkg.pkgName`,
+          className: "m-l-0_5em",
+        }),
       ],
     },
 
@@ -118,7 +105,14 @@ discovery.page.define("package", {
 
     {
       view: "block",
-      content: [
+      content: getPackageList({
+        data: "$.currentPkg",
+        itemPkgName: "text: pkgName",
+        showCopiesBadge: false,
+        expanded: true,
+      }),
+
+      /*[
         {
           view: "list",
           data: "$.currentPkg",
@@ -150,7 +144,7 @@ discovery.page.define("package", {
             },
           },
         },
-      ],
+      ]*/
     },
   ],
 });

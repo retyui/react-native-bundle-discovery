@@ -1,4 +1,16 @@
 const helpers = {
+  plural(count, [singular, plural]) {
+    return count === 1 ? singular : plural;
+  },
+  pluralWithCount(count, [singular, plural]) {
+    return `${count} ${helpers.plural(count, [singular, plural])}`;
+  },
+  pluralBadge(count, [singular, plural], prefix = "") {
+    return {
+      text: prefix + count,
+      postfix: helpers.plural(count, [singular, plural]),
+    };
+  },
   getHighchartsColors() {
     const Highcharts = require("highcharts");
     return Highcharts.getOptions().colors;
@@ -12,9 +24,25 @@ const helpers = {
     }
     return folder;
   },
+  getBestNetworkGraphSize(module, params) {
+    let maxParentDepth = 0;
+    let itemsCount = 0;
+    do {
+      maxParentDepth++;
+      itemsCount = helpers.getNetworkGraph(module, {
+        ...params,
+        maxParentDepth,
+      }).data.length;
+      if (itemsCount < 10) {
+        const limit = itemsCount - 1;
+        return limit > 2 ? limit : 2;
+      }
+    } while (maxParentDepth < 6);
+    return maxParentDepth;
+  },
   getNetworkGraph(
     module,
-    { maxParentDepth = 3, omitVisitedModules = true } = {},
+    { maxParentDepth = 2, omitVisitedModules = true } = {},
   ) {
     const queue = [{ module, parentId: "", level: 0 }];
     const visited = new Set();
@@ -122,10 +150,14 @@ const helpers = {
 
       const shortPath = path.replace(rootFolder + "/", "");
       const isNodeModule = shortPath.includes("node_modules/");
-      const parts = shortenPath(shortPath).split("/");
+      const parts = shortenPath(shortPath, nodeModulesMap).split("/");
       let current = (isNodeModule ? nodeModulesMap : sourceCodeMap).children;
 
       parts.forEach((part, index) => {
+        // console.log((" --- xdebug " + index + " ".repeat(50)).substr(0, 40), {
+        //   part,
+        //   parts,
+        // });
         if (!current[part]) {
           current[part] = { size: 0, children: {} };
         }
@@ -270,15 +302,27 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function shortenPath(path) {
-  let index = path.lastIndexOf("node_modules/");
+const nm = "node_modules/";
+function shortenPath(path, nodeModulesMap) {
+  let index = path.lastIndexOf(nm);
+
   if (index > 0) {
-    const parentPackage = helpers.getModulesName(path.slice(0, index));
-    return path
-      .slice(index)
-      .replace("node_modules/", `node_modules/${parentPackage} ~ `);
+    const pathWithoutNestedNM = path.slice(index);
+    // Find the package name after "node_modules/"
+    const firstSlash = pathWithoutNestedNM.indexOf("/");
+    const secondSlash = pathWithoutNestedNM.indexOf("/", firstSlash + 1);
+    const pkgName =
+      secondSlash === -1
+        ? pathWithoutNestedNM.slice(firstSlash + 1)
+        : pathWithoutNestedNM.slice(firstSlash + 1, secondSlash);
+
+    if (nodeModulesMap?.children?.node_modules?.children?.[pkgName]) {
+      const parentPackage = helpers.getModulesName(path.slice(0, index));
+      return nm + parentPackage + " ~ " + pathWithoutNestedNM.slice(nm.length);
+    }
+
+    return pathWithoutNestedNM;
   }
-  // no parent package
   return path;
 }
 
