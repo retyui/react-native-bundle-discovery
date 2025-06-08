@@ -1,5 +1,7 @@
 # react-native-bundle-discovery
 
+<img width="800" src="https://github.com/user-attachments/assets/211145d4-8fe7-499b-a372-9d752e878772" />
+
 > [!WARNING]
 > Currently, everything is in a very early stage. The project is not yet ready for use.
 
