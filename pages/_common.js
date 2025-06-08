@@ -1,6 +1,6 @@
 const platformColor = `transformOptions.platform = 'android' ? 'rgba(194, 239, 116, .4)' : 'rgba(119, 31, 218, .4)'`;
 
-function getTreeModule({ hasTextMatch = false } = {}) {
+function getTreeModule({ hasTextMatch = false, hasPercent = false } = {}) {
   return [
     "pill-badge:{ text: ext, color: ext.getExtColor() }",
     hasTextMatch
@@ -19,8 +19,10 @@ function getTreeModule({ hasTextMatch = false } = {}) {
         },
     "text:' '",
     "pill-badge:{ text: size, color: 'rgba(120, 177, 9, 0.35)' }",
-    "pill-badge:{ text: percent, color: 'rgba(120, 177, 9, 0.35)' }",
-  ];
+    hasPercent
+      ? "pill-badge:{ text: percent, color: 'rgba(120, 177, 9, 0.35)' }"
+      : null,
+  ].filter(Boolean);
 }
 function getModulesTree({ data }) {
   if (!data) {
@@ -60,7 +62,11 @@ function getModulesTree({ data }) {
                 when: 'type="reasons"',
                 content: {
                   view: "tree-leaf",
-                  content: "text:title",
+                  content: [
+                    "text:title",
+                    "text:' '",
+                    "badge:{ text: $.data.size() }",
+                  ],
                   children: `$.data`,
                   itemConfig: {
                     view: "tree-leaf",
@@ -72,7 +78,11 @@ function getModulesTree({ data }) {
                 when: 'type="duplicates"',
                 content: {
                   view: "tree-leaf",
-                  content: "text:title",
+                  content: [
+                    "text:title",
+                    "text:' '",
+                    "badge:{ text: $.data.size() }",
+                  ],
                   children: `$.data`,
                   itemConfig: {
                     view: "tree-leaf",
@@ -97,20 +107,20 @@ const metadata = {
   size: {
     when: "modules.filter(=> $.path has 'node_modules').size()",
     view: "badge",
-    data: `{ prefix: 'Size: ', text: modules.output.sizeInBytes.sum().formatBytes(), color: ${platformColor} }`,
+    data: `{ prefix: 'Size: ', text: modules.sum(=>output.sizeInBytes).formatBytes(), color: ${platformColor} }`,
   },
   node_modules_size: {
     when: "modules.filter(=> $.path has 'node_modules').size()",
     view: "badge",
-    data: "{ prefix: 'node_modules: ', text: modules.filter(=> $.path has 'node_modules').output.sizeInBytes.sum().formatBytes(), color: 'rgba(255, 0, 0, 0.35)' }",
+    data: "{ prefix: 'node_modules: ', text: modules.filter(=> $.path has 'node_modules').sum(=>output.sizeInBytes).formatBytes(), color: 'rgba(255, 0, 0, 0.35)' }",
   },
   source_code_size: {
     when: "modules.filter(=> $.path has 'node_modules').size()",
     view: "badge",
     data: `
         // vars
-        $totalSize: modules.output.sizeInBytes.sum();
-        $thirdPartySize: modules.filter(=> $.path has 'node_modules').output.sizeInBytes.sum();
+        $totalSize: modules.sum(=>output.sizeInBytes);
+        $thirdPartySize: modules.filter(=> $.path has 'node_modules').sum(=>output.sizeInBytes);
         // return data
         { prefix: 'Source code: ', text: ($totalSize - $thirdPartySize).formatBytes(), color: 'rgba(148, 111, 234, 0.5)' }`,
   },

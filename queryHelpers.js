@@ -121,9 +121,7 @@ const helpers = {
       }
 
       const shortPath = path.replace(rootFolder + "/", "");
-
-      const isNodeModule = shortPath.includes("node_modules");
-
+      const isNodeModule = shortPath.includes("node_modules/");
       const parts = shortenPath(shortPath).split("/");
       let current = (isNodeModule ? nodeModulesMap : sourceCodeMap).children;
 
@@ -274,7 +272,14 @@ function randomInt(min, max) {
 
 function shortenPath(path) {
   let index = path.lastIndexOf("node_modules/");
-  return index > 0 ? path.slice(index) : path;
+  if (index > 0) {
+    const parentPackage = helpers.getModulesName(path.slice(0, index));
+    return path
+      .slice(index)
+      .replace("node_modules/", `node_modules/${parentPackage} ~ `);
+  }
+  // no parent package
+  return path;
 }
 
 module.exports = helpers;

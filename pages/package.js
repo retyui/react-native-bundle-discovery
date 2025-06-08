@@ -18,14 +18,14 @@ discovery.page.define("package", {
        .map(=> ({ 
           $pkgName: $.key;
           pkgName: $pkgName, // example: lodash
-          size: $.value.map(=> output.sizeInBytes).sum(),
+          size: $.value.sum(=> output.sizeInBytes),
           pkgInstances: $.value
             .group(=> path.split($pkgName).pick(0) + $pkgName)
             .map(=> {
                $pkgNameWithPath: $.key;
                pkgName: $pkgNameWithPath, // example: node_modules/lodash
                version: $packages.[path = $pkgNameWithPath][0].version,
-               size: $.value.map(=> output.sizeInBytes).sum(),
+               size: $.value.sum(=> output.sizeInBytes),
                modules: $.value.map(=> $.$toModule()),
             }),
        }))[0];
@@ -37,6 +37,7 @@ discovery.page.define("package", {
     currentPkgCopiesCount: $pkg.pkgInstances.size() - 1,
     currentPkgVersion: $pkg.pkgInstances[0].version,
     currentPkgWithUniqVer: $pkg.pkgName + ($pkg.pkgInstances.size() = 1 ? '@' + $pkg.pkgInstances[0].version : ''),
+    currentPkgWithUniqVerNpm: $pkg.pkgName + ($pkg.pkgInstances.size() = 1 ? '/v/' + $pkg.pkgInstances[0].version : ''),
     
     currentPkg: $pkg,
   }`,
@@ -84,7 +85,7 @@ discovery.page.define("package", {
         {
           view: "link",
           external: true,
-          data: `{ href: "https://www.npmjs.com/package/" + currentPkg.pkgName }`,
+          data: `{ href: "https://www.npmjs.com/package/" + currentPkgWithUniqVerNpm }`,
           content: [
             "text: 'npmjs.com'",
             `html: '<span class="my-icon-inline my-icon-12">${externalLinkHtml}</span>'`,
@@ -143,7 +144,7 @@ discovery.page.define("package", {
                 children: `$.modules`,
                 itemConfig: {
                   view: "tree-leaf",
-                  content: getTreeModule(),
+                  content: getTreeModule({ hasPercent: false }),
                 },
               },
             },

@@ -21,6 +21,7 @@ function getDuplicateId(path) {
 }
 
 function prepare(data) {
+  // data.modules = data.modules.slice(875, 880); TODO for debugging a formtree chart
   let moduleMap = new Map();
   let duplicatesMap = new Map();
   let allLodashModules = new Set();

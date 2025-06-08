@@ -1,7 +1,7 @@
 
 **TODO:**
 - [x] Search/filters
-- [ ] bug: Code size is diff. treemap != badge info (BECAUSE no duplicated modules in treemap)
+- [x] bug: Code size is diff. treemap != badge info (BECAUSE no duplicated modules in treemap)
 - [ ] Diff page (to compare two versions bundle)
 - [ ] Map based on the coverage (https://x.com/chromedevtools/status/1095411723161354240?lang=en)
 - Static website (like  https://statoscope.tech)

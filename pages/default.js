@@ -115,7 +115,7 @@ discovery.page.define("default", [
           when: `#.id="${TABS.MODULES}"`,
           content: getModulesTree({
             data: `
-              $totalSize: modules.output.sizeInBytes.sum();
+              $totalSize: modules.sum(=>output.sizeInBytes);
               $toModule: => {
                 ext:  $.path.getFileExtension(),
                 name: $.path, 
@@ -137,7 +137,7 @@ discovery.page.define("default", [
               view: "content-filter",
               data: `
                 $packages: $.packages;
-                $totalSize: modules.output.sizeInBytes.sum();
+                $totalSize: modules.sum(=>output.sizeInBytes);
                 $toModule: => {
                   ext:  $.path.getFileExtension(),
                   name: $.path, 
@@ -150,14 +150,14 @@ discovery.page.define("default", [
                    .map(=> ({ 
                       $pkgName: $.key;
                       pkgName: $pkgName, // example: lodash
-                      size: $.value.map(=> output.sizeInBytes).sum(),
+                      size: $.value.sum(=>output.sizeInBytes),
                       pkgInstances: $.value
                         .group(=> path.split($pkgName).pick(0) + $pkgName)
                         .map(=> {
                            $pkgNameWithPath: $.key;
                            pkgName: $pkgNameWithPath, // example: node_modules/lodash
                            version: $packages.[path = $pkgNameWithPath][0].version,
-                           size: $.value.map(=> output.sizeInBytes).sum(),
+                           size: $.value.sum(=> output.sizeInBytes),
                            modules: $.value.map(=> $.$toModule()),
                         }),
                    }))
@@ -204,7 +204,7 @@ discovery.page.define("default", [
                       children: `$.modules`,
                       itemConfig: {
                         view: "tree-leaf",
-                        content: getTreeModule(),
+                        content: getTreeModule({ hasPercent: true }),
                       },
                     },
                   },
@@ -219,7 +219,7 @@ discovery.page.define("default", [
             data: `
               // values
               $duplicatesOnly: modules.filter(=> duplicates);
-              $totalSize: $duplicatesOnly.output.sizeInBytes.sum();
+              $totalSize: $duplicatesOnly.sum(=>output.sizeInBytes);
               $toModule: => {
                 ext:  $.path.getFileExtension(),
                 name: $.path, 
