@@ -1,3 +1,9 @@
+hr{
+    border: 1px solid rgb(222 222 222);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
 .inline-block{
     display: inline-block;
 }
@@ -50,4 +56,21 @@
 }
 .width-50p{
     width: 50%;
+}
+.my-icon{
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+.my-icon-inline{
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 4px;
+}
+.my-icon-12{
+    width: 12px;
+    height: 12px;
+}
+.no-margin{
+    margin: 0;
 }

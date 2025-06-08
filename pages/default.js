@@ -11,7 +11,6 @@ const topMetaData = [
 
 const TABS = {
   TREEMAP_FOAMTREE: "treemap-foamtree",
-  TREEMAP_HIGHCHARTS: "treemap-highcharts",
   MODULES: "modules",
   PACKAGES: "packages",
   DUPLICATES: "duplicates",
@@ -36,10 +35,12 @@ discovery.page.define("default", [
         className: `main-tabs-${TABS.TREEMAP_FOAMTREE}`,
       },
       {
-        value: TABS.TREEMAP_HIGHCHARTS,
-        className: `main-tabs-${TABS.TREEMAP_HIGHCHARTS}`,
-        text: "Treemap (#2)",
-        when: false,
+        value: TABS.PACKAGES,
+        className: `main-tabs-${TABS.PACKAGES}`,
+        content: [
+          "text:'Packages '",
+          `pill-badge: modules.filter(=> path has "node_modules").group(=> path.getModulesName(), => 0).size()`,
+        ],
       },
       {
         value: TABS.MODULES,
@@ -52,14 +53,6 @@ discovery.page.define("default", [
         content: [
           "text:'Duplicate modules '",
           "pill-badge: modules.filter(=> duplicates).size()",
-        ],
-      },
-      {
-        value: TABS.PACKAGES,
-        className: `main-tabs-${TABS.PACKAGES}`,
-        content: [
-          "text:'Packages '",
-          `pill-badge: modules.filter(=> path has "node_modules").group(=> path.getModulesName(), => 0).size()`,
         ],
       },
     ],
@@ -119,47 +112,6 @@ discovery.page.define("default", [
           },
         },
         {
-          when: `#.id="${TABS.TREEMAP_HIGHCHARTS}"`,
-          content: {
-            view: "highcharts",
-            data: `
-              $root: $.rootFolder;
-              $myData: modules
-                //.slice(0,9999999)
-                .map(=> {path, size: $.output.sizeInBytes})
-                .transformFilesList($root, "highcharts-treemap");
-              
-              {
-                options: {
-                  title: undefined,
-                  chart: {
-                    height: 700, // Set height in pixels
-                  },
-                  series: [
-                    {
-                      name: "Regions",
-                      type: "treemap",
-                      layoutAlgorithm: "squarified",
-                      allowDrillToNode: true,
-                      animationLimit: 1000,
-                      dataLabels: { enabled: false },
-                      levels: [
-                        {
-                          level: 1,
-                          dataLabels: { enabled: true },
-                          borderWidth: 3,
-                          levelIsConstant: false,
-                        },
-                        { level: 1, dataLabels: { style: { fontSize: "14px" } } },
-                      ],
-                      data: $myData,
-                    },
-                  ],
-                },
-              }`,
-          },
-        },
-        {
           when: `#.id="${TABS.MODULES}"`,
           content: getModulesTree({
             data: `
@@ -197,13 +149,14 @@ discovery.page.define("default", [
                    .group(=> path.getModulesName())
                    .map(=> ({ 
                       $pkgName: $.key;
-                      pkgName: $pkgName,
+                      pkgName: $pkgName, // example: lodash
                       size: $.value.map(=> output.sizeInBytes).sum(),
                       pkgInstances: $.value
                         .group(=> path.split($pkgName).pick(0) + $pkgName)
                         .map(=> {
-                           pkgName: $.key,
-                           version: $packages[path = $.key].version,
+                           $pkgNameWithPath: $.key;
+                           pkgName: $pkgNameWithPath, // example: node_modules/lodash
+                           version: $packages.[path = $pkgNameWithPath][0].version,
                            size: $.value.map(=> output.sizeInBytes).sum(),
                            modules: $.value.map(=> $.$toModule()),
                         }),
