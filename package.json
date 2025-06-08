@@ -1,6 +1,6 @@
 {
   "name": "react-native-bundle-discovery",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-rc.3",
   "main": "index.js",
   "repository": "git@github.com:retyui/react-native-bundle-discovery.git",
   "author": "David <4661784+retyui@users.noreply.github.com>",
@@ -26,7 +26,7 @@
     "index.js"
   ],
   "devDependencies": {
-    "@carrotsearch/foamtree": "3.5.2",
+    "@carrotsearch/foamtree": "3.5.1",
     "@discoveryjs/cli": "2.14.2",
     "@discoveryjs/discovery": "1.0.0-beta.93",
     "highcharts": "12.2.0",

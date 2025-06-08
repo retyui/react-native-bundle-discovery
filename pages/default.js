@@ -184,6 +184,7 @@ discovery.page.define("default", [
             {
               view: "content-filter",
               data: `
+                $packages: $.packages;
                 $totalSize: modules.output.sizeInBytes.sum();
                 $toModule: => {
                   ext:  $.path.getFileExtension(),
@@ -202,11 +203,12 @@ discovery.page.define("default", [
                         .group(=> path.split($pkgName).pick(0) + $pkgName)
                         .map(=> {
                            pkgName: $.key,
+                           version: $packages[path = $.key].version,
                            size: $.value.map(=> output.sizeInBytes).sum(),
                            modules: $.value.map(=> $.$toModule()),
                         }),
                    }))
-                   .sort(size desc)
+                   .sort(pkgInstances desc, size desc)
               `,
               name: "filterByPathStr",
               content: {
@@ -232,7 +234,7 @@ discovery.page.define("default", [
                       {
                         view: "pill-badge",
                         when: "pkgInstances.size() > 1",
-                        text: "has duplicates",
+                        data: "{text: '+' + (pkgInstances.size() - 1), postfix: (pkgInstances.size() - 1) = 1 ? 'copy' : 'copies' }",
                         color: "rgba(255, 0, 0, 0.35)",
                       },
                     ],
@@ -243,6 +245,7 @@ discovery.page.define("default", [
                         //
                         "text:pkgName",
                         "text:' '",
+                        "pill-badge:{ text: 'v' + version, color: '#0af' }",
                         "pill-badge:{ text: size.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
                       ],
                       children: `$.modules`,

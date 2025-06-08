@@ -5,10 +5,10 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@carrotsearch/foamtree@npm:3.5.2":
-  version: 3.5.2
-  resolution: "@carrotsearch/foamtree@npm:3.5.2"
-  checksum: 10c0/2f8aee3d2ffa9188a0c733d1337b7cbaf162ca8620f0ba97f88e23649be3e66cbf75db6149d8cbcca4eeacba6423a7afa10aa53d0bda50eccf6c775c1b685867
+"@carrotsearch/foamtree@npm:3.5.1":
+  version: 3.5.1
+  resolution: "@carrotsearch/foamtree@npm:3.5.1"
+  checksum: 10c0/bc0d8306931c441c33859ec002422bcfad989917901f2ac5d399008efe244ce0c5288b80c96b990423dbde9d7508a108c1ac91899176db246694b0183b73b759
   languageName: node
   linkType: hard
 
@@ -37,9 +37,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discoveryjs/discovery@npm:1.0.0-beta.97":
-  version: 1.0.0-beta.97
-  resolution: "@discoveryjs/discovery@npm:1.0.0-beta.97"
+"@discoveryjs/discovery@npm:1.0.0-beta.93":
+  version: 1.0.0-beta.93
+  resolution: "@discoveryjs/discovery@npm:1.0.0-beta.93"
   dependencies:
     "@discoveryjs/json-ext": "npm:^0.6.3"
     codemirror: "npm:^5.65.2"
@@ -47,7 +47,7 @@ __metadata:
     hitext: "npm:^1.0.0-beta.1"
     jora: "npm:1.0.0-beta.13"
     marked: "npm:^14.1.4"
-  checksum: 10c0/a58e4f174f7c5a337ba1b301f21bf977362bb358f60bb07ba3b759a676434515ef42b0788993d342ffe85272aeaaa825b8fd35c3222c125fcdbfc2617a2ea282
+  checksum: 10c0/9fc58bce3dab11879e84bb086ad664ea6e06a0f6e862d8cbcfa6d05f4317249adcd456fe35432668f202518191e406e58f8f9b0fcc449e359090d46cf464f39a
   languageName: node
   linkType: hard
 
@@ -1629,9 +1629,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "react-native-bundle-discovery@workspace:."
   dependencies:
-    "@carrotsearch/foamtree": "npm:3.5.2"
+    "@carrotsearch/foamtree": "npm:3.5.1"
     "@discoveryjs/cli": "npm:2.14.2"
-    "@discoveryjs/discovery": "npm:1.0.0-beta.97"
+    "@discoveryjs/discovery": "npm:1.0.0-beta.93"
     highcharts: "npm:12.2.0"
     lodash: "npm:4.17.21"
     patch-package: "npm:8.0.0"

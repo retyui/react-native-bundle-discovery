@@ -25,6 +25,9 @@ function prepare(data) {
   let duplicatesMap = new Map();
   let allLodashModules = new Set();
 
+  data.packages.forEach((pkg) => {
+    pkg.path = pkg.absolutePath.replace(data.rootFolder + "/", "");
+  });
   data.modules.forEach((m) => {
     // 0. Data transformation
     m.absolutePath = m.path;
