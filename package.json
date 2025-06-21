@@ -1,0 +1,42 @@
+{
+  "name": "react-native-bundle-discovery",
+  "version": "1.0.0",
+  "main": "index.js",
+  "bin": "lib/bin.js",
+  "repository": "git@github.com:retyui/react-native-bundle-discovery.git",
+  "author": "David <4661784+retyui@users.noreply.github.com>",
+  "license": "MIT",
+  "scripts": {
+    "format": "prettier --write .",
+    "start": "NODE_ENV=development npx discovery --config .discoveryrc.js",
+    "build": "npx discovery-build --config .discoveryrc.js --output build --serve-only-assets --single-file"
+  },
+  "dependencies": {
+    "@discoveryjs/cli": "2.14.2",
+    "@discoveryjs/discovery": "1.0.0-beta.93",
+    "chalk": "^4.1.2",
+    "highcharts": "12.2.0"
+  },
+  "peerDependencies": {
+    "metro": "*"
+  },
+  "peerDependenciesMeta": {
+    "metro": {
+      "optional": true
+    }
+  },
+  "files": [
+    "vendors",
+    "lib",
+    "views",
+    "pages",
+    "index.js",
+    "setup.js",
+    "prepare.js",
+    "queryHelpers.js",
+    ".discoveryrc.js"
+  ],
+  "devDependencies": {
+    "prettier": "3.5.3"
+  }
+}
