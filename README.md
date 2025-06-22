@@ -77,3 +77,10 @@ npx react-native-bundle-discovery metro-stats.json
 **Built using Discovery.js:**
 - Build blocks for pages: https://discoveryjs.github.io/discovery/#views-showcase
 - Jora syntax: https://discoveryjs.github.io/jora/#article:jora-syntax-operators
+
+---
+
+### Financial Contributors
+
+Become a financial contributor at [OpenCollective](https://opencollective.com/react-native-bundle-discovery) or [GitHub Sponsors](https://github.com/sponsors/retyui)
+
