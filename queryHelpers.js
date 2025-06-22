@@ -1,4 +1,24 @@
 const helpers = {
+  prettifyMap: new Map(),
+  prettifyJS(sourceStr) {
+    if (helpers.prettifyMap.has(sourceStr)) {
+      return helpers.prettifyMap.get(sourceStr);
+    }
+
+    const prettier = require("prettier/standalone");
+    const prettierPluginBabel = require("prettier/plugins/babel");
+    const prettierPluginEstree = require("prettier/plugins/estree");
+
+    return prettier
+      .format(sourceStr, {
+        parser: "babel",
+        plugins: [prettierPluginBabel, prettierPluginEstree],
+      })
+      .then((formatted) => {
+        helpers.prettifyMap.set(sourceStr, formatted);
+        return formatted;
+      });
+  },
   plural(count, [singular, plural]) {
     return count === 1 ? singular : plural;
   },

@@ -125,3 +125,9 @@ hr{
     background: red;
     opacity: 1;
 }
+.prettify-checkbox{
+    position: absolute;
+    right: 31px;
+    margin-top: -26px;
+    z-index: 1;
+}

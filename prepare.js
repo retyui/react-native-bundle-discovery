@@ -66,9 +66,6 @@ function prepare(data) {
       m.source.code = m.source.code
         .replaceAll(";", ";\n\n")
         .replaceAll(",", ",\n    ");
-      m.output.code = m.output.code
-        .replaceAll(";", ";\n\n")
-        .replaceAll(",", ",\n    ");
     }
   });
 

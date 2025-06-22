@@ -12,10 +12,12 @@
     "build": "npx discovery-build --config .discoveryrc.js --output build --serve-only-assets --single-file"
   },
   "dependencies": {
+    "@babel/parser": "^7.0.0",
     "@discoveryjs/cli": "2.14.2",
     "@discoveryjs/discovery": "1.0.0-beta.93",
     "chalk": "^4.1.2",
-    "highcharts": "12.2.0"
+    "highcharts": "12.2.0",
+    "prettier": "^3.5.3"
   },
   "peerDependencies": {
     "metro": "*"
@@ -35,8 +37,5 @@
     "prepare.js",
     "queryHelpers.js",
     ".discoveryrc.js"
-  ],
-  "devDependencies": {
-    "prettier": "3.5.3"
-  }
+  ]
 }

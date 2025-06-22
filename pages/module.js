@@ -119,11 +119,29 @@ discovery.page.define("module", {
                     view: "block",
                     className: "width-50p",
                     content: [
-                      "h5: 'Output'",
                       {
-                        view: "source",
-                        syntax: "ts",
-                        source: "=$.currentModule.output.code",
+                        view: "h5",
+                        content: 'text:"Output"',
+                      },
+                      {
+                        view: "context",
+                        modifiers: [
+                          {
+                            view: "checkbox",
+                            name: "prettify",
+                            checked: true,
+                            className: "prettify-checkbox",
+                            content: 'text:"Prettify"',
+                          },
+                        ],
+                        content: [
+                          {
+                            view: "source-prettify",
+                            syntax: "ts",
+                            source:
+                              "=(#.prettify ? $.currentModule.output.code.prettifyJS() : $.currentModule.output.code)",
+                          },
+                        ],
                       },
                     ],
                   },

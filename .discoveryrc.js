@@ -14,6 +14,7 @@ module.exports = {
       path.resolve(__dirname, "pages/package.js"),
       // Custom views
       path.resolve(__dirname, "views/highcharts.css"),
+      path.resolve(__dirname, "views/prettify.js"),
       path.resolve(__dirname, "views/highcharts.js"),
       path.resolve(__dirname, "views/foamtree.js"),
     ],
