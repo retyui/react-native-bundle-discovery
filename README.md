@@ -3,7 +3,6 @@
 > [!WARNING]
 > Currently, everything is in a very early stage. The project is not yet ready for use.
 
-
 A simple package that helps developers visualize and analyze the bundle size of React Native apps.
 With this tool, you can easily explore your app's codebase, identify large or heavy packages, and inspect the structure of modules and code within your project.
 
@@ -12,6 +11,7 @@ With this tool, you can easily explore your app's codebase, identify large or he
 ### Setup:
 
 #### 1. Install
+
 ```bash
 yarn add -D react-native-bundle-discovery
 ```
@@ -23,9 +23,9 @@ yarn add -D react-native-bundle-discovery
 const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 +const {createSerializer} = require('react-native-bundle-discovery');
 
-+const mySerializer = createSerializer({  
++const mySerializer = createSerializer({
 +  includeCode: true, // Useful if you want to compare source/bundle code (but a report file will be larger)
-+  projectRoot: __dirname, 
++  projectRoot: __dirname,
 +   //^^^ ⚠️ WARNING: In a monorepo setup, this should point to the monorepo root,
 +   //                not the individual package directory.
 +});
@@ -63,6 +63,21 @@ npx react-native-bundle-discovery metro-stats.json
 
 ---
 
+### `createSerializer(optiosn: Options)`
+
+| Prop                   | Default value             | Description                                                                                                                              |
+| ---------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| serializer: Function   | Default serializer        | A custom serializer function. If not provided, a default serializer is used.                                                             |
+| projectRoot: string    | Required                  | The root directory of the project. ⚠️ In a monorepo setup, this should point to the monorepo root, not the individual package directory. |
+| outputJsonPath: string | `<root>/metro-stats.json` | The path where the JSON report will be saved. Defaults to `metro-stats.json` in project root.                                            |
+| includeCode: boolean   | `true`                    | Whether to include the source and output code in the JSON report.                                                                        |
+
+### Financial Contributors
+
+Become a financial contributor at [OpenCollective](https://opencollective.com/react-native-bundle-discovery) or [GitHub Sponsors](https://github.com/sponsors/retyui)
+
+### Other
+
 **Similar projects:**
 
 - https://github.com/expo/atlas
@@ -72,15 +87,7 @@ npx react-native-bundle-discovery metro-stats.json
 - https://github.com/statoscope/statoscope
 - https://github.com/relative-ci/bundle-stats/tree/master/packages/cli
 
---- 
+**Built using [Discovery.js](https://github.com/discoveryjs/discovery):**
 
-**Built using Discovery.js:**
 - Build blocks for pages: https://discoveryjs.github.io/discovery/#views-showcase
 - Jora syntax: https://discoveryjs.github.io/jora/#article:jora-syntax-operators
-
----
-
-### Financial Contributors
-
-Become a financial contributor at [OpenCollective](https://opencollective.com/react-native-bundle-discovery) or [GitHub Sponsors](https://github.com/sponsors/retyui)
-
