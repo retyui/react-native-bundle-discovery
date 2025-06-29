@@ -3,6 +3,7 @@ const {
   getModulesTree,
   getPackage,
   getPackageList,
+  getCopyToClipboardButton,
 } = require("./_common");
 
 const topMetaData = [
@@ -141,9 +142,25 @@ discovery.page.define("default", [
         {
           when: `#.id="${TABS.PACKAGES}"`,
           content: [
+            getCopyToClipboardButton({
+              text: "Copy list",
+              className: "copy-before-ask-chatgpt",
+              textToCopy: `"- " + modules.filter(=> path has "node_modules").group(=> path.getModulesName()).map(=> $.key).join("\\n- ")`,
+            }),
+            {
+              view: "link",
+              className: "ask-chatgpt view-button",
+              text: "and Ask ChatGPT",
+              external: true,
+              data: `{
+                  href: $.askChatGPTAboutPackages()
+                }`,
+            },
             {
               view: "content-filter",
+              //
               data: `${getPackage(`modules.filter(=> path has "node_modules")`)}.sort(pkgInstances desc, size desc)`,
+              className: "packages-content",
               name: "filterByPathStr",
               content: getPackageList({
                 showCopiesBadge: true,

@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
   name: "react-native-bundle-discovery",
-  data: () => require("./tmp/before_metro-stats.json"),
+  data: () => require("./tmp/rainbow-metro-stats.json"),
   setup: path.resolve(__dirname, "setup.js"),
   view: {
     assets: [

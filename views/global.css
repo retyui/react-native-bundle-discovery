@@ -131,3 +131,34 @@ hr{
     margin-top: -26px;
     z-index: 1;
 }
+.ask-chatgpt{
+    color: var(--discovery-view-button-color, #000);
+    text-decoration: none;
+    vertical-align: middle;
+    position: absolute;
+    z-index: 9;
+    margin-top: 12px;
+    margin-left: 105px !important;
+    height: 35px;
+}
+.ask-chatgpt::before {
+    content: '”';
+    font-size: 2em;
+    vertical-align: middle;
+    font-family: math;
+    margin-right: 0.2em;
+    display: inline-block;
+    height: 15px;
+}
+.packages-content>.view-input{
+    padding-left: 265px;
+}
+.copy-before-ask-chatgpt{
+    width: 95px;
+    background-position: left center;
+    padding-left: 25px;
+    position: absolute;
+    z-index: 9;
+    margin-top: 12px;
+    height: 35px;
+}

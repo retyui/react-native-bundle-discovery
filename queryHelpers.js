@@ -19,6 +19,17 @@ const helpers = {
         return formatted;
       });
   },
+  askChatGPTAboutPackages() {
+    const prompt = `I have a list of JavaScript packages from my React Native bundle (see below). I want to optimize bundle size by identifying similar or redundant packages — such as multiple versions of similar libraries (e.g., lodash, lodash-es, underscore, etc.), duplicate utilities, or overlapping functionality (e.g., date libraries like moment, dayjs, date-fns).
+
+Please do the following:
+
+1. Group similar or overlapping packages together.
+2. For each group, suggest which one to keep and which ones to consider removing.
+3. For each group, provide a regex string that can be used to filter those packages from the list (e.g., in grep, find, or search tools).
+4. Keep the output concise and copy-paste friendly.`;
+    return `https://chat.openai.com/?prompt=${encodeURIComponent(prompt)}`;
+  },
   plural(count, [singular, plural]) {
     return count === 1 ? singular : plural;
   },

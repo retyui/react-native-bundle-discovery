@@ -9,10 +9,12 @@ With this tool, you can easily explore your app's codebase, identify large or he
 ### What you should consider when analyzing your bundle
 
 1. if you use **React 19** then it's time to remove a `prop-types` package from your bundle.
-2. Search for `development|debug` modules in your production JS bundle (it's a dead code that should not be there).
+2. Search for `development|debug|dev` modules in your production JS bundle (it's a dead code that should not be there).
 3. Also check polyfills duplicates (search example:  `url|fetch|crypto|buffer|base-?64`).
 4. Verify that you don't have any similar packages in your bundle (search example: `object|just-|debounce|ramda|lodash|underscore`). I often see that devs use both `lodash/debounce`, `lodash.debounce` and `debounce` in their projects. Or mix `ramda`, `underscore` and `lodash`._
-5. Please provide your ideas soo other devs can benefit from them :)
+5. Try to find `package.json$` files in your bundle. They are often used to get only the package `version/name` but all other fields are not needed in the bundle.
+6. Please provide your ideas soo other devs can benefit from them :)
+
 
 ### Setup:
 
