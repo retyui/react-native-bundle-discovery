@@ -98,6 +98,17 @@ discovery.page.define("package", {
             `html: '<span class="my-icon-inline my-icon-12">${externalLinkHtml}</span>'`,
           ],
         },
+        {
+          view: "link",
+          external: true,
+          data: `{ href: "https://bundlejs.com/?q=" + currentPkgWithUniqVer, q: currentPkgWithUniqVer }`,
+          content: [
+            {
+              view: "html",
+              data: `'<img class="bundlejs-badge-img" src="https://deno.bundlejs.com/?q=' + q + '&badge=detailed" />'`,
+            },
+          ],
+        },
       ],
     },
 

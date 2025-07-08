@@ -162,3 +162,8 @@ hr{
     margin-top: 12px;
     height: 35px;
 }
+.bundlejs-badge-img{
+    line-height: 0;
+    margin-bottom: -5px;
+    margin-left: 10px;
+}
