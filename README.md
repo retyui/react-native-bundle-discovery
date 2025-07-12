@@ -61,7 +61,9 @@ npx react-native bundle \
   --assets-dest ios/assets
 ```
 
-#### 4. View the report in the browser
+#### 4. CLI
+
+##### 4.1 View the report in the browser
 
 Run webserver to view the report:
 
@@ -69,7 +71,7 @@ Run webserver to view the report:
 npx react-native-bundle-discovery server metro-stats.json [--port <port>]
 ```
 
-#### 4. Build the HTML report
+##### 4.2 Build the HTML report
 
 Run the following command to generate an HTML report from the JSON file:
 
