@@ -25,3 +25,6 @@ tmp/
 
 # Ignore PnP files
 .pnp.*
+
+.bundle-discovery/
+/lib/.tmp.js
