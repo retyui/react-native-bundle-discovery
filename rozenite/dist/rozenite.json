@@ -1,0 +1,11 @@
+{
+  "name": "react-native-bundle-discovery-rozenite-plugin",
+  "version": "1.0.0-rc.2",
+  "description": "Metro Bundle Discovery for Rozenite.",
+  "panels": [
+    {
+      "name": "\uD83D\uDD0D Bundle Discovery",
+      "source": "/index.html"
+    }
+  ]
+}

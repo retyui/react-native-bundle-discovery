@@ -1,0 +1,14 @@
+{
+  "name": "react-native-bundle-discovery-rozenite-plugin",
+  "version": "1.0.0-rc.2",
+  "license": "MIT",
+  "main": "dist/react-native.js",
+  "files": [
+    "dist",
+    ".stats/.dir"
+  ],
+  "dependencies": {
+    "react-native-bundle-discovery": "*",
+    "@discoveryjs/cli": "2.14.2"
+  }
+}
