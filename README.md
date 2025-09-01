@@ -104,7 +104,7 @@ Become a financial contributor at [OpenCollective](https://opencollective.com/re
 - https://github.com/callstack/react-native-bundle-visualizer
 - https://github.com/webpack-contrib/webpack-bundle-analyzer
 - https://github.com/statoscope/statoscope
-- https://github.com/relative-ci/bundle-stats/tree/master/packages/cli
+- [https://github.com/relative-ci/bundle-stats/tree/master/packages/cli](https://github.com/relative-ci/bundle-stats/tree/master/packages/cli#readme)
 
 **Built using [Discovery.js](https://github.com/discoveryjs/discovery):**
 
