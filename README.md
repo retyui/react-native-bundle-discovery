@@ -18,13 +18,18 @@ With this tool, you can easily explore your app's codebase, identify large or he
 
 ### Setup:
 
-#### 1. Install
+There are two ways to install the package:
+
+1. As in independent tool 
+2. Or as a [Rozenite](https://www.rozenite.dev/) plugin (see below).
+
+#### 1. Install (independent tool)
 
 ```bash
 yarn add -D react-native-bundle-discovery
 ```
 
-#### 2. Add to your metro.config.js
+Add to your `metro.config.js`:
 
 ```diff
 // metro.config.js
@@ -47,6 +52,46 @@ const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);
 ```
+
+---
+
+#### 2. Install as a Rozenite plugin (OPTIONAL)
+
+
+```bash
+yarn dlx rozenite@latest init # init rozenite in your project (from: https://www.rozenite.dev/docs/getting-started)
+yarn add -D react-native-bundle-discovery-rozenite-plugin # add the plugin to your project
+```
+
+Then in the `metro.config.js` file add the following:
+
+```diff
+const { withRozenite } = require('@rozenite/metro');
++const { withRozeniteBundleDiscoveryPlugin } = require('react-native-bundle-discovery-rozenite-plugin');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+
+/**
+ * Metro configuration
+ * https://reactnative.dev/docs/metro
+ *
+ * @type {import('@react-native/metro-config').MetroConfig}
+ */
+const config = {};
+
+module.exports = withRozenite(
+  mergeConfig(getDefaultConfig(__dirname), config),
+  {
++    enhanceMetroConfig: config => withRozeniteBundleDiscoveryPlugin(config, { /* Your Bundle Discovery Options */ }),
+    enabled: true,
+  },
+);
+```
+
+Now you can run `yarn start` and open [React Native DevTools](https://reactnative.dev/docs/react-native-devtools)
+
+
+---
+
 
 #### 3. Build the app
 

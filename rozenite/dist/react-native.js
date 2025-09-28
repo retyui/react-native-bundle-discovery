@@ -29,6 +29,7 @@ function injectBundleDiscovery(config, options) {
 
   const newSerializer = createSerializer({
     projectRoot: process.cwd(),
+    silent: true,
     ...options,
     outputJsonPath,
     serializer: hasSerializer ? config.serializer.customSerializer : undefined,
