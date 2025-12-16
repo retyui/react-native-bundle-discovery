@@ -127,7 +127,7 @@ npx react-native-bundle-discovery build metro-stats.json
 
 ---
 
-### `createSerializer(optiosn: Options)`
+### `createSerializer(options: Options)`
 
 | Prop                   | Default value             | Description                                                                                                                              |
 | ---------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
