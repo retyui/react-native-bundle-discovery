@@ -1,5 +1,9 @@
 # react-native-bundle-discovery
 
+[![react-native-bundle-discovery on npm](https://badgen.net/npm/v/react-native-bundle-discovery)](https://www.npmjs.com/package/react-native-bundle-discovery)
+[![react-native-bundle-discovery downloads](https://badgen.net/npm/dm/react-native-bundle-discovery)](https://www.npmtrends.com/react-native-bundle-discovery)
+
+
 A simple package that helps developers visualize and analyze the bundle size of React Native apps.
 With this tool, you can easily explore your app's codebase, identify large or heavy packages, and inspect the structure of modules and code within your project.
 
@@ -144,12 +148,12 @@ Become a financial contributor at [OpenCollective](https://opencollective.com/re
 
 **Similar projects:**
 
-- https://github.com/expo/atlas
-- https://github.com/v3ron/expo-atlas-without-expo
-- https://github.com/callstack/react-native-bundle-visualizer
-- https://github.com/webpack-contrib/webpack-bundle-analyzer
-- https://github.com/statoscope/statoscope
-- [https://github.com/relative-ci/bundle-stats/tree/master/packages/cli](https://github.com/relative-ci/bundle-stats/tree/master/packages/cli#readme)
+- [expo-atlas](https://github.com/expo/atlas) [![expo-atlas downloads](https://badgen.net/npm/dm/expo-atlas)](https://www.npmtrends.com/expo-atlas) [![expo-atlas install size](https://packagephobia.com/badge?p=expo-atlas)](https://packagephobia.com/result?p=expo-atlas)
+- [expo-atlas-without-expo](https://github.com/v3ron/expo-atlas-without-expo) [![expo-atlas-without-expo downloads](https://badgen.net/npm/dm/expo-atlas-without-expo)](https://www.npmtrends.com/expo-atlas-without-expo) [![expo-atlas-without-expo install size](https://packagephobia.com/badge?p=expo-atlas-without-expo)](https://packagephobia.com/result?p=expo-atlas-without-expo)
+- [react-native-bundle-visualizer](https://github.com/callstack/react-native-bundle-visualizer) [![react-native-bundle-visualizer downloads](https://badgen.net/npm/dm/react-native-bundle-visualizer)](https://www.npmtrends.com/react-native-bundle-visualizer)[![react-native-bundle-visualizer install size](https://packagephobia.com/badge?p=react-native-bundle-visualizer)](https://packagephobia.com/result?p=react-native-bundle-visualizer)
+- [webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer) [![webpack-bundle-analyzer downloads](https://badgen.net/npm/dm/webpack-bundle-analyzer)](https://www.npmtrends.com/webpack-bundle-analyzer)[![webpack-bundle-analyzer install size](https://packagephobia.com/badge?p=webpack-bundle-analyzer)](https://packagephobia.com/result?p=webpack-bundle-analyzer)
+- [bundle-stats](https://github.com/relative-ci/bundle-stats/tree/master/packages/cli#readme) [![bundle-stats downloads](https://badgen.net/npm/dm/bundle-stats)](https://www.npmtrends.com/bundle-stats)[![bundle-stats install size](https://packagephobia.com/badge?p=bundle-stats)](https://packagephobia.com/result?p=bundle-stats)
+- [statoscope](https://github.com/statoscope/statoscope) [![@statoscope/cli downloads](https://badgen.net/npm/dm/@statoscope/cli)](https://www.npmtrends.com/@statoscope/cli)[![@statoscope/cli install size](https://packagephobia.com/badge?p=@statoscope/cli)](https://packagephobia.com/result?p=@statoscope/cli)
 
 **Built using [Discovery.js](https://github.com/discoveryjs/discovery):**
 
