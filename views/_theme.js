@@ -19,7 +19,7 @@ if (isDark()) {
   // require("highcharts/themes/brand-dark");
   // require("highcharts/themes/dark-blue");
   // require("highcharts/themes/dark-green");
-  require("highcharts/themes/high-contrast-dark");
+  require("../vendors/high-contrast-dark.js");
 } else {
   // require("highcharts/themes/avocado");
   // require("highcharts/themes/brand-light");

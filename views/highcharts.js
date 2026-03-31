@@ -1,9 +1,6 @@
-const Highcharts = require("highcharts");
-
-require("highcharts/modules/heatmap");
-require("highcharts/modules/treemap");
-require("highcharts/modules/networkgraph");
-require("highcharts/modules/exporting");
+import Highcharts from "../vendors/highcharts.js";
+import "../vendors/highcharts-networkgraph.js";
+import "../vendors/highcharts-exporting.js";
 
 const { doTheming } = require("./_theme");
 

@@ -42,10 +42,6 @@ Please do the following:
       postfix: helpers.plural(count, [singular, plural]),
     };
   },
-  getHighchartsColors() {
-    const Highcharts = require("highcharts");
-    return Highcharts.getOptions().colors;
-  },
   getModulesName(path) {
     const modules = path.split("node_modules/");
     const lastModule = modules[modules.length - 1];

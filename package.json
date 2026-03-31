@@ -12,11 +12,9 @@
     "build": "npx discovery-build --config .discoveryrc.js --output build --serve-only-assets --single-file"
   },
   "dependencies": {
-    "@babel/parser": "^7.0.0",
     "@discoveryjs/cli": "2.14.7",
     "@discoveryjs/discovery": "1.0.0-beta.99",
     "chalk": "^4.1.2",
-    "highcharts": "12.2.0",
     "minimist": "^1.2.8",
     "prettier": "^3.8.1"
   },

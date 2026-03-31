@@ -5,41 +5,6 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@babel/helper-string-parser@npm:^7.27.1":
-  version: 7.27.1
-  resolution: "@babel/helper-string-parser@npm:7.27.1"
-  checksum: 10c0/8bda3448e07b5583727c103560bcf9c4c24b3c1051a4c516d4050ef69df37bb9a4734a585fe12725b8c2763de0a265aa1e909b485a4e3270b7cfd3e4dbe4b602
-  languageName: node
-  linkType: hard
-
-"@babel/helper-validator-identifier@npm:^7.28.5":
-  version: 7.28.5
-  resolution: "@babel/helper-validator-identifier@npm:7.28.5"
-  checksum: 10c0/42aaebed91f739a41f3d80b72752d1f95fd7c72394e8e4bd7cdd88817e0774d80a432451bcba17c2c642c257c483bf1d409dd4548883429ea9493a3bc4ab0847
-  languageName: node
-  linkType: hard
-
-"@babel/parser@npm:^7.0.0":
-  version: 7.29.2
-  resolution: "@babel/parser@npm:7.29.2"
-  dependencies:
-    "@babel/types": "npm:^7.29.0"
-  bin:
-    parser: ./bin/babel-parser.js
-  checksum: 10c0/e5a4e69e3ac7acdde995f37cf299a68458cfe7009dff66bd0962fd04920bef287201169006af365af479c08ff216bfefbb595e331f87f6ae7283858aebbc3317
-  languageName: node
-  linkType: hard
-
-"@babel/types@npm:^7.29.0":
-  version: 7.29.0
-  resolution: "@babel/types@npm:7.29.0"
-  dependencies:
-    "@babel/helper-string-parser": "npm:^7.27.1"
-    "@babel/helper-validator-identifier": "npm:^7.28.5"
-  checksum: 10c0/23cc3466e83bcbfab8b9bd0edaafdb5d4efdb88b82b3be6728bbade5ba2f0996f84f63b1c5f7a8c0d67efded28300898a5f930b171bb40b311bca2029c4e9b4f
-  languageName: node
-  linkType: hard
-
 "@discoveryjs/cli@npm:2.14.7":
   version: 2.14.7
   resolution: "@discoveryjs/cli@npm:2.14.7"
@@ -1041,13 +1006,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"highcharts@npm:12.2.0":
-  version: 12.2.0
-  resolution: "highcharts@npm:12.2.0"
-  checksum: 10c0/fb482ef75fda50c30d115f394c534108ea40540bd405dd72f14ddc28ae72b7c3ac924da06fe84d25c215564a9e451043dfe4ac5b44416df635a90b09ee528b43
-  languageName: node
-  linkType: hard
-
 "hitext@npm:^1.0.0-beta.1":
   version: 1.0.0-beta.1
   resolution: "hitext@npm:1.0.0-beta.1"
@@ -1428,11 +1386,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "react-native-bundle-discovery@workspace:."
   dependencies:
-    "@babel/parser": "npm:^7.0.0"
     "@discoveryjs/cli": "npm:2.14.7"
     "@discoveryjs/discovery": "npm:1.0.0-beta.99"
     chalk: "npm:^4.1.2"
-    highcharts: "npm:12.2.0"
     minimist: "npm:^1.2.8"
     prettier: "npm:^3.8.1"
   peerDependencies:
