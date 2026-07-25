@@ -28,3 +28,5 @@ tmp/
 
 .bundle-discovery/
 /lib/.tmp.js
+
+_serializer/README.md

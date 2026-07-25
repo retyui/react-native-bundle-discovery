@@ -1,1 +1,1 @@
-module.exports = require("./lib/customSerializer");
+module.exports = require("./_serializer/customSerializer");

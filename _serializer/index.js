@@ -1,6 +1,5 @@
-const { parse } = require("path");
+const { parse, resolve } = require("path");
 const { writeFileSync, existsSync } = require("fs");
-const { resolve } = require("path");
 const { Buffer } = require("buffer");
 const chalk = require("chalk");
 
