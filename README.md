@@ -30,7 +30,7 @@ There are two ways to install the package:
 #### 1. Install (independent tool)
 
 ```bash
-yarn add -D react-native-bundle-discovery
+yarn add -D react-native-bundle-discovery react-native-bundle-discovery-ui
 ```
 
 Add to your `metro.config.js`:
@@ -117,7 +117,7 @@ npx react-native bundle \
 Run webserver to view the report:
 
 ```bash
-npx react-native-bundle-discovery server metro-stats.json [--port <port>]
+npx react-native-bundle-discovery-ui server metro-stats.json [--port <port>]
 ```
 
 ##### 4.2 Build the HTML report
@@ -125,7 +125,7 @@ npx react-native-bundle-discovery server metro-stats.json [--port <port>]
 Run the following command to generate an HTML report from the JSON file:
 
 ```bash
-npx react-native-bundle-discovery build metro-stats.json
+npx react-native-bundle-discovery-ui build metro-stats.json
 ```
 
 

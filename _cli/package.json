@@ -1,0 +1,18 @@
+{
+  "name": "react-native-bundle-discovery-cli",
+  "version": "2.0.0-rc.1",
+  "main": "index.js",
+  "bin": "bin.js",
+  "repository": "git@github.com:retyui/react-native-bundle-discovery.git",
+  "author": "David <4661784+retyui@users.noreply.github.com>",
+  "license": "MIT",
+  "dependencies": {
+    "minimist": "^1.2.8"
+  },
+  "files": [
+    "index.js",
+    "bin.js",
+    "packages.js",
+    "prepare.js"
+  ]
+}
