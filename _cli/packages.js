@@ -1,6 +1,7 @@
 const path = require("path");
 const { prepareReport } = require("./prepare.js");
 const { formatBytes } = require("./utils.js");
+const chalk = require("chalk");
 
 const LODASH_FAMILY_GROUP = "lodash (please use only one)";
 
@@ -70,23 +71,34 @@ function printDefaultFormat(packageGroups, report) {
   const duplicateCount = packageGroups.filter(({ entries }) => entries.length > 1).length;
 
   console.log(
-    `Found ${report.packages.length} package entries (${packageGroups.length} unique names)`,
+    chalk.bold.cyan(
+      `Found ${report.packages.length} package entries (${packageGroups.length} unique names)`,
+    ),
   );
-  console.log(`Duplicate package names: ${duplicateCount}`);
+
+  if (duplicateCount > 0) {
+    console.log(chalk.bold.yellow(`Duplicate package names: ${duplicateCount}`));
+  } else {
+    console.log(chalk.bold.green("Duplicate package names: 0"));
+  }
 
   packageGroups.forEach(({ name, entries }, index) => {
+    const listIndex = chalk.dim(`${index + 1}.`);
+
     if (entries.length === 1) {
       const entry = entries[0];
       console.log(
-        `${index + 1}. ${entry.name}@${entry.version} (${entry.path}) - ${formatBytes(entry.sizeInBytes)}`,
+        `${listIndex} ${chalk.whiteBright(`${entry.name}@${entry.version}`)} ${chalk.gray(`(${entry.path})`)} - ${chalk.magenta(formatBytes(entry.sizeInBytes))}`,
       );
       return;
     }
 
-    console.log(`${index + 1}. ${name} [DUPLICATE x${entries.length}]`);
+    console.log(
+      `${listIndex} ${chalk.yellowBright(name)} ${chalk.black.bgYellow(` DUPLICATE x${entries.length} `)}`,
+    );
     entries.forEach((entry, entryIndex) => {
       console.log(
-        `   - ${entryIndex + 1}) ${entry.name}@${entry.version} (${entry.path}) - ${formatBytes(entry.sizeInBytes)}`,
+        `   ${chalk.gray(`- ${entryIndex + 1})`)} ${chalk.white(`${entry.name}@${entry.version}`)} ${chalk.gray(`(${entry.path})`)} - ${chalk.magenta(formatBytes(entry.sizeInBytes))}`,
       );
     });
   });
@@ -240,4 +252,5 @@ module.exports = {
   printPackagesList,
   getDuplicateGroupName,
   getPackageGroups,
+  LODASH_FAMILY_GROUP,
 };

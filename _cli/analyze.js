@@ -16,17 +16,19 @@ function readBuildReport(filePath) {
 
 function collectRecommendations(report) {
   return recommendations
-    .map((recommendation) => {
+    .flatMap((recommendation) => {
       const finding = recommendation.check(report);
       if (!finding) {
         return null;
       }
 
-      return {
-        id: recommendation.id,
-        title: recommendation.title,
-        ...finding,
-      };
+      return (Array.isArray(finding) ? finding : [finding]).map(f => {
+        return {
+          id: recommendation.id,
+          title: recommendation.title,
+          ...f,
+        };
+      });
     })
     .filter(Boolean);
 }
@@ -54,7 +56,7 @@ function printDefaultFormat(filePath, findings) {
     }
 
     if (finding.packages && finding.packages.length > 0) {
-      console.log(`   ${chalk.magenta("Packages:")} ${finding.packages.join(", ")}`);
+      console.log(`   ${chalk.magenta("Packages:")} ${finding.packages}`);
     }
 
     if (finding.docsUrl) {
@@ -68,31 +70,10 @@ function printDefaultFormat(filePath, findings) {
   });
 }
 
-function printJsonFormat(filePath, findings) {
-  console.log(
-    JSON.stringify(
-      {
-        file: filePath,
-        recommendations: findings,
-      },
-      null,
-      2,
-    ),
-  );
-}
-
-function printAnalyzeReport(filePath, options = {}) {
-  const { format = "default" } = options;
+function printAnalyzeReport(filePath) {
   const report = readBuildReport(filePath);
   const findings = collectRecommendations(report);
-
-  switch (format) {
-    case "json":
-      printJsonFormat(filePath, findings);
-      break;
-    default:
-      printDefaultFormat(filePath, findings);
-  }
+  printDefaultFormat(filePath, findings);
 }
 
 module.exports = {
