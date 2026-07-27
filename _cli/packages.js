@@ -2,6 +2,22 @@ const path = require("path");
 const { prepareReport } = require("./prepare.js");
 const { formatBytes } = require("./utils.js");
 
+const LODASH_FAMILY_GROUP = "lodash (please use only one)";
+
+function getDuplicateGroupName(packageName) {
+  if (
+    packageName === "lodash" ||
+    packageName === "lodash-es" ||
+    packageName === "underscore" ||
+    packageName === "ramda" ||
+    packageName.startsWith("lodash.")
+  ) {
+    return LODASH_FAMILY_GROUP;
+  }
+
+  return packageName;
+}
+
 function readBuildReport(filePath) {
   try {
     // Resolve from current working directory to support relative CLI paths.
@@ -17,15 +33,21 @@ function readBuildReport(filePath) {
 function getPackageGroups(report, sort = "size") {
   const groupedPackages = report.packages.reduce((map, pkg) => {
     const name = pkg?.name ?? "<unknown>";
+    const duplicateGroupName = getDuplicateGroupName(name);
     const version = pkg?.version ?? "<unknown>";
     const packagePath = pkg?.path ?? pkg?.absolutePath ?? "<unknown>";
     const sizeInBytes = pkg?.sizeInBytes ?? 0;
 
-    if (!map.has(name)) {
-      map.set(name, []);
+    if (!map.has(duplicateGroupName)) {
+      map.set(duplicateGroupName, []);
     }
 
-    map.get(name).push({ version, path: packagePath, sizeInBytes });
+    map.get(duplicateGroupName).push({
+      name,
+      version,
+      path: packagePath,
+      sizeInBytes,
+    });
     return map;
   }, new Map());
 
@@ -56,7 +78,7 @@ function printDefaultFormat(packageGroups, report) {
     if (entries.length === 1) {
       const entry = entries[0];
       console.log(
-        `${index + 1}. ${name}@${entry.version} (${entry.path}) - ${formatBytes(entry.sizeInBytes)}`,
+        `${index + 1}. ${entry.name}@${entry.version} (${entry.path}) - ${formatBytes(entry.sizeInBytes)}`,
       );
       return;
     }
@@ -64,7 +86,7 @@ function printDefaultFormat(packageGroups, report) {
     console.log(`${index + 1}. ${name} [DUPLICATE x${entries.length}]`);
     entries.forEach((entry, entryIndex) => {
       console.log(
-        `   - ${entryIndex + 1}) ${entry.version} (${entry.path}) - ${formatBytes(entry.sizeInBytes)}`,
+        `   - ${entryIndex + 1}) ${entry.name}@${entry.version} (${entry.path}) - ${formatBytes(entry.sizeInBytes)}`,
       );
     });
   });
@@ -85,7 +107,7 @@ function printTableFormat(packageGroups, report) {
       const entry = entries[0];
       rows.push({
         "#": index + 1,
-        "Package": `${name}@${entry.version}`,
+        "Package": `${entry.name}@${entry.version}`,
         "Path": entry.path,
         "Size": formatBytes(entry.sizeInBytes),
       });
@@ -99,7 +121,7 @@ function printTableFormat(packageGroups, report) {
       entries.forEach((entry, entryIndex) => {
         rows.push({
           "#": "",
-          "Package": `  ${entryIndex + 1}) ${entry.version}`,
+          "Package": `  ${entryIndex + 1}) ${entry.name}@${entry.version}`,
           "Path": entry.path,
           "Size": formatBytes(entry.sizeInBytes),
         });
@@ -149,10 +171,11 @@ function printJsonFormat(packageGroups, report) {
         const entry = entries[0];
         return {
           index: index + 1,
-          name,
+          name: entry.name,
           isDuplicate: false,
           entries: [
             {
+              name: entry.name,
               version: entry.version,
               path: entry.path,
               sizeInBytes: entry.sizeInBytes,
@@ -170,6 +193,7 @@ function printJsonFormat(packageGroups, report) {
           duplicateCount: entries.length,
           entries: entries.map((entry, entryIndex) => ({
             index: entryIndex + 1,
+            name: entry.name,
             version: entry.version,
             path: entry.path,
             sizeInBytes: entry.sizeInBytes,
