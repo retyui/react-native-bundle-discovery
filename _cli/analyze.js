@@ -1,4 +1,5 @@
 const path = require("path");
+const chalk = require("chalk");
 const { prepareReport } = require("./prepare.js");
 const recommendations = require("./recommendations/index.js");
 
@@ -31,23 +32,38 @@ function collectRecommendations(report) {
 }
 
 function printDefaultFormat(filePath, findings) {
+  const prettyPath = chalk.cyan(filePath);
+
   if (findings.length === 0) {
-    console.log(`No optimization recommendations found for ${filePath}.`);
+    console.log(`${chalk.green("No optimization recommendations found for")} ${prettyPath}.`);
     return;
   }
 
-  console.log(`Found ${findings.length} optimization recommendation(s):`);
+  const recommendationLabel = findings.length === 1 ? "recommendation" : "recommendations";
+  console.log(
+    `${chalk.bold.green("Found")} ${chalk.bold(findings.length)} ${chalk.green(`${recommendationLabel}:`)}`,
+  );
+  console.log(`${chalk.dim("Report:")} ${prettyPath}`);
+  console.log();
 
   findings.forEach((finding, index) => {
-    console.log(`${index + 1}. ${finding.title}`);
+    console.log(`${chalk.bold.yellow(`${index + 1}.`)} ${chalk.bold(finding.title)}`);
+
     if (finding.message) {
-      console.log(`   Why: ${finding.message}`);
+      console.log(`   ${chalk.blue("Why:")} ${finding.message}`);
     }
+
     if (finding.packages && finding.packages.length > 0) {
-      console.log(`   Packages: ${finding.packages.join(", ")}`);
+      console.log(`   ${chalk.magenta("Packages:")} ${finding.packages.join(", ")}`);
     }
+
     if (finding.docsUrl) {
-      console.log(`   Docs: ${Array.isArray(finding.docsUrl) ? finding.docsUrl.join(", ") : finding.docsUrl}`);
+      const docs = Array.isArray(finding.docsUrl) ? finding.docsUrl.join(", ") : finding.docsUrl;
+      console.log(`   ${chalk.cyan("Links:")} ${chalk.underline(docs)}`);
+    }
+
+    if (index < findings.length - 1) {
+      console.log(chalk.dim("   ----------------------------------------"));
     }
   });
 }
@@ -82,4 +98,3 @@ function printAnalyzeReport(filePath, options = {}) {
 module.exports = {
   printAnalyzeReport,
 };
-

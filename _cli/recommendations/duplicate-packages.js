@@ -19,7 +19,7 @@ module.exports = {
 
     return {
       packages,
-      message: `Found ${duplicateGroups.length} duplicate package group(s). Align versions or use dependency overrides (npm) or resolutions (yarn) to keep a single copy per package group. Also you can use a "packages" command to see all packages in the bundle.`,
+      message: `Found ${duplicateGroups.length} duplicate package group(s). Align versions or use dependency overrides (npm) or resolutions (yarn) to keep a single copy per package group. Use a "${require('../package.json').name} packages <file>" command to see more...`,
       docsUrl: ["https://docs.npmjs.com/cli/v10/configuring-npm/package-json#overrides", "https://classic.yarnpkg.com/lang/en/docs/selective-version-resolutions/"],
     };
   },
