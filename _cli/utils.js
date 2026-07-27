@@ -6,4 +6,40 @@ function formatBytes(bytes, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
 }
 
-module.exports = {formatBytes};
+function parseVersion(version) {
+  if (typeof version !== "string") {
+    return null;
+  }
+
+  const match = version.match(/^(\d+)\.(\d+)\.(\d+)/);
+  if (!match) {
+    return null;
+  }
+
+  return {
+    major: Number(match[1]),
+    minor: Number(match[2]),
+    patch: Number(match[3]),
+  };
+}
+
+function isVersionGte(version, targetVersion) {
+  const current = parseVersion(version);
+  const target = parseVersion(targetVersion);
+
+  if (!current || !target) {
+    return false;
+  }
+
+  if (current.major !== target.major) {
+    return current.major > target.major;
+  }
+
+  if (current.minor !== target.minor) {
+    return current.minor > target.minor;
+  }
+
+  return current.patch >= target.patch;
+}
+
+module.exports = {formatBytes, isVersionGte};

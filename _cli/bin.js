@@ -6,9 +6,13 @@ function printHelp() {
 
 Usage:
   react-native-bundle-discovery-cli packages <file> [--sort size|name] [--format json|table|default]
+  react-native-bundle-discovery-cli analyze <file> [--format json|default]
+  react-native-bundle-discovery-cli analize <file> [--format json|default]
 
 Commands:
   packages <file>       Print package list from a Metro bundler stat report
+  analyze <file>        Analyze bundle and print optimization recommendations
+  analize <file>        Alias for analyze
 
 Options:
   -h, --help             Show help
@@ -58,6 +62,24 @@ if (command === "packages") {
   try {
     const { printPackagesList } = require("./packages.js");
     return printPackagesList(file, { sort, format });
+  } catch (error) {
+    fail(error.message);
+  }
+}
+
+if (command === "analyze" || command === "analize") {
+  const file = argv._[1];
+  const format = argv.format;
+  if (!file) {
+    fail("Missing required argument: <file>");
+  }
+  if (format !== "json" && format !== "default") {
+    fail(`Invalid value for --format: ${format}. Expected one of: json, default.`);
+  }
+
+  try {
+    const { printAnalyzeReport } = require("./analyze.js");
+    return printAnalyzeReport(file, { format });
   } catch (error) {
     fail(error.message);
   }

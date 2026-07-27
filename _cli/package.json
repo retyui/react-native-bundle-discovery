@@ -12,7 +12,9 @@
   "files": [
     "index.js",
     "bin.js",
+    "analyze.js",
     "packages.js",
-    "prepare.js"
+    "prepare.js",
+    "recommendations"
   ]
 }
