@@ -238,4 +238,6 @@ function printPackagesList(filePath, options = {}) {
 
 module.exports = {
   printPackagesList,
+  getDuplicateGroupName,
+  getPackageGroups,
 };

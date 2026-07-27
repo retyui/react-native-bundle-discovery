@@ -47,7 +47,7 @@ function printDefaultFormat(filePath, findings) {
       console.log(`   Packages: ${finding.packages.join(", ")}`);
     }
     if (finding.docsUrl) {
-      console.log(`   Docs: ${finding.docsUrl}`);
+      console.log(`   Docs: ${Array.isArray(finding.docsUrl) ? finding.docsUrl.join(", ") : finding.docsUrl}`);
     }
   });
 }
