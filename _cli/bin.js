@@ -7,12 +7,10 @@ function printHelp() {
 Usage:
   react-native-bundle-discovery-cli packages <file> [--sort size|name] [--format json|table|default]
   react-native-bundle-discovery-cli analyze <file> [--format json|default]
-  react-native-bundle-discovery-cli analize <file> [--format json|default]
 
 Commands:
   packages <file>       Print package list from a Metro bundler stat report
   analyze <file>        Analyze bundle and print optimization recommendations
-  analize <file>        Alias for analyze
 
 Options:
   -h, --help             Show help
@@ -56,7 +54,9 @@ if (command === "packages") {
     fail(`Invalid value for --sort: ${sort}. Expected one of: size, name.`);
   }
   if (format !== "json" && format !== "table" && format !== "default") {
-    fail(`Invalid value for --format: ${format}. Expected one of: json, table, default.`);
+    fail(
+      `Invalid value for --format: ${format}. Expected one of: json, table, default.`,
+    );
   }
 
   try {
@@ -74,7 +74,9 @@ if (command === "analyze" || command === "analize") {
     fail("Missing required argument: <file>");
   }
   if (format !== "json" && format !== "default") {
-    fail(`Invalid value for --format: ${format}. Expected one of: json, default.`);
+    fail(
+      `Invalid value for --format: ${format}. Expected one of: json, default.`,
+    );
   }
 
   try {

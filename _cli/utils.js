@@ -3,7 +3,9 @@ function formatBytes(bytes, decimals = 2) {
   const k = 1024,
     sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
     i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
+  return (
+    parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i]
+  );
 }
 
 function parseVersion(version) {
@@ -42,4 +44,9 @@ function isVersionGte(version, targetVersion) {
   return current.patch >= target.patch;
 }
 
-module.exports = {formatBytes, isVersionGte};
+// 0.87.1 -> 0.87
+function formatRnVersionToDocsFormat(version) {
+  return version.split(".").slice(0, 2).join(".");
+}
+
+module.exports = { formatBytes, isVersionGte, formatRnVersionToDocsFormat };
