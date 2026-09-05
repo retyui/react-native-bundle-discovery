@@ -1,5 +1,8 @@
-const { isVersionGte } = require("../utils.js");
-const { formatRnVersionToDocsFormat } = require("../utils");
+const {
+  getReactNativeVersion,
+  isVersionGte,
+  formatRnVersionToDocsFormat,
+} = require("../utils.js");
 
 module.exports = {
   id: "radial-gradient-vs-background-image",
@@ -17,9 +20,7 @@ module.exports = {
       return null;
     }
 
-    const reactNativeVersion = packages.find(
-      (pkg) => pkg?.name === "react-native",
-    )?.version;
+    const reactNativeVersion = getReactNativeVersion(packages);
 
     if (!isVersionGte(reactNativeVersion, "0.80.0")) {
       return null;

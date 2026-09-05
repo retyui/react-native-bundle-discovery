@@ -8,6 +8,14 @@ function formatBytes(bytes, decimals = 2) {
   );
 }
 
+function getReactNativeVersion(packages) {
+  if (!Array.isArray(packages)) {
+    return undefined;
+  }
+
+  return packages.find((pkg) => pkg?.name === "react-native")?.version;
+}
+
 function parseVersion(version) {
   if (typeof version !== "string") {
     return null;
@@ -49,4 +57,9 @@ function formatRnVersionToDocsFormat(version) {
   return version.split(".").slice(0, 2).join(".");
 }
 
-module.exports = { formatBytes, isVersionGte, formatRnVersionToDocsFormat };
+module.exports = {
+  formatBytes,
+  getReactNativeVersion,
+  isVersionGte,
+  formatRnVersionToDocsFormat,
+};

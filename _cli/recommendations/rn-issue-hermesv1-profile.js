@@ -1,4 +1,4 @@
-const { isVersionGte } = require("../utils.js");
+const { getReactNativeVersion, isVersionGte } = require("../utils.js");
 
 const filesToCheck = [
   "react-native/Libraries/Blob/File.js",
@@ -9,9 +9,7 @@ module.exports = {
   id: "rn-issue-hermes-transform-profile",
   title: "Prefer hermes-stable transform profile for React Native 0.85+",
   check: (report) => {
-    const reactNativeVersion = report?.packages?.find(
-      (pkg) => pkg?.name === "react-native",
-    )?.version;
+    const reactNativeVersion = getReactNativeVersion(report?.packages);
 
     if (!isVersionGte(reactNativeVersion, "0.85.0")) {
       return null;

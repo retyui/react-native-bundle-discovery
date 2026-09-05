@@ -1,4 +1,8 @@
-const { isVersionGte, formatRnVersionToDocsFormat } = require("../utils.js");
+const {
+  getReactNativeVersion,
+  isVersionGte,
+  formatRnVersionToDocsFormat,
+} = require("../utils.js");
 
 module.exports = {
   id: "linear-gradient-vs-background-image",
@@ -16,9 +20,7 @@ module.exports = {
       return null;
     }
 
-    const reactNativeVersion = packages.find(
-      (pkg) => pkg?.name === "react-native",
-    )?.version;
+    const reactNativeVersion = getReactNativeVersion(packages);
 
     if (!isVersionGte(reactNativeVersion, "0.76.0")) {
       return null;

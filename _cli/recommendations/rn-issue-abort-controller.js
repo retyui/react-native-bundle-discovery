@@ -1,4 +1,4 @@
-const { isVersionGte } = require("../utils.js");
+const { getReactNativeVersion, isVersionGte } = require("../utils.js");
 
 module.exports = {
   id: "rn-issue-abort-controller-polyfill",
@@ -20,9 +20,7 @@ module.exports = {
       return null;
     }
 
-    const reactNativeVersion = packages.find(
-      (pkg) => pkg?.name === "react-native",
-    )?.version;
+    const reactNativeVersion = getReactNativeVersion(packages);
 
     if (!isVersionGte(reactNativeVersion, "0.87.0")) {
       return null;
