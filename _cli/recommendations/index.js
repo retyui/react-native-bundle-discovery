@@ -3,6 +3,7 @@ const reactNativeRadialGradient = require("./radial-gradient.js");
 const duplicatePackages = require("./duplicate-packages.js");
 const abortControllerPolyfill = require("./rn-issue-abort-controller.js");
 const babelRuntimeInlineHelpers = require("./rn-issue-babel-runtime.js");
+const hermesTransformProfile = require("./rn-issue-hermesv1-profile.js");
 
 module.exports = [
   reactNativeLinearGradient,
@@ -10,4 +11,5 @@ module.exports = [
   duplicatePackages,
   abortControllerPolyfill,
   babelRuntimeInlineHelpers,
+  hermesTransformProfile,
 ];
