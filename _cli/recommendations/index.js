@@ -6,6 +6,7 @@ const babelRuntimeInlineHelpers = require("./rn-issue-babel-runtime.js");
 const hermesTransformProfile = require("./rn-issue-hermesv1-profile.js");
 const promisePolyfill = require("./rn-issue-promise-polyfill.js");
 const devOnlyPackages = require("./dev-only-packages.js");
+const rendererArchitectureMismatch = require("./TODO-no-skip-fabric-modules.js");
 
 module.exports = [
   reactNativeLinearGradient,
@@ -16,4 +17,5 @@ module.exports = [
   hermesTransformProfile,
   promisePolyfill,
   devOnlyPackages,
+  rendererArchitectureMismatch,
 ];
