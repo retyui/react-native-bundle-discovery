@@ -83,7 +83,8 @@ module.exports = {
       messageParts.push(
         "Bundle contains `react-native/Libraries/Promise.js`, which is dead code on Hermes. " +
           "Patch React Native to stop loading it: in `node_modules/react-native/Libraries/Core/polyfillPromise.js`, " +
-          "comment out `polyfillGlobal('Promise', () => require('../Promise').default);`, then generate a patch with `patch-package react-native`.",
+          "comment out `polyfillGlobal('Promise', () => require('../Promise').default);`, then generate a patch with `patch-package react-native`. " +
+          "Or exclude it at bundle time in `metro.config.js` via `serializer.processModuleFilter`, e.g. return false for modules ending with `react-native/Libraries/Promise.js`.",
       );
     }
 

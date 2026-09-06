@@ -5,6 +5,7 @@ const abortControllerPolyfill = require("./rn-issue-abort-controller.js");
 const babelRuntimeInlineHelpers = require("./rn-issue-babel-runtime.js");
 const hermesTransformProfile = require("./rn-issue-hermesv1-profile.js");
 const promisePolyfill = require("./rn-issue-promise-polyfill.js");
+const devOnlyPackages = require("./dev-only-packages.js");
 
 module.exports = [
   reactNativeLinearGradient,
@@ -14,4 +15,5 @@ module.exports = [
   babelRuntimeInlineHelpers,
   hermesTransformProfile,
   promisePolyfill,
+  devOnlyPackages,
 ];
