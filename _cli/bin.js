@@ -13,9 +13,9 @@ Commands:
   analyze <file>        Analyze bundle and print optimization recommendations
 
 Options:
-  -h, --help             Show help
-  --sort                 Sort by size (default, desc) or name (asc)
-  --format               Output format: json, table, or default (default: default)
+  -h, --help            Show help
+  --sort                Sort by size (default, desc) or name (asc)
+  --format              Output format (packages: json|table|default; analyze: json|default)
 `);
 }
 

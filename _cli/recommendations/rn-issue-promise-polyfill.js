@@ -48,7 +48,7 @@ function findMatchingPromisePolyfills(report, entries) {
 
 module.exports = {
   id: "rn-issue-promise-polyfill",
-  title: "Remove Promise polyfills and dead code on modern React Native",
+  title: "Remove Promise polyfills",
   check: (report) => {
     const packages = report?.packages ?? [];
     const modules = report?.modules ?? [];
@@ -81,16 +81,27 @@ module.exports = {
 
     if (hasDeadPromiseModule) {
       messageParts.push(
-        "Bundle contains `react-native/Libraries/Promise.js`, which is dead code on Hermes. " +
-          "Patch React Native to stop loading it: in `node_modules/react-native/Libraries/Core/polyfillPromise.js`, " +
-          "comment out `polyfillGlobal('Promise', () => require('../Promise').default);`, then generate a patch with `patch-package react-native`. " +
-          "Or exclude it at bundle time in `metro.config.js` via `serializer.processModuleFilter`, e.g. return false for modules ending with `react-native/Libraries/Promise.js`.",
+        `Bundle contains \`react-native/Libraries/Promise.js\`. This file is dead code because Hermes already provides Promise out of the box. You can update 'metro.config.js' to remove this file from the bundle:
+
+\`\`\`js
+
+const { createProcessModuleFilter } = require('react-native-bundle-discovery');
+const processModuleFilter = createProcessModuleFilter({ removePromisePolyfill: true });
+
+const config = {
+  serializer: {
+    processModuleFilter,
+  },
+};
+\`\`\`
+
+        `,
       );
     }
 
     if (uniquePolyfills.length > 0) {
       messageParts.push(
-        "Bundle also includes Promise polyfill modules/packages that Hermes supports out of the box. " +
+        "Bundle also includes Promise polyfill modules/packages that Hermes already supports natively. " +
           `Consider removing: ${uniquePolyfills.join(", ")}.`,
       );
     }
