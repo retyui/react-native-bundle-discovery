@@ -16,6 +16,7 @@
     "analyze.js",
     "packages.js",
     "prepare.js",
+    "utils.js",
     "recommendations"
   ]
 }
