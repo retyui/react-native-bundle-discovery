@@ -72,6 +72,9 @@ function printDefaultFormat(filePath, findings) {
 
 function printAnalyzeReport(filePath) {
   const report = readBuildReport(filePath);
+  if (report?.transformOptions?.dev !== false) {
+    throw new Error("Analyze requires a production report generated with --dev false.");
+  }
   const findings = collectRecommendations(report);
   printDefaultFormat(filePath, findings);
 }
