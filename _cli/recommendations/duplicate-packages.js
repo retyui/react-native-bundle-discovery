@@ -23,7 +23,7 @@ module.exports = {
 
       const message = [
         hasDotLodash && hasSimpleLodash && "You can simply use `lodash/*` imports and remove `lodash.*` packages",
-        hasESLodash && hasSimpleLodash && "You don't need two copy of `lodash` and `lodash-es`! Just use one",
+        hasESLodash && hasSimpleLodash && "You don't need two copies of `lodash` and `lodash-es`! Just use one",
         hasUnderscore && "You have both `underscore` and `lodash` in your project. Consider using only one library to reduce bundle size.",
         hasRamda && "You have both `ramda` and `lodash` in your project. Consider using only one library to reduce bundle size.",
       ].filter(Boolean).join("; ");
