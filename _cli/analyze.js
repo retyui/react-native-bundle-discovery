@@ -70,12 +70,16 @@ function printDefaultFormat(filePath, findings) {
   });
 }
 
-function printAnalyzeReport(filePath) {
+function printAnalyzeReport(filePath, { format = "default" } = {}) {
   const report = readBuildReport(filePath);
   if (report?.transformOptions?.dev !== false) {
     throw new Error("Analyze requires a production report generated with --dev false.");
   }
   const findings = collectRecommendations(report);
+  if (format === "json") {
+    console.log(JSON.stringify(findings, null, 2));
+    return;
+  }
   printDefaultFormat(filePath, findings);
 }
 
