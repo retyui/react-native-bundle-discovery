@@ -7,6 +7,7 @@ const hermesTransformProfile = require("./rn-issue-hermesv1-profile.js");
 const promisePolyfill = require("./rn-issue-promise-polyfill.js");
 const devOnlyPackages = require("./dev-only-packages.js");
 const rendererArchitectureMismatch = require("./no-skip-fabric-modules.js");
+const packageJsonFiles = require("./package-json-files.js");
 
 module.exports = [
   reactNativeLinearGradient,
@@ -18,4 +19,5 @@ module.exports = [
   promisePolyfill,
   devOnlyPackages,
   rendererArchitectureMismatch,
+  packageJsonFiles,
 ];
