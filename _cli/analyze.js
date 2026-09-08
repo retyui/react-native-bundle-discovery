@@ -10,7 +10,9 @@ function readBuildReport(filePath) {
     const report = require(resolvedPath);
     return prepareReport(report);
   } catch (error) {
-    throw new Error(`Failed to read report file: ${filePath}\n${error.message}`);
+    throw new Error(
+      `Failed to read report file: ${filePath}\n${error.message}`,
+    );
   }
 }
 
@@ -22,7 +24,7 @@ function collectRecommendations(report) {
         return null;
       }
 
-      return (Array.isArray(finding) ? finding : [finding]).map(f => {
+      return (Array.isArray(finding) ? finding : [finding]).map((f) => {
         return {
           id: recommendation.id,
           title: recommendation.title,
@@ -37,11 +39,14 @@ function printDefaultFormat(filePath, findings) {
   const prettyPath = chalk.cyan(filePath);
 
   if (findings.length === 0) {
-    console.log(`${chalk.green("No optimization recommendations found for")} ${prettyPath}.`);
+    console.log(
+      `${chalk.green("No optimization recommendations found for")} ${prettyPath}.`,
+    );
     return;
   }
 
-  const recommendationLabel = findings.length === 1 ? "recommendation" : "recommendations";
+  const recommendationLabel =
+    findings.length === 1 ? "recommendation" : "recommendations";
   console.log(
     `${chalk.bold.green("Found")} ${chalk.bold(findings.length)} ${chalk.green(`${recommendationLabel}:`)}`,
   );
@@ -49,10 +54,14 @@ function printDefaultFormat(filePath, findings) {
   console.log();
 
   findings.forEach((finding, index) => {
-    console.log(`${chalk.bold.yellow(`${index + 1}.`)} ${chalk.bold(finding.title)}`);
+    console.log(
+      `${chalk.bold.yellow(`${index + 1}.`)} ${chalk.bold(finding.title)}`,
+    );
 
     if (finding.message) {
-      console.log(`   ${chalk.blue("Why:")} ${finding.message}`);
+      const prefix = `   ${chalk.blue("Why:")} `;
+      const offset = "        ";
+      console.log(`${prefix}${finding.message.replace(/\n/g, "\n" + offset)}`);
     }
 
     if (finding.packages && finding.packages.length > 0) {
@@ -60,12 +69,14 @@ function printDefaultFormat(filePath, findings) {
     }
 
     if (finding.docsUrl) {
-      const docs = Array.isArray(finding.docsUrl) ? finding.docsUrl.join(", ") : finding.docsUrl;
+      const docs = Array.isArray(finding.docsUrl)
+        ? finding.docsUrl.join(", ")
+        : finding.docsUrl;
       console.log(`   ${chalk.cyan("Links:")} ${chalk.underline(docs)}`);
     }
 
     if (index < findings.length - 1) {
-      console.log(chalk.dim("   ----------------------------------------"));
+      console.log(chalk.dim("\n   ----------------------------------------\n"));
     }
   });
 }
@@ -73,7 +84,9 @@ function printDefaultFormat(filePath, findings) {
 function printAnalyzeReport(filePath, { format = "default" } = {}) {
   const report = readBuildReport(filePath);
   if (report?.transformOptions?.dev !== false) {
-    throw new Error("Analyze requires a production report generated with --dev false.");
+    throw new Error(
+      "Analyze requires a production report generated with --dev false.",
+    );
   }
   const findings = collectRecommendations(report);
   if (format === "json") {

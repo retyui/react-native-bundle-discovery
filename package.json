@@ -1,6 +1,6 @@
 {
   "name": "react-native-bundle-discovery-ui",
-  "version": "2.0.0-rc.4",
+  "version": "2.0.0-rc.5",
   "main": "index.js",
   "bin": "lib/bin.js",
   "repository": "git@github.com:retyui/react-native-bundle-discovery.git",
@@ -12,8 +12,8 @@
     "build": "npx discovery-build --config .discoveryrc.js --output build --serve-only-assets --single-file"
   },
   "resolutions": {
-    "react-native-bundle-discovery-ui": "2.0.0-rc.4",
-    "react-native-bundle-discovery": "2.0.0-rc.4"
+    "react-native-bundle-discovery-ui": "2.0.0-rc.5",
+    "react-native-bundle-discovery": "2.0.0-rc.5"
   },
   "dependencies": {
     "@discoveryjs/cli": "2.14.7",

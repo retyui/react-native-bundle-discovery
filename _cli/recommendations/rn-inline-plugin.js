@@ -23,7 +23,11 @@ module.exports = {
     const reactNativeVersion = getReactNativeVersion(packages);
 
     // Issue is fixed in React Native 0.88.0, so we can skip the recommendation for versions >= 0.88.0
-    if (isVersionGte(reactNativeVersion, "0.88.0")) {
+    // skip old RN versions `0.79.x and below` to avoid Babel build issues
+    if (
+      isVersionGte(reactNativeVersion, "0.88.0") ||
+      !isVersionGte(reactNativeVersion, "0.80.0")
+    ) {
       return null;
     }
 
@@ -39,7 +43,7 @@ You can save bundle size by removing the that code as ${report?.transformOptions
 🍏 iOS: -17.76 KB
 🤖 Android: -19.61 KB
 
-To fix the issue you can bump \`@react-native/babel-preset\` to \`0.88.x\` or \`nightly\` (if \`0.88.x\` not released yet).`,
+To fix the issue you can bump \`@react-native/babel-preset\` to \`0.88.x\` or \`nightly\` or \`rc\` (if \`0.88.x\` not released yet).`,
       packages: ["@react-native/babel-preset"],
       docsUrl: DOCS_URL,
     };

@@ -7,10 +7,11 @@ const filesToCheck = [
 
 module.exports = {
   id: "rn-issue-hermes-transform-profile",
-  title: "Prefer hermes-stable transform profile for React Native 0.85+",
+  title: "Prefer hermes-stable transform profile for React Native 0.84+",
   check: (report) => {
     const reactNativeVersion = getReactNativeVersion(report?.packages);
 
+    // 0.85.x is used as in 0.84.x needs more complicated babel config to avoid ES5 output, so we only recommend for 0.85.x+
     if (!isVersionGte(reactNativeVersion, "0.85.0")) {
       return null;
     }

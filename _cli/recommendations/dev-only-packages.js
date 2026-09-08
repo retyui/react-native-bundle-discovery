@@ -1,3 +1,8 @@
+const { getReactNativeVersion, isVersionGte } = require("../utils");
+const rn74PlusDevOnlyPackages = [
+  "prop-types",
+  "deprecated-react-native-prop-types",
+];
 const devOnlyPackages = [
   "redux-logger",
   "redux-devtools",
@@ -6,8 +11,6 @@ const devOnlyPackages = [
   "redux-devtools-extension",
   "@redux-devtools/instrument",
   "@redux-devtools/remote-redux-devtools",
-  "prop-types",
-  "deprecated-react-native-prop-types",
   "@storybook/react",
   "@storybook/react-native",
   "@storybook/addon-actions",
@@ -30,14 +33,14 @@ const devOnlyPackages = [
   "react-refresh",
 ];
 
-function findBundledDevPackages(report) {
+function findBundledDevPackages(report, _devOnlyPackages) {
   const packages = report?.packages ?? [];
   const modules = report?.modules ?? [];
   const matches = new Set();
 
   for (const pkg of packages) {
     if (
-      devOnlyPackages.includes(pkg?.name) &&
+      _devOnlyPackages.includes(pkg?.name) &&
       Number(pkg?.sizeInBytes ?? 0) > 1000
     ) {
       matches.add(`${pkg.name}@${pkg.version}`);
@@ -50,7 +53,7 @@ function findBundledDevPackages(report) {
       continue;
     }
 
-    for (const pkgName of devOnlyPackages) {
+    for (const pkgName of _devOnlyPackages) {
       if (
         modulePath.includes(`/node_modules/${pkgName}/`) ||
         modulePath.endsWith(`/node_modules/${pkgName}`)
@@ -70,7 +73,12 @@ module.exports = {
   id: "dev-only-packages-in-production-bundle",
   title: "Remove dev-only packages from production bundle",
   check: (report) => {
-    const bundledDevPackages = findBundledDevPackages(report);
+    const bundledDevPackages = findBundledDevPackages(
+      report,
+      isVersionGte(getReactNativeVersion(report?.packages ?? []), "0.74.0")
+        ? [...devOnlyPackages, ...rn74PlusDevOnlyPackages]
+        : devOnlyPackages,
+    );
 
     if (bundledDevPackages.length === 0) {
       return null;
