@@ -1382,9 +1382,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-bundle-discovery@workspace:.":
+"react-native-bundle-discovery-ui@workspace:.":
   version: 0.0.0-use.local
-  resolution: "react-native-bundle-discovery@workspace:."
+  resolution: "react-native-bundle-discovery-ui@workspace:."
   dependencies:
     "@discoveryjs/cli": "npm:2.14.7"
     "@discoveryjs/discovery": "npm:1.0.0-beta.99"
@@ -1397,7 +1397,7 @@ __metadata:
     metro:
       optional: true
   bin:
-    react-native-bundle-discovery: lib/bin.js
+    react-native-bundle-discovery-ui: lib/bin.js
   languageName: unknown
   linkType: soft
 
