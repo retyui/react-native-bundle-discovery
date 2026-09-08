@@ -43,11 +43,8 @@ const processModuleFilter = createProcessModuleFilter({
   removeOldRenderer: true, // true when NEW_ARCH ON
   removeNewRenderer: true, // true when NEW_ARCH OFF
 });
-
 const config = {
-  serializer: {
-    processModuleFilter,
-  },
+  serializer: { processModuleFilter },
 };
 \`\`\`
 `,

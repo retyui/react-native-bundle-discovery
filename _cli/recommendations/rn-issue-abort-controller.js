@@ -27,7 +27,8 @@ module.exports = {
     }
 
     return {
-      message: `React Native 0.87.x+ includes built-in AbortController / AbortSignal support, so you can remove the \`${abortControllerPkgs.map((pkg) => pkg.name).join(", ")}\` polyfill(s) from the bundle.`,
+      message: `React Native 0.87.x+ includes built-in AbortController / AbortSignal support, 
+so you can remove the \`${abortControllerPkgs.map((pkg) => pkg.name).join(", ")}\` polyfill(s) from the bundle.`,
       packages: [
         ...abortControllerPkgs.map((pkg) => `${pkg.name}@${pkg.version}`),
         `react-native@${reactNativeVersion}`,

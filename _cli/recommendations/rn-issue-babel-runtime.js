@@ -43,12 +43,22 @@ module.exports = {
     const runtimeVersionForConfig = babelRuntimeVersion ?? "x.x.x";
 
     return {
-      message:
-        `Bundle contains inlined Babel runtime helpers in ${inlinedHelpersModules.length} module(s). ` +
-        `Add React Native preset option to reuse helpers from @babel/runtime: ` +
-        "`['module:@react-native/babel-preset', { enableBabelRuntime: '" +
-        runtimeVersionForConfig +
-        "' }]`.",
+      message: `Bundle contains inlined Babel runtime helpers in ${inlinedHelpersModules.length} module(s).
+
+To fix the issue, add the \`enableBabelRuntime\` option to your Babel config, 
+where value is \`@babel/runtime\` version installed in your project:
+
+\`\`\`js
+// babel.config.js
+module.exports = {
+  presets: [
+    [
+      'module:@react-native/babel-preset', 
+      { enableBabelRuntime: '${runtimeVersionForConfig}' }
+    ],
+  ],
+};
+\`\`\``,
       packages: babelRuntimeVersion
         ? [`@babel/runtime@${babelRuntimeVersion}`]
         : [],

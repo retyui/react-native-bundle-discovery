@@ -85,9 +85,18 @@ module.exports = {
     }
 
     return {
-      message:
-        `Detected dev-only packages in the production bundle: ${bundledDevPackages.join(", ")}. ` +
-        "Move debug-only imports/usage behind `__DEV__` checks so Metro can exclude them from release builds.",
+      message: `Detected dev-only packages in the production bundle: ${bundledDevPackages.join(", ")}. 
+
+Move debug-only imports/usage behind \`__DEV__\` checks so Metro can exclude them from release builds, see example below:
+
+\`\`\`js
+// Init dev-only packages conditionally
+if (__DEV__) {
+  const { whyDidYouRender } = require('@welldone-software/why-did-you-render');
+  whyDidYouRender(React, { trackAllPureComponents: true });
+}
+\`\`\`
+      `,
       packages: bundledDevPackages,
       docsUrl: "https://reactnative.dev/docs/global-__DEV__",
     };

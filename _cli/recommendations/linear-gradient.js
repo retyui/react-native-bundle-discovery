@@ -35,7 +35,9 @@ module.exports = {
       : "experimental_backgroundimage";
 
     return {
-      message: `React Native ships built-in \`linear-gradient()\` support (starting React Native 0.76.x+). You can remove ${gradientPkgs.map((e) => e.name).join(", ")} and migrate to a simple View with a \`${backgroundImageProp}\` style prop.`,
+      message: `React Native ships built-in \`linear-gradient()\` support (starting React Native 0.76.x+).
+You can remove ${gradientPkgs.map((e) => e.name).join(", ")} 
+and migrate to a simple View with a \`${backgroundImageProp}\` style prop.`,
       packages: [
         ...gradientPkgs.map((e) => `${e.name}@${e.version}`),
         `react-native@${reactNativeVersion}`,

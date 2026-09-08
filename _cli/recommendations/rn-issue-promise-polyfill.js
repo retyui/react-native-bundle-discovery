@@ -81,17 +81,16 @@ module.exports = {
 
     if (hasDeadPromiseModule) {
       messageParts.push(
-        `Bundle contains \`react-native/Libraries/Promise.js\`. This file is dead code because Hermes already provides Promise out of the box. You can update 'metro.config.js' to remove this file from the bundle:
+        `Bundle contains \`react-native/Libraries/Promise.js\`. 
+This file is dead code because Hermes already provides Promise out of the box. 
+You can update 'metro.config.js' to remove this file from the bundle:
 
 \`\`\`js
-
 const { createProcessModuleFilter } = require('react-native-bundle-discovery');
 const processModuleFilter = createProcessModuleFilter({ removePromisePolyfill: true });
 
 const config = {
-  serializer: {
-    processModuleFilter,
-  },
+  serializer: { processModuleFilter },
 };
 \`\`\`
 
@@ -101,8 +100,8 @@ const config = {
 
     if (uniquePolyfills.length > 0) {
       messageParts.push(
-        "Bundle also includes Promise polyfill modules/packages that Hermes already supports natively. " +
-          `Consider removing: ${uniquePolyfills.join(", ")}.`,
+        `Bundle also includes Promise polyfill modules/packages that Hermes already supports natively.
+Consider removing: ${uniquePolyfills.join(", ")}.`,
       );
     }
 

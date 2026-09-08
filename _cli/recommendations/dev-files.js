@@ -18,13 +18,12 @@ module.exports = {
       return null;
     }
 
-    const sample = devFiles.slice(0, 5).join(", ");
+    const sample = devFiles.slice(0, 5).join("\n, ");
 
     return {
-      message:
-        `Detected ${devFiles.length} dev/debug file(s) in the production bundle. ` +
-        "Files matching development|debug|dev|storybook should be excluded from release builds. " +
-        `Example paths: ${sample}`,
+      message: `Detected ${devFiles.length} dev/debug file(s) in the production bundle.
+Files matching development|debug|dev|storybook should be excluded from release builds.
+Example paths: ${sample}`,
       packages: [],
       docsUrl: null,
     };

@@ -56,7 +56,17 @@ module.exports = {
 
       return {
         packages,
-        message: `Found ${duplicateGroups.length} duplicate packages. Align versions or use dependency overrides (npm) / resolutions (yarn) to keep a single copy per package. Use a "${require("../package.json").name} packages <file>" command to see more...`,
+        message: `Found ${duplicateGroups.length} duplicate packages. 
+
+Align versions or use dependency \`overrides\` (npm) / \`resolutions\` (yarn) to keep a single copy per package.
+
+Or you can use \`patch-package\` to remove usage of specific package, example lodash: 
+\`\`\`diff
+-const get = require('lodash.get');
++const get = require('lodash/get');
+\`\`\`
+
+To see more use the next command: "${require("../package.json").name} packages <file>"`,
         docsUrl: [
           "https://docs.npmjs.com/cli/v10/configuring-npm/package-json#overrides",
           "https://classic.yarnpkg.com/lang/en/docs/selective-version-resolutions/",

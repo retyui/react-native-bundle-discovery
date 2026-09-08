@@ -29,13 +29,15 @@ module.exports = {
     return {
       message: `Hermes V1 is enabled, but Babel is targeting ES5 because it uses the default transform profile.
 
-Fix in babel.config.js:
+To fix the issue, you can set the \`unstable_transformProfile\` option to \`hermes-stable\` in your Babel config:
+
 \`\`\`js
+// babel.config.js
 module.exports = {
   presets: [
     [
       'module:@react-native/babel-preset',
-      { unstable_transformProfile: 'hermes-stable' }, // <-- HERE
+      { unstable_transformProfile: 'hermes-stable' },
     ],
   ],
 };
