@@ -4,6 +4,7 @@ const duplicatePackages = require("./duplicate-packages.js");
 const abortControllerPolyfill = require("./rn-issue-abort-controller.js");
 const babelRuntimeInlineHelpers = require("./rn-issue-babel-runtime.js");
 const hermesTransformProfile = require("./rn-issue-hermesv1-profile.js");
+const inlinePlatformPlugin = require("./rn-inline-plugin.js");
 const promisePolyfill = require("./rn-issue-promise-polyfill.js");
 const devOnlyPackages = require("./dev-only-packages.js");
 const rendererArchitectureMismatch = require("./no-skip-fabric-modules.js");
@@ -17,6 +18,7 @@ module.exports = [
   abortControllerPolyfill,
   babelRuntimeInlineHelpers,
   hermesTransformProfile,
+  inlinePlatformPlugin,
   promisePolyfill,
   devOnlyPackages,
   rendererArchitectureMismatch,
