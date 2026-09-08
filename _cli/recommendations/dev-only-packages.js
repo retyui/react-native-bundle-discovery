@@ -34,8 +34,8 @@ const devOnlyPackages = [
 ];
 
 function findBundledDevPackages(report, _devOnlyPackages) {
-  const packages = report?.packages ?? [];
-  const modules = report?.modules ?? [];
+  const packages = report.packages;
+  const modules = report.modules;
   const matches = new Set();
 
   for (const pkg of packages) {
@@ -75,7 +75,7 @@ module.exports = {
   check: (report) => {
     const bundledDevPackages = findBundledDevPackages(
       report,
-      isVersionGte(getReactNativeVersion(report?.packages ?? []), "0.74.0")
+      isVersionGte(getReactNativeVersion(report.packages), "0.74.0")
         ? [...devOnlyPackages, ...rn74PlusDevOnlyPackages]
         : devOnlyPackages,
     );

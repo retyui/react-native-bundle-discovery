@@ -1,5 +1,5 @@
 function findBundledDependencyPackageJsonFiles(report) {
-  const modules = report?.modules ?? [];
+  const modules = report.modules;
 
   return modules
     .map((module) => module?.path)

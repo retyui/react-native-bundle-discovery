@@ -9,7 +9,7 @@ module.exports = {
   title:
     "Replace third-party radial gradient libraries with built-in backgroundImage",
   check(report) {
-    const packages = report?.packages ?? [];
+    const packages = report.packages;
     const gradientPkgs = packages.filter(
       (pkg) =>
         pkg?.name === "react-native-radial-gradient" ||

@@ -16,7 +16,7 @@ module.exports = {
       return null;
     }
 
-    const hasClassInOutput = (report?.modules ?? []).some(
+    const hasClassInOutput = report.modules.some(
       (module) =>
         filesToCheck.some((file) => module?.path?.endsWith(file)) &&
         module?.output?.code?.includes("class "),

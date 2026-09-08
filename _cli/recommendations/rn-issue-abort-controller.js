@@ -4,7 +4,7 @@ module.exports = {
   id: "rn-issue-abort-controller-polyfill",
   title: "Remove abort-controller polyfill on React Native 0.87+",
   check: (report) => {
-    const packages = report?.packages ?? [];
+    const packages = report.packages;
     const abortControllerNames = [
       "abort-controller",
       "abort-controller-x",

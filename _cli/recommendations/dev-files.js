@@ -1,10 +1,10 @@
 const devFileNamePattern = /\b(development|debug|dev|storybook)\b/i;
 
 function findDevFilesInBundle(report) {
-  const modules = report?.modules ?? [];
+  const modules = report.modules;
 
   return modules
-    .map((module) => module?.path)
+    .map((module) => module?.path?.replace(report.rootFolder, ""))
     .filter((modulePath) => devFileNamePattern?.test(modulePath));
 }
 

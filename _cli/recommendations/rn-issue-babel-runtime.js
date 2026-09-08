@@ -30,7 +30,7 @@ module.exports = {
   id: "rn-issue-babel-runtime-inline-helpers",
   title: "Enable Babel runtime helpers deduplication",
   check: (report) => {
-    const modules = report?.modules ?? [];
+    const modules = report.modules;
     const inlinedHelpersModules = modules.filter(hasInlinedBabelRuntimeHelpers);
 
     if (inlinedHelpersModules.length === 0) {

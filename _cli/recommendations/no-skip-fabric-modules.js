@@ -15,21 +15,21 @@ module.exports = {
   id: "rn-renderer-implementation-does-not-match-architecture",
   title: "Keep only the renderer for the active React Native architecture",
   check: (report) => {
-    const packages = report?.packages ?? [];
+    const packages = report.packages;
     const reactNativeVersion = getReactNativeVersion(packages);
 
     if (isVersionGte(reactNativeVersion, "0.86.0")) {
       return null;
     }
 
-    const modules = report?.modules ?? [];
+    const modules = report.modules;
     const hasReactNativeRenderer = hasModulePath(
       modules,
       REACT_NATIVE_RENDERER_PATH,
     );
     const hasReactFabric = hasModulePath(modules, REACT_FABRIC_PATH);
 
-    if (!hasReactNativeRenderer && hasReactFabric) {
+    if (!(hasReactNativeRenderer && hasReactFabric)) {
       return null;
     }
 

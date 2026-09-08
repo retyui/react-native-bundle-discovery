@@ -23,8 +23,8 @@ const promiseAnyAllSettledEntries = [
 ];
 
 function findMatchingPromisePolyfills(report, entries) {
-  const packages = report?.packages ?? [];
-  const modules = report?.modules ?? [];
+  const packages = report.packages;
+  const modules = report.modules;
   const matches = new Set();
   const entriesCoreJs = entries.filter((entry) => entry.startsWith("core-js/"));
   const entriesNonCoreJs = entries.filter(
@@ -50,8 +50,8 @@ module.exports = {
   id: "rn-issue-promise-polyfill",
   title: "Remove Promise polyfills",
   check: (report) => {
-    const packages = report?.packages ?? [];
-    const modules = report?.modules ?? [];
+    const packages = report.packages;
+    const modules = report.modules;
     const reactNativeVersion = getReactNativeVersion(packages);
 
     const hasDeadPromiseModule = modules.some((module) =>
