@@ -1,6 +1,6 @@
 {
   "name": "react-native-bundle-discovery-cli",
-  "version": "2.0.0-rc.6",
+  "version": "2.0.0",
   "main": "bin.js",
   "bin": "bin.js",
   "repository": "git@github.com:retyui/react-native-bundle-discovery.git",
