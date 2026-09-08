@@ -34,8 +34,11 @@ module.exports = {
     }
 
     return {
-      message: `Bundle contains both legacy and Fabric renderer implementations. Keep only the renderer for your active architecture by excluding the inactive files in \`metro.config.js\` with \`serializer.processModuleFilter\`.
+      message: `Bundle contains both legacy and Fabric renderer implementations. 
+Keep only the renderer for your active architecture 
+by excluding the inactive files in \`metro.config.js\` with \`serializer.processModuleFilter\`.
 
+Fix example:
 \`\`\`js
 // metro.config.js
 const { createProcessModuleFilter } = require('react-native-bundle-discovery');
@@ -46,8 +49,7 @@ const processModuleFilter = createProcessModuleFilter({
 const config = {
   serializer: { processModuleFilter },
 };
-\`\`\`
-`,
+\`\`\``,
       packages: ["react-native"],
       docsUrl: null,
     };

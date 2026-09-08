@@ -92,9 +92,7 @@ const processModuleFilter = createProcessModuleFilter({ removePromisePolyfill: t
 const config = {
   serializer: { processModuleFilter },
 };
-\`\`\`
-
-        `,
+\`\`\``,
       );
     }
 

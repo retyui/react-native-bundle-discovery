@@ -58,12 +58,6 @@ function printDefaultFormat(filePath, findings) {
       `${chalk.bold.yellow(`${index + 1}.`)} ${chalk.bold(finding.title)}`,
     );
 
-    if (finding.message) {
-      const prefix = `   ${chalk.blue("Why:")} `;
-      const offset = "        ";
-      console.log(`${prefix}${finding.message.replace(/\n/g, "\n" + offset)}`);
-    }
-
     if (finding.packages && finding.packages.length > 0) {
       console.log(`   ${chalk.magenta("Packages:")} ${finding.packages}`);
     }
@@ -73,6 +67,12 @@ function printDefaultFormat(filePath, findings) {
         ? finding.docsUrl.join(", ")
         : finding.docsUrl;
       console.log(`   ${chalk.cyan("Links:")} ${chalk.underline(docs)}`);
+    }
+
+    if (finding.message) {
+      const prefix = `   ${chalk.blue("Why:")} `;
+      const offset = "        ";
+      console.log(`${prefix}${finding.message.replace(/\n/g, "\n" + offset)}`);
     }
 
     if (index < findings.length - 1) {
