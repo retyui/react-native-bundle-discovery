@@ -10,27 +10,26 @@ With this tool, you can easily explore your app's codebase, identify large or he
 <img width="800" alt="" src="./assets/img.png" />
 
 
-### What you should consider when analyzing your bundle
+### Packages:
 
-1. if you use **React 19** then it's time to remove a `prop-types` package from your bundle.
-2. Search for `development|debug|dev|storybook` modules in your production JS bundle (it's a dead code that should not be there).
-3. Also check polyfills duplicates (search example:  `url|fetch|crypto|buffer|base-?64`).
-4. Verify that you don't have any similar packages in your bundle (search example: `object|just-|debounce|ramda|lodash|underscore`). I often see that devs use both `lodash/debounce`, `lodash.debounce` and `debounce` in their projects. Or mix `ramda`, `underscore` and `lodash`._
-5. Try to find `package.json$` files in your bundle. They are often used to get only the package `version/name` but all other fields are not needed in the bundle.
-6. Please provide your ideas soo other devs can benefit from them :)
-
+- `react-native-bundle-discovery` - simple JS library to generate a JSON report of the bundle.
+- `react-native-bundle-discovery-ui` - UI to visualize the bundle report.
+- `react-native-bundle-discovery-cli` - CLI to analyze the bundle report.
+- `react-native-bundle-discovery-rozenite-plugin` - Rozenite plugin to integrate UI tool to [React Native DevTools](https://reactnative.dev/docs/react-native-devtools).
 
 ### Setup:
 
 There are two ways to install the package:
 
-1. As in independent tool 
-2. Or as a [Rozenite](https://www.rozenite.dev/) plugin (see below).
+1. As in independent tool (UI + CLI) 
+2. Or as a [Rozenite](_rozenite/README.md) plugin (see: [_rozenite/README.md](_rozenite/README.md))
 
 #### 1. Install (independent tool)
 
 ```bash
-yarn add -D react-native-bundle-discovery
+yarn add -D react-native-bundle-discovery # required for generating the JSON report
+yarn add -D react-native-bundle-discovery-ui # optional: used for visualizing the report in the browser
+yarn add -D react-native-bundle-discovery-cli # optional: used for analysis of the report in the CLI
 ```
 
 Add to your `metro.config.js`:
@@ -49,55 +48,19 @@ const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 
 -const config = {};
 +const config = {
-+  serializer: {
-+    customSerializer: mySerializer
-+  },
-+};
+  serializer: { customSerializer: mySerializer },
+};
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);
 ```
 
----
+#### 2. Install (as plugin for Rozenite)
 
-#### 2. Install as a Rozenite plugin (OPTIONAL)
-
-
-```bash
-yarn dlx rozenite@latest init # init rozenite in your project (from: https://www.rozenite.dev/docs/getting-started)
-yarn add -D react-native-bundle-discovery-rozenite-plugin # add the plugin to your project
-```
-
-Then in the `metro.config.js` file add the following:
-
-```diff
-const { withRozenite } = require('@rozenite/metro');
-+const { withRozeniteBundleDiscoveryPlugin } = require('react-native-bundle-discovery-rozenite-plugin');
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
-
-/**
- * Metro configuration
- * https://reactnative.dev/docs/metro
- *
- * @type {import('@react-native/metro-config').MetroConfig}
- */
-const config = {};
-
-module.exports = withRozenite(
-  mergeConfig(getDefaultConfig(__dirname), config),
-  {
-+    enhanceMetroConfig: config => withRozeniteBundleDiscoveryPlugin(config, { /* Your Bundle Discovery Options */ }),
-    enabled: true,
-  },
-);
-```
-
-Now you can run `yarn start` and open [React Native DevTools](https://reactnative.dev/docs/react-native-devtools)
-
+See: [_rozenite/README.md](_rozenite/README.md)
 
 ---
 
-
-#### 3. Build the app
+### 3. Build the app
 
 As example, for iOS you can run the following command, and it will generate the `metro-stats.json` file in the root of your project:
 
@@ -110,28 +73,37 @@ npx react-native bundle \
   --assets-dest ios/assets
 ```
 
-#### 4. CLI
+### 4. Commands
 
-##### 4.1 View the report in the browser
+#### CLI package
 
-Run webserver to view the report:
-
-```bash
-npx react-native-bundle-discovery server metro-stats.json [--port <port>]
-```
-
-##### 4.2 Build the HTML report
-
-Run the following command to generate an HTML report from the JSON file:
+You need to install `react-native-bundle-discovery-cli`
 
 ```bash
-npx react-native-bundle-discovery build metro-stats.json
+# Display all recommended optimizations for the bundle
+npx react-native-bundle-discovery-cli metro-stats.json
+
+# Display all packages in the bundle report
+npx react-native-bundle-discovery-cli packages metro-stats.json [--sort size|name] [--format json|table|default]
 ```
 
+#### UI package
+
+You need to install `react-native-bundle-discovery-ui`
+
+```bash
+# Start server to view the report in the browser (default port: 8079)
+npx react-native-bundle-discovery-ui metro-stats.json [--port <port>]
+
+# Build the report into a static HTML file
+npx react-native-bundle-discovery-ui build metro-stats.json
+```
 
 ---
 
-### `createSerializer(options: Options)`
+### `react-native-bundle-discovery` JS API
+
+#### `createSerializer(options: Options)`
 
 | Prop                   | Default value             | Description                                                                                                                              |
 | ---------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -139,6 +111,34 @@ npx react-native-bundle-discovery build metro-stats.json
 | projectRoot: string    | Required                  | The root directory of the project. ⚠️ In a monorepo setup, this should point to the monorepo root, not the individual package directory. |
 | outputJsonPath: string | `<root>/metro-stats.json` | The path where the JSON report will be saved. Defaults to `metro-stats.json` in project root.                                            |
 | includeCode: boolean   | `true`                    | Whether to include the source and output code in the JSON report.                                                                        |
+
+### `createProcessModuleFilter(options: ProcessModuleFilterOptions)`
+
+
+| Prop                   | Default value             | Description                   |
+| ---------------------- | ------------------------- | ----------------------------- |
+| removePromisePolyfill: boolean | `false` | Remove the Promise polyfill as Hermes provide own impl. (issue: [#57702](https://github.com/react/react-native/issues/57702)) |
+| removeOldRenderer: boolean     | `false` | Whether to remove the old renderer. Set to `true` when New Arch is enabled    |
+| removeNewRenderer: boolean     | `false` | Whether to remove the new renderer. Set to `true` when New Arch is disabled    |
+| removeUTFSequence: boolean     | `false` | Remove useless undocumented RN module.     |
+
+
+Simple helper that devs can use to filter out unnecessary modules from the bundle report.
+You can get recommendations during the analysis of the bundle report using the CLI tool.
+
+```js
+// metro.config.js
+const {createProcessModuleFilter} = require('react-native-bundle-discovery');
+const config = {
+  serializer: {
+    processModuleFilter: createProcessModuleFilter({
+      removePromisePolyfill: true,
+      removeOldRenderer: true,
+      removeUTFSequence: true,
+    }),
+  },
+};
+```
 
 ### Financial Contributors
 

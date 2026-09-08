@@ -1,10 +1,9 @@
-const { parse } = require("path");
+const { parse, resolve } = require("path");
 const { writeFileSync, existsSync } = require("fs");
-const { resolve } = require("path");
 const { Buffer } = require("buffer");
 const chalk = require("chalk");
 
-const NAME = require("../package.json").name;
+const NAME = require("./package.json").name;
 
 function getDefault(module) {
   return module.__esModule ? module.default : module;
@@ -116,8 +115,12 @@ function createJsonReport({
   outputJsonPath,
   rootFolder,
   silent,
+  options,
 }) {
-  const dependencies = Array.from(graph.dependencies.values());
+  const { processModuleFilter = () => true } = options || {};
+  const dependencies = Array.from(graph.dependencies.values()).filter(
+    processModuleFilter,
+  );
 
   const stats = {
     date: Date.now(),
@@ -185,6 +188,7 @@ function createSerializer({
       outputJsonPath: myOutputJsonPath,
       rootFolder: projectRoot,
       silent,
+      options,
     });
 
     return code;
@@ -193,4 +197,44 @@ function createSerializer({
   return customSerializer;
 }
 
-module.exports = { createSerializer };
+const createProcessModuleFilter =
+  ({
+    removePromisePolyfill = false, // Remove useless polyfill (Hermes already has Promise)
+    removeOldRenderer = false, // Should be true when new ARCH is enabled
+    removeNewRenderer = false, // Should be true when new ARCH is disabled
+    removeUTFSequence = false, // Remove useless code
+  } = {}) =>
+  (module) => {
+    if (
+      removePromisePolyfill &&
+      module.path.endsWith("/react-native/Libraries/Promise.js")
+    ) {
+      return false;
+    }
+    if (
+      removeOldRenderer &&
+      module.path.endsWith(
+        "/react-native/Libraries/Renderer/shims/ReactNative.js",
+      )
+    ) {
+      return false;
+    }
+    if (
+      removeNewRenderer &&
+      module.path.endsWith(
+        "/react-native/Libraries/Renderer/shims/ReactFabric.js",
+      )
+    ) {
+      return false;
+    }
+    if (
+      removeUTFSequence &&
+      module.path.endsWith("/react-native/Libraries/UTFSequence.js")
+    ) {
+      return false;
+    }
+
+    return true;
+  };
+
+module.exports = { createSerializer, createProcessModuleFilter };

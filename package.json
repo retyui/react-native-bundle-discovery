@@ -1,6 +1,6 @@
 {
-  "name": "react-native-bundle-discovery",
-  "version": "1.3.1",
+  "name": "react-native-bundle-discovery-ui",
+  "version": "2.0.0-rc.6",
   "main": "index.js",
   "bin": "lib/bin.js",
   "repository": "git@github.com:retyui/react-native-bundle-discovery.git",
@@ -16,7 +16,7 @@
     "@discoveryjs/discovery": "1.0.0-beta.99",
     "chalk": "^4.1.2",
     "minimist": "^1.2.8",
-    "prettier": "^3.8.1"
+    "prettier": "^3.9.6"
   },
   "peerDependencies": {
     "metro": "*"
@@ -37,5 +37,5 @@
     "queryHelpers.js",
     ".discoveryrc.js"
   ],
-  "packageManager": "yarn@4.13.0"
+  "packageManager": "yarn@4.18.0"
 }

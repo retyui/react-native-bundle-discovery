@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { createSerializer } from "react-native-bundle-discovery";
 import { createServer } from "@discoveryjs/cli";
-import discoveryrc from "react-native-bundle-discovery/.discoveryrc.js";
+import discoveryrc from "react-native-bundle-discovery-ui/.discoveryrc.js";
 
 const id = Math.floor(Math.random() * 10);
 const fileName = `rozenite-metro-stats-${id}.json`; // Random name in case if multiple instances of Metro are running on different ports
