@@ -95,6 +95,12 @@ if (__DEV__) {
   const { whyDidYouRender } = require('@welldone-software/why-did-you-render');
   whyDidYouRender(React, { trackAllPureComponents: true });
 }
+
+// Or PropTypes
+if (__DEV__) {
+  const PropTypes = require('prop-types');
+  Calendar.propTypes = { minDate: PropTypes.string };
+}
 \`\`\`
       `,
       packages: bundledDevPackages,

@@ -16,12 +16,12 @@ module.exports = {
       return null;
     }
 
-    const sample = packageJsonFiles.slice(0, 3).join(", ");
+    const sample = packageJsonFiles.slice(0, 3).join("\n - ");
     return {
       message: `Detected ${packageJsonFiles.length} dependency package.json file(s) in the bundle.
 They are often used to get only the package \`version/name\` but all other fields are not needed in the bundle.
 Remove package.json imports from app code and dependencies (use a \`patch-packages\` for node_modules if needed).
-Example paths: ${sample}
+Example paths:\n - ${sample}
 `,
       packages: [],
       docsUrl: null,
