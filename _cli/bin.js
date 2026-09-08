@@ -5,12 +5,15 @@ function printHelp() {
   console.log(`react-native-bundle-discovery-cli
 
 Usage:
-  react-native-bundle-discovery-cli packages <file> [--sort size|name] [--format json|table|default]
+  react-native-bundle-discovery-cli <file> [--format json|default] # <- analyze can be omitted
   react-native-bundle-discovery-cli analyze <file> [--format json|default]
+
+  react-native-bundle-discovery-cli packages <file> [--sort size|name] [--format json|table|default]
 
 Commands:
   packages <file>       Print package list from a Metro bundler stat report
   analyze <file>        Analyze bundle and print optimization recommendations
+  analize <file>        Alias for \`analyze\`
 
 Options:
   -h, --help            Show help
@@ -37,13 +40,17 @@ const argv = minimist(process.argv.slice(2), {
 });
 
 const command = argv._[0];
+const isPackagesCommand = command === "packages";
+const isAnalyzeCommand = command === "analyze" || command === "analize";
+const isImplicitAnalyzeCommand =
+  Boolean(command) && !isPackagesCommand && !isAnalyzeCommand;
 
 if (argv.help || !command) {
   printHelp();
   process.exit(0);
 }
 
-if (command === "packages") {
+if (isPackagesCommand) {
   const file = argv._[1];
   const sort = argv.sort;
   const format = argv.format;
@@ -67,8 +74,8 @@ if (command === "packages") {
   }
 }
 
-if (command === "analyze" || command === "analize") {
-  const file = argv._[1];
+if (isAnalyzeCommand || isImplicitAnalyzeCommand) {
+  const file = isImplicitAnalyzeCommand ? argv._[0] : argv._[1];
   const format = argv.format;
   if (!file) {
     fail("Missing required argument: <file>");
