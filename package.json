@@ -11,16 +11,12 @@
     "start": "NODE_ENV=development npx discovery --config .discoveryrc.js",
     "build": "npx discovery-build --config .discoveryrc.js --output build --serve-only-assets --single-file"
   },
-  "resolutions": {
-    "react-native-bundle-discovery-ui": "2.0.0-rc.6",
-    "react-native-bundle-discovery": "2.0.0-rc.6"
-  },
   "dependencies": {
     "@discoveryjs/cli": "2.14.7",
     "@discoveryjs/discovery": "1.0.0-beta.99",
     "chalk": "^4.1.2",
     "minimist": "^1.2.8",
-    "prettier": "^3.8.1"
+    "prettier": "^3.9.6"
   },
   "peerDependencies": {
     "metro": "*"
