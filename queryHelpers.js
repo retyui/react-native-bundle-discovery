@@ -211,7 +211,7 @@ Please do the following:
         return nodeModulesGroup;
       }
       if (!nodeModulesGroup.groups) {
-        return nodeModulesGroup;
+        return sourceCodeGroup;
       }
 
       const topLevelNode = { groups: [sourceCodeGroup, nodeModulesGroup] };

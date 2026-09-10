@@ -2,7 +2,7 @@ const { getReactNativeVersion, isVersionGte } = require("../utils.js");
 
 const TARGET_MODULE_PATH =
   "react-native/Libraries/Components/Pressable/useAndroidRippleForView.js";
-const ANDROID_PLATFORM_CHECK_PATTERN = /['"]android['"]===\w\.default\.OS/g;
+const ANDROID_PLATFORM_CHECK_PATTERN = /['"]android['"]===\w\.default\.OS/;
 const DOCS_URL = "https://github.com/react/react-native/pull/57848";
 
 function findAffectedModules(report) {
@@ -23,7 +23,7 @@ module.exports = {
     const reactNativeVersion = getReactNativeVersion(packages);
 
     // Issue is fixed in React Native 0.88.0, so we can skip the recommendation for versions >= 0.88.0
-    // skip old RN versions `0.85.x and below` as babel config has changed too much and can cause regression issues for those versions.
+    // skip old RN versions `0.84.x and below` as babel config has changed too much and can cause regression issues for those versions.
     if (
       isVersionGte(reactNativeVersion, "0.88.0") ||
       !isVersionGte(reactNativeVersion, "0.85.0")
