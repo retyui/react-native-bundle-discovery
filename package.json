@@ -29,6 +29,7 @@
   "files": [
     "vendors",
     "lib",
+    "!lib/.tmp.js",
     "views",
     "pages",
     "index.js",
