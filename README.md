@@ -112,8 +112,7 @@ npx react-native-bundle-discovery-ui build metro-stats.json
 | outputJsonPath: string | `<root>/metro-stats.json` | The path where the JSON report will be saved. Defaults to `metro-stats.json` in project root.                                            |
 | includeCode: boolean   | `true`                    | Whether to include the source and output code in the JSON report.                                                                        |
 
-### `createProcessModuleFilter(options: ProcessModuleFilterOptions)`
-
+### `createResolveRequest(options: ResolveRequestOptions)`
 
 | Prop                   | Default value             | Description                   |
 | ---------------------- | ------------------------- | ----------------------------- |
@@ -122,20 +121,20 @@ npx react-native-bundle-discovery-ui build metro-stats.json
 | removeNewRenderer: boolean     | `false` | Whether to remove the new renderer. Set to `true` when New Arch is disabled    |
 | removeUTFSequence: boolean     | `false` | Remove useless undocumented RN module.     |
 
-
-Simple helper that devs can use to filter out unnecessary modules from the bundle report.
+Helper that creates a custom resolve request function to filter out unnecessary modules from the bundle.
 You can get recommendations during the analysis of the bundle report using the CLI tool.
 
 ```js
 // metro.config.js
-const {createProcessModuleFilter} = require('react-native-bundle-discovery');
+const {createResolveRequest} = require('react-native-bundle-discovery');
+const resolveRequest = createResolveRequest({
+  removePromisePolyfill: true,
+  removeOldRenderer: true,
+  removeUTFSequence: true,
+});
 const config = {
-  serializer: {
-    processModuleFilter: createProcessModuleFilter({
-      removePromisePolyfill: true,
-      removeOldRenderer: true,
-      removeUTFSequence: true,
-    }),
+  resolver: {
+    resolveRequest,
   },
 };
 ```
