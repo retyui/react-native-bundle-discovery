@@ -86,11 +86,11 @@ This file is dead code because Hermes already provides Promise out of the box.
 You can update 'metro.config.js' to remove this file from the bundle:
 
 \`\`\`js
-const { createProcessModuleFilter } = require('react-native-bundle-discovery');
-const processModuleFilter = createProcessModuleFilter({ removePromisePolyfill: true });
+const { createResolveRequest } = require('react-native-bundle-discovery');
+const resolveRequest = createResolveRequest({ removePromisePolyfill: true });
 
 const config = {
-  serializer: { processModuleFilter },
+  resolver: { resolveRequest },
 };
 \`\`\``,
       );

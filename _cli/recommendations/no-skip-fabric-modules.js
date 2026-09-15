@@ -34,20 +34,23 @@ module.exports = {
     }
 
     return {
-      message: `Bundle contains both legacy and Fabric renderer implementations. 
+      message: `Bundle contains both Legacy and Fabric renderer implementations:
+- ${REACT_NATIVE_RENDERER_PATH}
+- ${REACT_FABRIC_PATH}
+
 Keep only the renderer for your active architecture 
-by excluding the inactive files in \`metro.config.js\` with \`serializer.processModuleFilter\`.
+by excluding the inactive files in \`metro.config.js\` with \`resolver.resolveRequest\`.
 
 Fix example:
 \`\`\`js
 // metro.config.js
-const { createProcessModuleFilter } = require('react-native-bundle-discovery');
-const processModuleFilter = createProcessModuleFilter({ 
+const { createResolveRequest } = require('react-native-bundle-discovery');
+const resolveRequest = createResolveRequest({ 
   removeOldRenderer: true, // true when NEW_ARCH ON
   removeNewRenderer: true, // true when NEW_ARCH OFF
 });
 const config = {
-  serializer: { processModuleFilter },
+  resolver: { resolveRequest },
 };
 \`\`\``,
       packages: ["react-native"],

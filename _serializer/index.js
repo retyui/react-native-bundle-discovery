@@ -197,6 +197,70 @@ function createSerializer({
   return customSerializer;
 }
 
+/**
+ * Usage:
+ *
+ * ```js
+ * // metro.config.js
+ * const { createResolveRequest } = require("react-native-bundle-discovery");
+ * const resolveRequest = createResolveRequest({
+ *   removePromisePolyfill: true,
+ * });
+ * const config = {
+ *   resolver: {
+ *     resolveRequest,
+ *   },
+ * };
+ * ```
+ */
+const empty = { type: "empty" };
+const createResolveRequest = ({
+  removePromisePolyfill = false, // Remove useless polyfill (Hermes already has Promise)
+  removeOldRenderer = false, // Should be true when new ARCH is enabled
+  removeNewRenderer = false, // Should be true when new ARCH is disabled
+  removeUTFSequence = false, // Remove useless code
+} = {}) => {
+  const resolveRequest = (context, ...rest) => {
+    const result = context.resolveRequest(context, ...rest);
+    if (context.dev) {
+      return result;
+    }
+    if (
+      removeUTFSequence &&
+      result?.filePath?.endsWith("/react-native/Libraries/UTFSequence.js")
+    ) {
+      return empty;
+    }
+    if (
+      removePromisePolyfill &&
+      result?.filePath?.endsWith("/react-native/Libraries/Promise.js")
+    ) {
+      return empty;
+    }
+    if (
+      removeOldRenderer &&
+      result?.filePath?.endsWith(
+        "/react-native/Libraries/Renderer/shims/ReactNative.js",
+      )
+    ) {
+      return empty;
+    }
+    if (
+      removeNewRenderer &&
+      result?.filePath?.endsWith(
+        "/react-native/Libraries/Renderer/shims/ReactFabric.js",
+      )
+    ) {
+      return empty;
+    }
+    return result;
+  };
+  return resolveRequest;
+};
+
+/**
+ * @deprecated Use `createResolveRequest` instead.
+ */
 const createProcessModuleFilter =
   ({
     removePromisePolyfill = false, // Remove useless polyfill (Hermes already has Promise)
@@ -237,4 +301,8 @@ const createProcessModuleFilter =
     return true;
   };
 
-module.exports = { createSerializer, createProcessModuleFilter };
+module.exports = {
+  createResolveRequest,
+  createSerializer,
+  createProcessModuleFilter,
+};
