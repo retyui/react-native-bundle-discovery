@@ -7,7 +7,7 @@
   "author": "David <4661784+retyui@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "prepublishOnly": "cp ../README.md README.md"
+    "prepublishOnly": "cp ../README.md README.md && cp ../lib/rsdoctor.js rsdoctor.js && cp ../lib/isRsdoctorReport.js isRsdoctorReport.js"
   },
   "dependencies": {
     "minimist": "^1.2.8",
