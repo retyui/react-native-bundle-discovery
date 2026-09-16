@@ -3,16 +3,17 @@ const chalk = require("chalk");
 const { prepareReport } = require("./prepare.js");
 const recommendations = require("./recommendations/index.js");
 
-function readBuildReport(filePath) {
+function readBuildReport(filePath, format) {
   try {
     // Resolve from current working directory to support relative CLI paths.
     const resolvedPath = path.resolve(filePath);
     const report = require(resolvedPath);
-    return prepareReport(report);
+    const noLogs = format === "json";
+    return prepareReport(report, resolvedPath, noLogs);
   } catch (error) {
-    throw new Error(
-      `Failed to read report file: ${filePath}\n${error.message}`,
-    );
+    console.error(chalk.red(`Error reading report file: ${filePath}`));
+    console.error(error);
+    process.exit(1);
   }
 }
 
@@ -82,7 +83,7 @@ function printDefaultFormat(filePath, findings) {
 }
 
 function printAnalyzeReport(filePath, { format = "default" } = {}) {
-  const report = readBuildReport(filePath);
+  const report = readBuildReport(filePath, format);
   if (report?.transformOptions?.dev !== false) {
     throw new Error(
       "Analyze requires a production report generated with --dev false.",

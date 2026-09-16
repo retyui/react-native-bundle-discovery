@@ -1,3 +1,13 @@
+const { isRsdoctorReport } = require("./isRsdoctorReport.js");
+const { transformRSDoctorData } = require("./rsdoctor.js");
+
+function normalizeReportData(report, reportPath, noLogs) {
+  if (isRsdoctorReport(report, reportPath, noLogs)) {
+    return transformRSDoctorData(report);
+  }
+  return report;
+}
+
 function getSize(report, pkg) {
   let size = 0;
   const packagePrefix = `${pkg.absolutePath}/`;
@@ -13,7 +23,8 @@ function getSize(report, pkg) {
   return size;
 }
 
-function prepareReport(report) {
+function prepareReport(_report, reportPath, noLogs) {
+  const report = normalizeReportData(_report, reportPath, noLogs);
   report.packages = report.packages.map((pkg) => {
     const sizeInBytes = getSize(report, pkg);
     return {

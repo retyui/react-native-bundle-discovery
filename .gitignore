@@ -31,3 +31,5 @@ tmp/
 
 _serializer/README.md
 _cli/README.md
+_cli/rsdoctor.js
+_cli/utils.js
