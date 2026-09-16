@@ -112,6 +112,16 @@ npx react-native-bundle-discovery-ui build metro-stats.json
 | outputJsonPath: string | `<root>/metro-stats.json` | The path where the JSON report will be saved. Defaults to `metro-stats.json` in project root.                                            |
 | includeCode: boolean   | `true`                    | Whether to include the source and output code in the JSON report.                                                                        |
 
+
+
+**⚠️ Be cautious sharing reports with `includeCode` enabled**
+
+Enabling this option significantly increases report size and **embeds the source code** of your assets.
+
+If your code is proprietary 🔒, share these reports responsibly 🤝!
+
+---
+
 ### `createResolveRequest(options: ResolveRequestOptions)`
 
 | Prop                   | Default value             | Description                   |
