@@ -3,12 +3,10 @@
 [![react-native-bundle-discovery on npm](https://badgen.net/npm/v/react-native-bundle-discovery)](https://www.npmjs.com/package/react-native-bundle-discovery)
 [![react-native-bundle-discovery downloads](https://badgen.net/npm/dm/react-native-bundle-discovery)](https://www.npmtrends.com/react-native-bundle-discovery)
 
-
 A simple package that helps developers visualize and analyze the bundle size of React Native apps.
 With this tool, you can easily explore your app's codebase, identify large or heavy packages, and inspect the structure of modules and code within your project.
 
 <img width="800" alt="" src="./assets/img.png" />
-
 
 ### Packages:
 
@@ -21,7 +19,7 @@ With this tool, you can easily explore your app's codebase, identify large or he
 
 There are two ways to install the package:
 
-1. As in independent tool (UI + CLI) 
+1. As in independent tool (UI + CLI)
 2. Or as a [Rozenite](_rozenite/README.md) plugin (see: [_rozenite/README.md](_rozenite/README.md))
 
 #### 1. Install (independent tool)
@@ -112,8 +110,6 @@ npx react-native-bundle-discovery-ui build metro-stats.json
 | outputJsonPath: string | `<root>/metro-stats.json` | The path where the JSON report will be saved. Defaults to `metro-stats.json` in project root.                                            |
 | includeCode: boolean   | `true`                    | Whether to include the source and output code in the JSON report.                                                                        |
 
-
-
 **⚠️ Be cautious sharing reports with `includeCode` enabled**
 
 Enabling this option significantly increases report size and **embeds the source code** of your assets.
@@ -124,22 +120,19 @@ If your code is proprietary 🔒, share these reports responsibly 🤝!
 
 ### `createResolveRequest(options: ResolveRequestOptions)`
 
-| Prop                   | Default value             | Description                   |
-| ---------------------- | ------------------------- | ----------------------------- |
-| removePromisePolyfill: boolean | `false` | Remove the Promise polyfill as Hermes provide own impl. (issue: [#57702](https://github.com/react/react-native/issues/57702)) |
-| removeOldRenderer: boolean     | `false` | Whether to remove the old renderer. Set to `true` when New Arch is enabled    |
-| removeNewRenderer: boolean     | `false` | Whether to remove the new renderer. Set to `true` when New Arch is disabled    |
-| removeUTFSequence: boolean     | `false` | Remove useless undocumented RN module.     |
+| Prop                           | Default value | Description                                                                                                                   |
+| ------------------------------ | ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| removePromisePolyfill: boolean | `false`       | Remove the Promise polyfill as Hermes provide own impl. (issue: [#57702](https://github.com/react/react-native/issues/57702)) |
+| removeUTFSequence: boolean     | `false`       | Remove useless undocumented RN module.                                                                                        |
 
 Helper that creates a custom resolve request function to filter out unnecessary modules from the bundle.
 You can get recommendations during the analysis of the bundle report using the CLI tool.
 
 ```js
 // metro.config.js
-const {createResolveRequest} = require('react-native-bundle-discovery');
+const { createResolveRequest } = require("react-native-bundle-discovery");
 const resolveRequest = createResolveRequest({
   removePromisePolyfill: true,
-  removeOldRenderer: true,
   removeUTFSequence: true,
 });
 const config = {

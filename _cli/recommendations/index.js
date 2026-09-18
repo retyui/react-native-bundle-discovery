@@ -7,7 +7,6 @@ const hermesTransformProfile = require("./rn-issue-hermesv1-profile.js");
 const inlinePlatformPlugin = require("./rn-inline-plugin.js");
 const promisePolyfill = require("./rn-issue-promise-polyfill.js");
 const devOnlyPackages = require("./dev-only-packages.js");
-const rendererArchitectureMismatch = require("./no-skip-fabric-modules.js");
 const packageJsonFiles = require("./package-json-files.js");
 const devFiles = require("./dev-files.js");
 
@@ -21,7 +20,6 @@ module.exports = [
   inlinePlatformPlugin,
   promisePolyfill,
   devOnlyPackages,
-  rendererArchitectureMismatch,
   packageJsonFiles,
   devFiles,
 ];

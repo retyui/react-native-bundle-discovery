@@ -215,8 +215,6 @@ function createSerializer({
  */
 const empty = { type: "empty" };
 const createResolveRequest = ({
-  removePromisePolyfill = false, // Remove useless polyfill (Hermes already has Promise)
-  removeOldRenderer = false, // Should be true when new ARCH is enabled
   removeNewRenderer = false, // Should be true when new ARCH is disabled
   removeUTFSequence = false, // Remove useless code
 } = {}) => {
@@ -228,20 +226,6 @@ const createResolveRequest = ({
     if (
       removeUTFSequence &&
       result?.filePath?.endsWith("/react-native/Libraries/UTFSequence.js")
-    ) {
-      return empty;
-    }
-    if (
-      removePromisePolyfill &&
-      result?.filePath?.endsWith("/react-native/Libraries/Promise.js")
-    ) {
-      return empty;
-    }
-    if (
-      removeOldRenderer &&
-      result?.filePath?.endsWith(
-        "/react-native/Libraries/Renderer/shims/ReactNative.js",
-      )
     ) {
       return empty;
     }
@@ -264,30 +248,12 @@ const createResolveRequest = ({
 const createProcessModuleFilter =
   ({
     removePromisePolyfill = false, // Remove useless polyfill (Hermes already has Promise)
-    removeOldRenderer = false, // Should be true when new ARCH is enabled
-    removeNewRenderer = false, // Should be true when new ARCH is disabled
     removeUTFSequence = false, // Remove useless code
   } = {}) =>
   (module) => {
     if (
       removePromisePolyfill &&
       module.path.endsWith("/react-native/Libraries/Promise.js")
-    ) {
-      return false;
-    }
-    if (
-      removeOldRenderer &&
-      module.path.endsWith(
-        "/react-native/Libraries/Renderer/shims/ReactNative.js",
-      )
-    ) {
-      return false;
-    }
-    if (
-      removeNewRenderer &&
-      module.path.endsWith(
-        "/react-native/Libraries/Renderer/shims/ReactFabric.js",
-      )
     ) {
       return false;
     }
