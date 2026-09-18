@@ -9,7 +9,9 @@
     "prepublishOnly": "cp ../README.md README.md"
   },
   "dependencies": {
-    "chalk": "^4.1.2"
+    "chalk": "^4.1.2",
+    "acorn": "^8.0.4",
+    "acorn-walk": "^8.0.0"
   },
   "peerDependencies": {
     "metro": "*"
@@ -20,6 +22,6 @@
     }
   },
   "files": [
-    "index.js"
+    "*.js"
   ]
 }

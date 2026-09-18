@@ -2,7 +2,7 @@ const { parse, resolve } = require("path");
 const { writeFileSync, existsSync } = require("fs");
 const { Buffer } = require("buffer");
 const chalk = require("chalk");
-
+const BundleDiscoveryPlugin = require("./webpack").BundleDiscoveryPlugin;
 const NAME = require("./package.json").name;
 
 function getDefault(module) {
@@ -268,7 +268,8 @@ const createProcessModuleFilter =
   };
 
 module.exports = {
-  createResolveRequest,
   createSerializer,
+  createResolveRequest,
   createProcessModuleFilter,
+  BundleDiscoveryPlugin,
 };

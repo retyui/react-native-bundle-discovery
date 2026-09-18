@@ -17,6 +17,9 @@ const helpers = {
       .then((formatted) => {
         helpers.prettifyMap.set(sourceStr, formatted);
         return formatted;
+      })
+      .catch(() => {
+        return sourceStr;
       });
   },
   askChatGPTAboutPackages() {

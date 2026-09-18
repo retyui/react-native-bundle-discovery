@@ -19,15 +19,18 @@ function getDuplicateGroupName(packageName) {
   return packageName;
 }
 
-function readBuildReport(filePath) {
+function readBuildReport(filePath, format) {
   try {
     // Resolve from current working directory to support relative CLI paths.
     const resolvedPath = path.resolve(filePath);
     const report = require(resolvedPath);
+    const noLogs = format === "json";
 
-    return prepareReport(report);
+    return prepareReport(report, resolvedPath, noLogs);
   } catch (error) {
-    throw new Error(`Failed to read report file: ${filePath}\n${error.message}`);
+    console.error(chalk.red(`Error reading report file: ${filePath}`));
+    console.error(error);
+    process.exit(1);
   }
 }
 
@@ -52,10 +55,15 @@ function getPackageGroups(report, sort = "size") {
     return map;
   }, new Map());
 
-  const packageGroups = Array.from(groupedPackages.entries()).map(([name, entries]) => {
-    const totalSizeInBytes = entries.reduce((sum, entry) => sum + entry.sizeInBytes, 0);
-    return { name, entries, totalSizeInBytes };
-  });
+  const packageGroups = Array.from(groupedPackages.entries()).map(
+    ([name, entries]) => {
+      const totalSizeInBytes = entries.reduce(
+        (sum, entry) => sum + entry.sizeInBytes,
+        0,
+      );
+      return { name, entries, totalSizeInBytes };
+    },
+  );
 
   if (sort === "name") {
     packageGroups.sort((a, b) => a.name.localeCompare(b.name));
@@ -68,7 +76,9 @@ function getPackageGroups(report, sort = "size") {
 }
 
 function printDefaultFormat(packageGroups, report) {
-  const duplicateCount = packageGroups.filter(({ entries }) => entries.length > 1).length;
+  const duplicateCount = packageGroups.filter(
+    ({ entries }) => entries.length > 1,
+  ).length;
 
   console.log(
     chalk.bold.cyan(
@@ -77,7 +87,9 @@ function printDefaultFormat(packageGroups, report) {
   );
 
   if (duplicateCount > 0) {
-    console.log(chalk.bold.yellow(`Duplicate package names: ${duplicateCount}`));
+    console.log(
+      chalk.bold.yellow(`Duplicate package names: ${duplicateCount}`),
+    );
   } else {
     console.log(chalk.bold.green("Duplicate package names: 0"));
   }
@@ -105,7 +117,9 @@ function printDefaultFormat(packageGroups, report) {
 }
 
 function printTableFormat(packageGroups, report) {
-  const duplicateCount = packageGroups.filter(({ entries }) => entries.length > 1).length;
+  const duplicateCount = packageGroups.filter(
+    ({ entries }) => entries.length > 1,
+  ).length;
 
   console.log(
     `Found ${report.packages.length} package entries (${packageGroups.length} unique names)`,
@@ -119,23 +133,23 @@ function printTableFormat(packageGroups, report) {
       const entry = entries[0];
       rows.push({
         "#": index + 1,
-        "Package": `${entry.name}@${entry.version}`,
-        "Path": entry.path,
-        "Size": formatBytes(entry.sizeInBytes),
+        Package: `${entry.name}@${entry.version}`,
+        Path: entry.path,
+        Size: formatBytes(entry.sizeInBytes),
       });
     } else {
       rows.push({
         "#": index + 1,
-        "Package": `${name} [DUPLICATE x${entries.length}]`,
-        "Path": "",
-        "Size": "",
+        Package: `${name} [DUPLICATE x${entries.length}]`,
+        Path: "",
+        Size: "",
       });
       entries.forEach((entry, entryIndex) => {
         rows.push({
           "#": "",
-          "Package": `  ${entryIndex + 1}) ${entry.name}@${entry.version}`,
-          "Path": entry.path,
-          "Size": formatBytes(entry.sizeInBytes),
+          Package: `  ${entryIndex + 1}) ${entry.name}@${entry.version}`,
+          Path: entry.path,
+          Size: formatBytes(entry.sizeInBytes),
         });
       });
     }
@@ -145,32 +159,30 @@ function printTableFormat(packageGroups, report) {
   if (rows.length > 0) {
     const keys = Object.keys(rows[0]);
     const colWidths = {};
-    keys.forEach(key => {
+    keys.forEach((key) => {
       colWidths[key] = Math.max(
         key.length,
-        ...rows.map(row => String(row[key]).length),
+        ...rows.map((row) => String(row[key]).length),
       );
     });
 
     // Print header
-    console.log(
-      keys.map(key => key.padEnd(colWidths[key])).join(" | "),
-    );
-    console.log(
-      keys.map(key => "-".repeat(colWidths[key])).join("-+-"),
-    );
+    console.log(keys.map((key) => key.padEnd(colWidths[key])).join(" | "));
+    console.log(keys.map((key) => "-".repeat(colWidths[key])).join("-+-"));
 
     // Print rows
-    rows.forEach(row => {
+    rows.forEach((row) => {
       console.log(
-        keys.map(key => String(row[key]).padEnd(colWidths[key])).join(" | "),
+        keys.map((key) => String(row[key]).padEnd(colWidths[key])).join(" | "),
       );
     });
   }
 }
 
 function printJsonFormat(packageGroups, report) {
-  const duplicateCount = packageGroups.filter(({ entries }) => entries.length > 1).length;
+  const duplicateCount = packageGroups.filter(
+    ({ entries }) => entries.length > 1,
+  ).length;
 
   const output = {
     summary: {
@@ -178,44 +190,46 @@ function printJsonFormat(packageGroups, report) {
       uniquePackageNames: packageGroups.length,
       duplicatePackages: duplicateCount,
     },
-    packages: packageGroups.map(({ name, entries, totalSizeInBytes }, index) => {
-      if (entries.length === 1) {
-        const entry = entries[0];
-        return {
-          index: index + 1,
-          name: entry.name,
-          isDuplicate: false,
-          entries: [
-            {
+    packages: packageGroups.map(
+      ({ name, entries, totalSizeInBytes }, index) => {
+        if (entries.length === 1) {
+          const entry = entries[0];
+          return {
+            index: index + 1,
+            name: entry.name,
+            isDuplicate: false,
+            entries: [
+              {
+                name: entry.name,
+                version: entry.version,
+                path: entry.path,
+                sizeInBytes: entry.sizeInBytes,
+                size: formatBytes(entry.sizeInBytes),
+              },
+            ],
+            totalSizeInBytes,
+            totalSize: formatBytes(totalSizeInBytes),
+          };
+        } else {
+          return {
+            index: index + 1,
+            name,
+            isDuplicate: true,
+            duplicateCount: entries.length,
+            entries: entries.map((entry, entryIndex) => ({
+              index: entryIndex + 1,
               name: entry.name,
               version: entry.version,
               path: entry.path,
               sizeInBytes: entry.sizeInBytes,
               size: formatBytes(entry.sizeInBytes),
-            },
-          ],
-          totalSizeInBytes,
-          totalSize: formatBytes(totalSizeInBytes),
-        };
-      } else {
-        return {
-          index: index + 1,
-          name,
-          isDuplicate: true,
-          duplicateCount: entries.length,
-          entries: entries.map((entry, entryIndex) => ({
-            index: entryIndex + 1,
-            name: entry.name,
-            version: entry.version,
-            path: entry.path,
-            sizeInBytes: entry.sizeInBytes,
-            size: formatBytes(entry.sizeInBytes),
-          })),
-          totalSizeInBytes,
-          totalSize: formatBytes(totalSizeInBytes),
-        };
-      }
-    }),
+            })),
+            totalSizeInBytes,
+            totalSize: formatBytes(totalSizeInBytes),
+          };
+        }
+      },
+    ),
   };
 
   console.log(JSON.stringify(output, null, 2));
@@ -223,7 +237,7 @@ function printJsonFormat(packageGroups, report) {
 
 function printPackagesList(filePath, options = {}) {
   const { sort = "size", format = "default" } = options;
-  const report = readBuildReport(filePath);
+  const report = readBuildReport(filePath, format);
 
   if (report.packages.length === 0) {
     if (format === "json") {
