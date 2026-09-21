@@ -161,14 +161,6 @@ Please do the following:
   isPackageImport(moduleName) {
     return moduleName?.[0] !== ".";
   },
-  // isRuntimeCode(moduleName) {
-  //   return (
-  //     moduleName === "__prelude__" ||
-  //     moduleName.includes("@babel/runtime") ||
-  //     moduleName.includes("metro-runtime") ||
-  //     moduleName.includes("@react-native/js-polyfills")
-  //   );
-  // },
   transformFilesList(files, rootFolder, type) {
     const nodeModulesMap = { children: {}, size: 0 };
     const sourceCodeMap = { children: {}, size: 0 };
@@ -176,6 +168,9 @@ Please do the following:
     files.forEach(({ path, size }) => {
       if (path === "__prelude__") {
         path = "node_modules/__prelude__";
+      }
+      if (path === "__runtime__") {
+        path = "node_modules/__runtime__";
       }
 
       const shortPath = path.replace(rootFolder + "/", "");
@@ -195,6 +190,7 @@ Please do the following:
         if (index === parts.length - 1) {
           current[part].size = size;
           current[part].path = shortPath;
+          current[part].fullPath = path;
         }
 
         current = current[part].children;
@@ -310,6 +306,7 @@ function toGroups(node, label) {
   const common = {
     label,
     weight: node.size,
+    fullPath: node.fullPath,
     files: node.files,
     type: node.type,
     size: helpers.formatBytes(node.size),
@@ -332,6 +329,9 @@ function randomInt(min, max) {
 
 const nm = "node_modules/";
 function shortenPath(path, nodeModulesMap) {
+  if (path.startsWith(nm + ".pnpm/")) {
+    path = path.replaceAll(nm + ".pnpm/", "");
+  }
   let index = path.lastIndexOf(nm);
 
   if (index > 0) {

@@ -17,7 +17,7 @@ function getPackage(entry) {
         pkgName: $pkgName, // example: lodash
         size: $.value.sum(=>output.sizeInBytes),
         pkgInstances: $.value
-          .group(=> path.split($pkgName).pick(0) + $pkgName)
+          .group(=> path.split('node_modules/' + $pkgName).pick(0) + 'node_modules/' + $pkgName)
           .map(=> {
              $pkgNameWithPath: $.key;
              pkgName: $pkgNameWithPath, // example: node_modules/lodash

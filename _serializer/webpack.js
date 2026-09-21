@@ -5,6 +5,7 @@ const chalk = require("chalk");
 
 const { parseBundle } = require("./parseUtils.js");
 const NAME = require("./package.json").name;
+const packageRegex = /(?:^|\/)node_modules\/((?:@[^\/]+\/)?[^\/]+)/g;
 
 /**
  * Simple Webpack/Rspack plugin
@@ -47,6 +48,7 @@ class BundleDiscoveryPlugin {
         all: false,
         source: true,
       });
+
       // Format the stats into the desired structure
       const statsJson = this.formatStat(
         json,
@@ -83,49 +85,82 @@ class BundleDiscoveryPlugin {
     }
   }
 
-  getPackageName(modulePath) {
-    if (!modulePath) {
-      return null;
+  getPkgVersionFromPath(path) {
+    try {
+      // Extract the segment right before node_modules in `.pnpm/.../node_modules/`
+      const matches = [...path.matchAll(/\.pnpm\/([^/]+)\/node_modules/g)];
+      if (!matches.length) return null;
+
+      const lastPnpmFolder = matches[matches.length - 1][1];
+
+      // Match the version pattern `@<version>` right before optional peer dep suffix (`_`) or string end
+      const versionMatch = lastPnpmFolder.match(/@([^/_]+)(?:_|$)/);
+
+      return versionMatch ? versionMatch[1] : null;
+    } catch {
+      return "";
     }
-    const parts = modulePath.split("node_modules");
-    if (parts.length < 2) {
-      return null;
-    }
-    // WARN: Won't work with `pnpm's nested layout`
-    const packagePath = parts[1].split(path.sep).filter(Boolean);
-    if (packagePath.length === 0) {
-      return null;
-    }
-    if (packagePath[0].startsWith("@")) {
-      return `${packagePath[0]}/${packagePath[1]}`;
-    }
-    return packagePath[0];
   }
-  getAbsolutePath(packageName, modulePath) {
-    if (!packageName) {
-      return null;
-    }
-    return modulePath.substring(
-      0,
-      modulePath.indexOf(packageName) + packageName.length,
-    );
-  }
+
   getPackages(statsJson) {
-    const packagesMap = statsJson.modules.reduce((allPackages, mdl) => {
-      const name = this.getPackageName(mdl.nameForCondition);
-      if (!name) {
-        return allPackages;
+    const packagesMap = new Map();
+
+    for (const mdl of statsJson.modules) {
+      const filePath = mdl.nameForCondition;
+      if (!filePath) {
+        continue;
       }
-      const absolutePath = this.getAbsolutePath(name, mdl.nameForCondition);
-      if (!allPackages.has(absolutePath)) {
-        allPackages.set(absolutePath, {
-          name,
-          absolutePath,
-          version: require(path.join(absolutePath, "package.json")).version,
+
+      let match;
+      let lastMatch = null;
+
+      // Reset regex state for global matching
+      packageRegex.lastIndex = 0;
+
+      // Find the LAST valid node_modules/<pkg> pattern in the path
+      while ((match = packageRegex.exec(filePath)) !== null) {
+        lastMatch = match;
+      }
+
+      if (!lastMatch) continue;
+
+      const packageName = lastMatch[1];
+      const matchIndex = lastMatch.index;
+
+      // Account for potential leading slash in the regex match
+      const prefixOffset = filePath[matchIndex] === "/" ? 1 : 0;
+      const cutIndex =
+        matchIndex + prefixOffset + "node_modules/".length + packageName.length;
+
+      const absolutePath = filePath.slice(0, cutIndex);
+
+      let version = "";
+      try {
+        version = require(path.join(absolutePath, "package.json")).version;
+      } catch (e) {
+        const verFromPath = this.getPkgVersionFromPath(absolutePath);
+        if (verFromPath) {
+          version = verFromPath;
+        } else {
+          if (e?.code === "MODULE_NOT_FOUND") {
+            console.warn(`[${NAME}] getPackages: unexpected path resolution`, {
+              filePath,
+              absolutePath,
+            });
+          } else {
+            throw e;
+          }
+        }
+      }
+
+      if (!packagesMap.has(absolutePath)) {
+        packagesMap.set(absolutePath, {
+          name: packageName,
+          absolutePath: absolutePath,
+          version: version,
         });
       }
-      return allPackages;
-    }, new Map());
+    }
     return Array.from(packagesMap.values());
   }
   getEntryFile(statsJson, rootFolder) {
@@ -166,10 +201,15 @@ class BundleDiscoveryPlugin {
       statsJson,
       compilerOptions,
     );
+
     return {
+      kind: "webpack",
       date: statsJson.builtAt || Date.now(),
       entryPoint: this.getEntryFile(statsJson, compilerOptions.context),
-      rootFolder: compilerOptions.context,
+      rootFolder:
+        this.findCommonRoot(
+          statsJson.modules.map((m) => m.nameForCondition).filter(Boolean),
+        ) || compilerOptions.context,
       // envs: {},
       transformOptions: {
         // customTransformOptions: {},
@@ -195,7 +235,7 @@ class BundleDiscoveryPlugin {
             };
 
             return {
-              path: "runtime modules", // Can we rename it?
+              path: "__runtime__",
               source: sourceAndOutput,
               output: sourceAndOutput,
               dependencies: [],
@@ -209,7 +249,7 @@ class BundleDiscoveryPlugin {
             dependencies: modulesDeps.get(mdl.nameForCondition) ?? [],
           };
         })
-        .filter((e) => e !== null),
+        .filter((e) => e !== null && e.path),
       packages: this.getPackages(statsJson),
     };
   }
@@ -263,6 +303,44 @@ class BundleDiscoveryPlugin {
     }
 
     return importsMap;
+  }
+
+  findCommonRoot(paths) {
+    if (!paths || paths.length === 0) return "";
+    if (paths.length === 1) {
+      const lastSlash = paths[0].lastIndexOf("/");
+      return lastSlash === -1 ? "" : paths[0].slice(0, lastSlash);
+    }
+
+    const first = paths[0];
+    let maxLen = first.length;
+
+    // Short-circuit scanning loop across all paths
+    for (let i = 1; i < paths.length; i++) {
+      const current = paths[i];
+      const limit = Math.min(maxLen, current.length);
+      let j = 0;
+
+      // Fast character match using engine string optimizations
+      while (j < limit && first.charCodeAt(j) === current.charCodeAt(j)) {
+        j++;
+      }
+
+      maxLen = j;
+      if (maxLen === 0) return "";
+    }
+
+    // Exact match down to the root or full path segment
+    if (maxLen === first.length) {
+      const lastSlash = first.lastIndexOf("/");
+      return lastSlash === -1 ? "" : first.slice(0, lastSlash);
+    }
+
+    // Truncate to the last valid '/' boundary within maxLen
+    const commonSlice = first.slice(0, maxLen);
+    const lastSlash = commonSlice.lastIndexOf("/");
+
+    return lastSlash === -1 ? "" : commonSlice.slice(0, lastSlash);
   }
 }
 

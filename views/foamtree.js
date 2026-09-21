@@ -96,6 +96,7 @@ discovery.view.define("foamtree", function (el, config, rawData, context) {
             const htmlContent = [
               `<b class="tooltip-name">${group.type}</b>: ${prependDuplicateTo(group.label)}`,
               `<b>Size</b>: ${group.size}`,
+              group.type === "folder" ? null : `<b>Path</b>: ${group.fullPath}`,
               group.type === "folder" ? `<b>Files</b>: ${group.files}` : null,
             ]
               .filter((e) => !!e)

@@ -30,7 +30,8 @@ discovery.page.define("module", {
     ...$, 
     currentModule: $currentModule,
     isEntry: $currentModule.isEntry,
-    isInjectedByMetro: $currentModule.path = '__prelude__' or $currentModule.path has '@react-native/js-polyfills',  
+    isInjectedByMetro: $currentModule.path = '__prelude__' or $currentModule.path has '@react-native/js-polyfills',
+    isWebpackRuntime: $currentModule.path has '__runtime__',
   }`,
   content: [
     {
@@ -57,12 +58,12 @@ discovery.page.define("module", {
         },
         {
           value: "networkGraph",
-          when: "not isInjectedByMetro and not isEntry",
+          when: "not isInjectedByMetro and not isEntry and not isWebpackRuntime",
           text: "Imported by modules",
         },
         {
           value: "mduplicates",
-          when: "not isInjectedByMetro and not isEntry and currentModule.duplicates",
+          when: "not isInjectedByMetro and not isEntry and not isWebpackRuntime and currentModule.duplicates",
           text: "Duplicates",
         },
       ],
