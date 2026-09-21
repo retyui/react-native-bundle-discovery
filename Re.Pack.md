@@ -13,6 +13,8 @@ For projects using [Re.Pack](https://re-pack.dev/docs/guides/bundle-analysis) th
 1. As [`BundleDiscoveryPlugin`](https://github.com/retyui/react-native-bundle-discovery/blob/main/_serializer/webpack.js) Webpack/Rspack plugin
 2. or JSON report from [`Rsdoctor`](https://rsdoctor.rs/)
 
+> 🤖 Using an AI coding agent? Point it at the [`setup-react-native-bundle-discovery`](./skills/setup-react-native-bundle-discovery/SKILL.md) Agent Skill to automatically install `react-native-bundle-discovery`
+
 ---
 
 
@@ -36,13 +38,13 @@ import { BundleDiscoveryPlugin } from 'react-native-bundle-discovery';
 
 export default Repack.defineRspackConfig({
   plugins: [
-    process.env.BUNDLE_ANALYZER && new BundleDiscoveryPlugin({
+    new BundleDiscoveryPlugin({
         // Default options, you can customize them if needed
         filename: 'metro-stats.json',
         options: { source: true }, // All options: https://webpack.js.org/configuration/stats/#stats-options
-        enabled: true
+        enabled: !!process.env.BUNDLE_ANALYZER
     })
-  ].filter(Boolean),
+  ],
 });
 ```
 3. Build the app with the `BUNDLE_ANALYZER` environment variable:
