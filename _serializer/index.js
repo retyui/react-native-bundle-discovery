@@ -3,6 +3,7 @@ const { writeFileSync, existsSync } = require("fs");
 const { Buffer } = require("buffer");
 const chalk = require("chalk");
 const BundleDiscoveryPlugin = require("./webpack").BundleDiscoveryPlugin;
+const { addNpmMetaToPackages } = require("./npmMeta");
 const NAME = require("./package.json").name;
 
 function getDefault(module) {
@@ -82,6 +83,16 @@ function toPackages(modules) {
   );
 }
 
+function getPackages(packages, npmMeta, silent) {
+  if (npmMeta === false || process.env.RN_BUNDLE_DISCOVERY_NO_NPM_META) {
+    return packages;
+  }
+  return addNpmMetaToPackages(packages, {
+    silent,
+    ...(typeof npmMeta === "object" ? npmMeta : {}),
+  });
+}
+
 function toModuleStruct(m, includeCode) {
   const sourceCode = m.getSource().toString("utf8");
   const outputCode = m.output[0].data.code;
@@ -106,7 +117,7 @@ function toModuleStruct(m, includeCode) {
   };
 }
 
-function createJsonReport({
+async function createJsonReport({
   graph,
   entryPoint,
   includeEnvs,
@@ -115,6 +126,7 @@ function createJsonReport({
   outputJsonPath,
   rootFolder,
   silent,
+  npmMeta,
   options,
 }) {
   const { processModuleFilter = () => true } = options || {};
@@ -131,7 +143,11 @@ function createJsonReport({
       return acc;
     }, {}),
     rootFolder,
-    packages: toPackages(preModules).concat(toPackages(dependencies)),
+    packages: await getPackages(
+      toPackages(preModules).concat(toPackages(dependencies)),
+      npmMeta,
+      silent,
+    ),
     modules: preModules
       .map((m) => toModuleStruct(m, includeCode))
       .concat(dependencies.map((m) => toModuleStruct(m, includeCode))),
@@ -156,6 +172,9 @@ function createJsonReport({
  * @param {string} [options.outputJsonPath] - The path where the JSON report will be saved. Defaults to "metro-stats.json" in the project root.
  * @param {boolean} [options.includeCode=true] - Whether to include the source and output code in the JSON report.
  * @param {string[]} [options.includeEnvs=[]] - A list of environment variable names to include in the JSON report.
+ * @param {boolean | Object} [options.npmMeta=true] - Whether to add npm registry info (`meta` prop) to each package.
+ *   Responses are stored in a global cache, so network requests are made only for new packages/versions.
+ *   Pass an object to customize: `{ registry, cacheDir, ttl, timeout, concurrency }`.
  * @returns {Function} - A custom serializer function to be used by Metro.
  * @throws {Error} - Throws an error if the project root does not exist.
  */
@@ -166,6 +185,7 @@ function createSerializer({
   includeCode = true,
   silent = false,
   includeEnvs = [],
+  npmMeta = true,
 } = {}) {
   const mySerializer = serializer || getDefaultSerializer();
 
@@ -179,7 +199,7 @@ function createSerializer({
   function customSerializer(entryPoint, preModules, graph, options) {
     const code = mySerializer(entryPoint, preModules, graph, options);
 
-    createJsonReport({
+    void createJsonReport({
       graph,
       entryPoint,
       includeEnvs,
@@ -188,6 +208,7 @@ function createSerializer({
       outputJsonPath: myOutputJsonPath,
       rootFolder: projectRoot,
       silent,
+      npmMeta,
       options,
     });
 
