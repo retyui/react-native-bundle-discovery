@@ -21,6 +21,7 @@ function findDeprecatedPackages(report) {
 }
 
 module.exports = {
+  findDeprecatedPackages,
   id: "deprecated-packages",
   title: "Replace deprecated packages",
   check: (report) => {

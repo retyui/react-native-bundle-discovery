@@ -1,5 +1,4 @@
-const path = require("path");
-const { prepareReport } = require("./prepare.js");
+const { readBuildReport } = require("./readReport.js");
 const { formatBytes } = require("./utils.js");
 const chalk = require("chalk");
 
@@ -17,21 +16,6 @@ function getDuplicateGroupName(packageName) {
   }
 
   return packageName;
-}
-
-function readBuildReport(filePath, format) {
-  try {
-    // Resolve from current working directory to support relative CLI paths.
-    const resolvedPath = path.resolve(filePath);
-    const report = require(resolvedPath);
-    const noLogs = format === "json";
-
-    return prepareReport(report, resolvedPath, noLogs);
-  } catch (error) {
-    console.error(chalk.red(`Error reading report file: ${filePath}`));
-    console.error(error);
-    process.exit(1);
-  }
 }
 
 function getPackageGroups(report, sort = "size") {

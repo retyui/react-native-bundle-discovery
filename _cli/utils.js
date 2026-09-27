@@ -52,6 +52,38 @@ function isVersionGte(version, targetVersion) {
   return current.patch >= target.patch;
 }
 
+const SIZE_UNITS = {
+  b: 1,
+  k: 1024,
+  kb: 1024,
+  m: 1024 ** 2,
+  mb: 1024 ** 2,
+  g: 1024 ** 3,
+  gb: 1024 ** 3,
+};
+
+// "50KB" | "0.5mb" | "51200" -> bytes, "5%" -> { percent: 5 }, invalid -> null
+function parseSizeLimit(value, { allowPercent = false } = {}) {
+  const text = String(value).trim().toLowerCase().replace(/\s+/g, "");
+
+  const percentMatch = text.match(/^(\d+(?:\.\d+)?)%$/);
+  if (percentMatch) {
+    return allowPercent ? { percent: Number(percentMatch[1]) } : null;
+  }
+
+  const sizeMatch = text.match(/^(\d+(?:\.\d+)?)([a-z]*)$/);
+  if (!sizeMatch) {
+    return null;
+  }
+
+  const multiplier = sizeMatch[2] ? SIZE_UNITS[sizeMatch[2]] : 1;
+  if (!multiplier) {
+    return null;
+  }
+
+  return { bytes: Math.round(Number(sizeMatch[1]) * multiplier) };
+}
+
 // 0.87.1 -> 0.87
 function formatRnVersionToDocsFormat(version) {
   return version.split(".").slice(0, 2).join(".");
@@ -62,4 +94,5 @@ module.exports = {
   getReactNativeVersion,
   isVersionGte,
   formatRnVersionToDocsFormat,
+  parseSizeLimit,
 };
