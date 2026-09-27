@@ -3,6 +3,7 @@ const { writeFileSync, existsSync } = require("fs");
 const { Buffer } = require("buffer");
 const chalk = require("chalk");
 const BundleDiscoveryPlugin = require("./webpack").BundleDiscoveryPlugin;
+const { withPackagesMetadata } = require("./packageMetadata");
 const NAME = require("./package.json").name;
 
 function getDefault(module) {
@@ -106,7 +107,7 @@ function toModuleStruct(m, includeCode) {
   };
 }
 
-function createJsonReport({
+async function createJsonReport({
   graph,
   entryPoint,
   includeEnvs,
@@ -116,11 +117,29 @@ function createJsonReport({
   rootFolder,
   silent,
   options,
+  fetchPackagesMetadata,
 }) {
   const { processModuleFilter = () => true } = options || {};
   const dependencies = Array.from(graph.dependencies.values()).filter(
     processModuleFilter,
   );
+
+  let packages = toPackages(preModules).concat(toPackages(dependencies));
+  const modules = preModules
+    .map((m) => toModuleStruct(m, includeCode))
+    .concat(dependencies.map((m) => toModuleStruct(m, includeCode)));
+
+  if (fetchPackagesMetadata) {
+    packages = await withPackagesMetadata(packages, {
+      onError: (error, pkg) => {
+        if (!silent) {
+          console.warn(
+            `${chalk.yellow(`[${NAME}]`)}: Failed to fetch metadata for ${pkg.name}@${pkg.version}: ${error.message}`,
+          );
+        }
+      },
+    });
+  }
 
   const stats = {
     date: Date.now(),
@@ -131,10 +150,8 @@ function createJsonReport({
       return acc;
     }, {}),
     rootFolder,
-    packages: toPackages(preModules).concat(toPackages(dependencies)),
-    modules: preModules
-      .map((m) => toModuleStruct(m, includeCode))
-      .concat(dependencies.map((m) => toModuleStruct(m, includeCode))),
+    packages,
+    modules,
   };
 
   writeFileSync(outputJsonPath, JSON.stringify(stats));
@@ -156,6 +173,7 @@ function createJsonReport({
  * @param {string} [options.outputJsonPath] - The path where the JSON report will be saved. Defaults to "metro-stats.json" in the project root.
  * @param {boolean} [options.includeCode=true] - Whether to include the source and output code in the JSON report.
  * @param {string[]} [options.includeEnvs=[]] - A list of environment variable names to include in the JSON report.
+ * @param {boolean} [options.fetchPackagesMetadata=true] - Whether to fetch packages metadata (publish date, deprecation, latest version) from the npm registry.
  * @returns {Function} - A custom serializer function to be used by Metro.
  * @throws {Error} - Throws an error if the project root does not exist.
  */
@@ -166,6 +184,7 @@ function createSerializer({
   includeCode = true,
   silent = false,
   includeEnvs = [],
+  fetchPackagesMetadata = true,
 } = {}) {
   const mySerializer = serializer || getDefaultSerializer();
 
@@ -179,6 +198,12 @@ function createSerializer({
   function customSerializer(entryPoint, preModules, graph, options) {
     const code = mySerializer(entryPoint, preModules, graph, options);
 
+    // Keeps the Node.js process alive until the report is written
+    // (otherwise it can exit while metadata requests are still pending)
+    const keepAlive = setInterval(() => {}, 1000);
+
+    // Graph/modules are read synchronously before the first `await`,
+    // so the report is not affected by later Metro graph mutations
     createJsonReport({
       graph,
       entryPoint,
@@ -189,7 +214,8 @@ function createSerializer({
       rootFolder: projectRoot,
       silent,
       options,
-    });
+      fetchPackagesMetadata,
+    }).finally(() => clearInterval(keepAlive));
 
     return code;
   }
