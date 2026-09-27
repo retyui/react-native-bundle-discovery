@@ -90,6 +90,10 @@ npx react-native-bundle-discovery-cli metro-stats.json
 
 # Display all packages in the bundle report
 npx react-native-bundle-discovery-cli packages metro-stats.json [--sort size|name] [--format json|table|default]
+
+# Display the heaviest modules in the bundle report (default limit: 50, --limit 0 shows all)
+# --filter accepts plain text (case-insensitive) or a regexp: --filter '/\.json/i'
+npx react-native-bundle-discovery-cli modules metro-stats.json [--limit 50] [--filter <text|/regexp/>] [--sort size|name] [--format json|table|default]
 ```
 
 #### UI package
