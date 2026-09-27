@@ -5,7 +5,7 @@ const fs = require("node:fs");
 const chalk = require("chalk");
 const NAME = require("./package.json").name;
 
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const DEFAULT_REGISTRY = "https://registry.npmjs.org";
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -13,8 +13,7 @@ const DEFAULT_OPTIONS = {
   registry: DEFAULT_REGISTRY,
   // A global (per-user) cache shared by all projects on the machine
   cacheDir: null,
-  // How long `latest` dist-tag and "not found" answers stay fresh.
-  // Version manifests are immutable on npm and never expire.
+  // How long cached answers stay fresh (`latest` dist-tag and `deprecated` can change)
   ttl: DAY,
   timeout: 10_000,
   concurrency: 16,
@@ -86,43 +85,28 @@ async function fetchJson(url, timeout) {
   return res.json();
 }
 
-function getRepositoryUrl(repository) {
-  const url = typeof repository === "string" ? repository : repository?.url;
-  if (!url) {
-    return null;
-  }
-  return url
-    .replace(/^git\+/, "")
-    .replace(/^git:\/\//, "https://")
-    .replace(/^ssh:\/\/git@/, "https://")
-    .replace(/^git@([^:]+):/, "https://$1/")
-    .replace(/^github:/, "https://github.com/")
-    .replace(/\.git$/, "");
+/**
+ * npm doesn't return publish time in a version manifest, but it's encoded in
+ * `_npmOperationalInternal.tmp` (`tmp/<name>_<version>_<publishTimestampMs>_<random>`)
+ */
+function getCreatedAt(manifest) {
+  const match =
+    manifest._npmOperationalInternal?.tmp?.match(/_(\d{13})_[\d.]+$/);
+  return match ? new Date(Number(match[1])).toISOString() : null;
 }
 
-function getAuthorName(author) {
-  return typeof author === "string" ? author : (author?.name ?? null);
+function getLicense(license) {
+  return (typeof license === "string" ? license : license?.type) ?? null;
 }
 
 /**
- * Keep only fields that are useful for bundle analysis, the whole manifest is too big
+ * Keep only needed fields, the whole manifest is too big
  */
 function pickVersionMeta(manifest) {
   return {
-    description: manifest.description ?? null,
-    license:
-      (typeof manifest.license === "string"
-        ? manifest.license
-        : manifest.license?.type) ?? null,
-    homepage: manifest.homepage ?? null,
-    repository: getRepositoryUrl(manifest.repository),
-    author: getAuthorName(manifest.author),
+    createdAt: getCreatedAt(manifest),
+    license: getLicense(manifest.license),
     deprecated: manifest.deprecated ?? null,
-    sideEffects: manifest.sideEffects ?? null,
-    hasTypes: Boolean(manifest.types || manifest.typings),
-    unpackedSize: manifest.dist?.unpackedSize ?? null,
-    fileCount: manifest.dist?.fileCount ?? null,
-    dependenciesCount: Object.keys(manifest.dependencies ?? {}).length,
   };
 }
 
@@ -144,12 +128,13 @@ async function runWithConcurrency(items, concurrency, fn) {
  * Fetches npm registry metadata for the given packages, using a global on-disk cache.
  *
  * Cache layout (`<cacheDir>/npm-meta.json`):
- *   - `v:<name>@<version>` -> version manifest subset (immutable, never expires)
+ *   - `v:<name>@<version>` -> `{ createdAt, license, deprecated }` (expires after `ttl`)
  *   - `l:<name>`           -> latest version (expires after `ttl`)
  *
  * @param {{name: string, version: string}[]} packages
  * @param {Partial<typeof DEFAULT_OPTIONS>} [options]
- * @returns {Promise<Map<string, object | null>>} `<name>@<version>` -> meta (`null` when not published on the registry)
+ * @returns {Promise<Map<string, {createdAt: string | null, license: string | null, deprecated: string | null, latestVersion: string | null, isLatest: boolean | null} | null>>}
+ *   `<name>@<version>` -> meta (`null` when not published on the registry)
  */
 async function fetchPackagesMeta(packages, options = {}) {
   const { registry, cacheDir, ttl, timeout, concurrency, silent } = {
@@ -169,10 +154,10 @@ async function fetchPackagesMeta(packages, options = {}) {
   let cacheChanged = false;
   let failedRequests = 0;
 
-  const getCached = (key, withTtl) => {
+  const getCached = (key) => {
     const entry = cache.entries[cachePrefix + key];
     if (!entry) return undefined;
-    if (withTtl && now - entry.fetchedAt > ttl) return undefined;
+    if (now - entry.fetchedAt > ttl) return undefined;
     return entry.data;
   };
   const setCached = (key, data) => {
@@ -197,23 +182,23 @@ async function fetchPackagesMeta(packages, options = {}) {
   }
   const names = [...new Set([...unique.values()].map((pkg) => pkg.name))];
 
-  // 1. Latest versions (one request per package name)
+  // 1. Latest versions (one tiny `dist-tags` request per package name)
   const latest = new Map();
   await runWithConcurrency(names, concurrency, async (name) => {
     const key = `l:${name}`;
-    let data = getCached(key, true);
+    let data = getCached(key);
     if (data === undefined) {
       const res = await request(
-        `${registryUrl}/${encodePackageName(name)}/latest`,
+        `${registryUrl}/-/package/${encodePackageName(name)}/dist-tags`,
       );
       if (!res.ok) return;
-      data = res.data?.version ?? null;
+      data = res.data?.latest ?? null;
       setCached(key, data);
     }
     latest.set(name, data);
   });
 
-  // 2. Version specific manifests (one request per name@version)
+  // 2. Manifests of the exact versions used in the bundle (one request per name@version)
   const result = new Map();
   await runWithConcurrency(
     [...unique.values()],
@@ -221,11 +206,7 @@ async function fetchPackagesMeta(packages, options = {}) {
     async ({ name, version }) => {
       const id = `${name}@${version}`;
       const key = `v:${id}`;
-      // Unpublished versions (private/local packages) may get published later, so they respect ttl
-      let data = getCached(key, false);
-      if (data === null) {
-        data = getCached(key, true);
-      }
+      let data = getCached(key);
       if (data === undefined) {
         // Package itself isn't on the registry -> no need to request the version
         if (latest.has(name) && latest.get(name) === null) {
@@ -244,10 +225,11 @@ async function fetchPackagesMeta(packages, options = {}) {
       result.set(
         id,
         data && {
-          ...data,
+          createdAt: data.createdAt,
+          license: data.license,
+          deprecated: data.deprecated,
           latestVersion,
           isLatest: latestVersion ? latestVersion === version : null,
-          npmUrl: `https://www.npmjs.com/package/${name}/v/${version}`,
         },
       );
     },
