@@ -20,12 +20,51 @@ function getPackage(entry) {
           .group(=> path.split('node_modules/' + $pkgName).pick(0) + 'node_modules/' + $pkgName)
           .map(=> {
              $pkgNameWithPath: $.key;
+             $pkgInfo: $packages.[path = $pkgNameWithPath][0];
              pkgName: $pkgNameWithPath, // example: node_modules/lodash
-             version: $packages.[path = $pkgNameWithPath][0].version,
+             version: $pkgInfo.version,
+             metadata: $pkgInfo.metadata,
              size: $.value.sum(=> output.sizeInBytes),
              modules: $.value.map(=> $.$toModule()),
           }),
      }))`;
+}
+
+const metadataTooltip = {
+  view: "text",
+  when: "metadata.createdAt",
+  data: "'Published ' + metadata.createdAt.formatDate() + ' (' + metadata.createdAt.timeAgo() + ')'",
+};
+const outdatedColor = "rgba(255, 165, 0, 0.35)";
+
+// Compact npm metadata badges (`metadata` from the report)
+function getMetadataBadges({
+  deprecated,
+  outdated,
+  latestVersion,
+  renderLatestVersion,
+}) {
+  return [
+    {
+      view: "pill-badge",
+      when: deprecated,
+      data: `{ text: '⚠️ deprecated', message: ${deprecated} }`,
+      color: "#cf222e",
+      textColor: "white",
+      darkColor: "#f85149",
+      darkTextColor: "white",
+      tooltip: "text: message",
+    },
+    renderLatestVersion
+      ? {
+          view: "pill-badge",
+          when: outdated,
+          data: `{ text: '↑ v' + ${latestVersion} }`,
+          color: outdatedColor,
+          tooltip: "text: 'Latest version on npm'",
+        }
+      : null,
+  ].filter(Boolean);
 }
 
 function getPackageList({
@@ -49,6 +88,13 @@ function getPackageList({
           itemPkgName,
           "text: ' '",
           "pill-badge:{ text: size.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
+          // Summary of all instances (visible when the tree is collapsed)
+          ...getMetadataBadges({
+            deprecated: "pkgInstances.metadata.deprecated[0]",
+            outdated: "pkgInstances.[metadata and not metadata.isLatest]",
+            latestVersion: "pkgInstances.metadata.latestVersion[0]",
+            renderLatestVersion: false,
+          }),
           showCopiesBadge
             ? {
                 view: "pill-badge",
@@ -70,12 +116,23 @@ function getPackageList({
             //
             "text:pkgName",
             "text:' '",
-            "pill-badge:{ text: 'v' + version, color: '#0af' }",
+            {
+              view: "pill-badge",
+              data: "{ text: 'v' + version, metadata }",
+              color: "#0af",
+              tooltip: metadataTooltip,
+            },
             "pill-badge:{ text: size.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
             {
               view: "pill-badge",
               data: "modules.size().pluralBadge(['file','files'])",
             },
+            ...getMetadataBadges({
+              deprecated: "metadata.deprecated",
+              outdated: "metadata and not metadata.isLatest",
+              latestVersion: "metadata.latestVersion",
+              renderLatestVersion: true,
+            }),
           ],
           children: `$.modules`,
           itemConfig: {

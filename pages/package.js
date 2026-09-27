@@ -24,6 +24,10 @@ discovery.page.define("package", {
       currentPkgWithUniqVer: $pkg.pkgName + ($copies = 0 ? '@' + $ver : ''),
       currentPkgWithUniqVerNpm: $pkg.pkgName + ($copies = 0 ? '/v/' + $ver : ''),
       currentPkg: $pkg,
+      currentPkgInstancesWithMetadata: $pkg.pkgInstances.[metadata],
+      currentPkgDeprecated: $pkg.pkgInstances.[metadata.deprecated],
+      currentPkgOutdated: $pkg.pkgInstances.[metadata and not metadata.isLatest],
+      currentPkgLatestVersion: $pkg.pkgInstances.metadata.latestVersion[0],
     }
   `,
   content: [
@@ -56,11 +60,41 @@ discovery.page.define("package", {
             }`,
           ],
         },
+        {
+          when: "$.currentPkgDeprecated",
+          view: "h2",
+          className: "inline-block no-margin",
+          content: `badge: { text: 'deprecated', color: "rgba(255, 0, 0, 0.35)" }`,
+        },
+        {
+          when: "$.currentPkgOutdated",
+          view: "h2",
+          className: "inline-block no-margin",
+          content: `badge: {
+            prefix: 'latest',
+            text: 'v' + $.currentPkgLatestVersion,
+            color: "rgba(255, 165, 0, 0.35)"
+          }`,
+        },
         getCopyToClipboardButton({
           textToCopy: `$.currentPkg.pkgName`,
           className: "m-l-0_5em",
         }),
       ],
+    },
+
+    {
+      when: "$.currentPkgDeprecated",
+      view: "list",
+      data: "$.currentPkgDeprecated",
+      item: {
+        view: "alert-danger",
+        content: [
+          "html: '<b>Deprecated</b> '",
+          "text: 'v' + version + (#.data.currentPkgHasCopies ? ' (' + pkgName + ')' : '') + ': '",
+          "text: metadata.deprecated",
+        ],
+      },
     },
 
     "html: '<br>'",
@@ -106,6 +140,66 @@ discovery.page.define("package", {
             {
               view: "html",
               data: `'<img class="bundlejs-badge-img" src="https://deno.bundlejs.com/?q=' + q + '&badge=detailed" />'`,
+            },
+          ],
+        },
+      ],
+    },
+
+    {
+      when: "$.currentPkgInstancesWithMetadata",
+      view: "block",
+      content: [
+        "h3: 'Versions'",
+        {
+          view: "table",
+          data: "$.currentPkgInstancesWithMetadata",
+          cols: [
+            { header: "Path", content: "text: pkgName" },
+            {
+              header: "Version",
+              content: "pill-badge:{ text: 'v' + version, color: '#0af' }",
+            },
+            {
+              header: "Published",
+              data: "metadata.createdAt",
+              content: [
+                "text: formatDate()",
+                "text: ' '",
+                "pill-badge:{ text: timeAgo() }",
+              ],
+            },
+            {
+              header: "Latest",
+              content: [
+                {
+                  view: "link",
+                  external: true,
+                  data: `{
+                    href: "https://www.npmjs.com/package/" + #.data.currentPkg.pkgName + "/v/" + metadata.latestVersion,
+                    text: 'v' + metadata.latestVersion,
+                  }`,
+                },
+              ],
+            },
+            {
+              header: "Status",
+              content: {
+                view: "switch",
+                content: [
+                  {
+                    when: "metadata.deprecated",
+                    content: `badge: { text: 'deprecated', color: "rgba(255, 0, 0, 0.35)" }`,
+                  },
+                  {
+                    when: "metadata.isLatest",
+                    content: `badge: { text: 'latest', color: "rgba(120, 177, 9, 0.35)" }`,
+                  },
+                  {
+                    content: `badge: { text: 'outdated', color: "rgba(255, 165, 0, 0.35)" }`,
+                  },
+                ],
+              },
             },
           ],
         },

@@ -7,6 +7,8 @@
   "author": "David <4661784+retyui@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
+    "srv": "node ./lib/bin.js server",
+    "tmp": "yarn srv /Users/davyd.narbutovich/tmp/RNDiscovery/metro-stats.json",
     "format": "prettier --write .",
     "start": "NODE_ENV=development npx discovery --config .discoveryrc.js",
     "build": "npx discovery-build --config .discoveryrc.js --output build --serve-only-assets --single-file"

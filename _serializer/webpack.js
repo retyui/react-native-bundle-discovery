@@ -4,6 +4,7 @@ const path = require("node:path");
 const chalk = require("chalk");
 
 const { parseBundle } = require("./parseUtils.js");
+const { withPackagesMetadata } = require("./packageMetadata.js");
 const NAME = require("./package.json").name;
 const packageRegex = /(?:^|\/)node_modules\/((?:@[^\/]+\/)?[^\/]+)/g;
 
@@ -13,10 +14,11 @@ const packageRegex = /(?:^|\/)node_modules\/((?:@[^\/]+\/)?[^\/]+)/g;
  *   to metro-stats.json format used by `react-native-bundle-discovery`
  */
 class BundleDiscoveryPlugin {
-  constructor({ filename, options, enabled } = {}) {
+  constructor({ filename, options, enabled, fetchPackagesMetadata } = {}) {
     this.options = options;
     this.filename = filename || "metro-stats.json";
     this.enabled = enabled ?? true;
+    this.fetchPackagesMetadata = fetchPackagesMetadata ?? true;
   }
 
   extractSizesFromJsBundle(statAsset, options) {
@@ -59,14 +61,37 @@ class BundleDiscoveryPlugin {
       );
       // Write the formatted stats to the specified output file
       const outputPath = path.resolve(compiler.options.context, this.filename);
-      fs.writeFileSync(outputPath, JSON.stringify(statsJson, null, 2));
 
-      console.log(
-        `${chalk.yellow(`[${NAME}]`)}: Saved stats to ${chalk.green(
-          outputPath,
-        )}`,
-      );
+      // Keeps the Node.js process alive until the report is written
+      // (otherwise it can exit while metadata requests are still pending)
+      const keepAlive = setInterval(() => {}, 1000);
+
+      this.writeReport(statsJson, outputPath)
+        .catch((error) => {
+          console.error(
+            `${chalk.yellow(`[${NAME}]`)}: Failed to create JSON report: ${error.message}`,
+          );
+        })
+        .finally(() => clearInterval(keepAlive));
     });
+  }
+
+  async writeReport(statsJson, outputPath) {
+    if (this.fetchPackagesMetadata) {
+      statsJson.packages = await withPackagesMetadata(statsJson.packages, {
+        onError: (error, pkg) => {
+          console.warn(
+            `${chalk.yellow(`[${NAME}]`)}: Failed to fetch metadata for ${pkg.name}@${pkg.version}: ${error.message}`,
+          );
+        },
+      });
+    }
+
+    fs.writeFileSync(outputPath, JSON.stringify(statsJson, null, 2));
+
+    console.log(
+      `${chalk.yellow(`[${NAME}]`)}: Saved stats to ${chalk.green(outputPath)}`,
+    );
   }
 
   readSource(filePath) {
@@ -93,8 +118,9 @@ class BundleDiscoveryPlugin {
 
       const lastPnpmFolder = matches[matches.length - 1][1];
 
-      // Match the version pattern `@<version>` right before optional peer dep suffix (`_`) or string end
-      const versionMatch = lastPnpmFolder.match(/@([^/_]+)(?:_|$)/);
+      // Folder format is `<name>@<version>[_<peers>]`, where `<name>` may be scoped
+      // (`@scope+name`, `@scope_name`), so skip the leading `@` of the scope
+      const versionMatch = lastPnpmFolder.match(/^@?[^@]+@([^_]+)/);
 
       return versionMatch ? versionMatch[1] : null;
     } catch {

@@ -144,6 +144,24 @@ Please do the following:
     const idx = filename.lastIndexOf(".");
     return idx === -1 ? "js" : filename.slice(idx + 1);
   },
+  // "2022-06-14T19:46:38.369Z" -> "2022-06-14"
+  formatDate(isoDate) {
+    return isoDate ? new Date(isoDate).toISOString().slice(0, 10) : "";
+  },
+  // "2022-06-14T19:46:38.369Z" -> "3 years ago"
+  timeAgo(isoDate) {
+    if (!isoDate) return "";
+    const days = Math.floor((Date.now() - new Date(isoDate)) / 86_400_000);
+    const [count, unit] =
+      days >= 365
+        ? [Math.floor(days / 365), ["year", "years"]]
+        : days >= 30
+          ? [Math.floor(days / 30), ["month", "months"]]
+          : [days, ["day", "days"]];
+    return count === 0
+      ? "today"
+      : `${helpers.pluralWithCount(count, unit)} ago`;
+  },
   toFixed(value, fractionDigits = 2) {
     return Number(value).toFixed(fractionDigits);
   },
