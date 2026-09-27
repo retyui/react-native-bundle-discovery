@@ -8,6 +8,7 @@
   "license": "MIT",
   "scripts": {
     "srv": "node ./lib/bin.js server",
+    "analyze": "node ./_cli/bin.js analyze",
     "tmp": "yarn srv /Users/davyd.narbutovich/tmp/RNDiscovery/metro-stats.json",
     "format": "prettier --write .",
     "start": "NODE_ENV=development npx discovery --config .discoveryrc.js",

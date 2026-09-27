@@ -50,6 +50,9 @@ module.exports = {
   id: "rn-issue-promise-polyfill",
   title: "Remove Promise polyfills",
   check: (report) => {
+    if (report.kind === "webpack") {
+      return null;
+    }
     const packages = report.packages;
     const modules = report.modules;
     const reactNativeVersion = getReactNativeVersion(packages);

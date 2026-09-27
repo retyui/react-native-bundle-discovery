@@ -9,6 +9,7 @@ const promisePolyfill = require("./rn-issue-promise-polyfill.js");
 const devOnlyPackages = require("./dev-only-packages.js");
 const packageJsonFiles = require("./package-json-files.js");
 const devFiles = require("./dev-files.js");
+const deprecatedPackages = require("./deprecated-packages.js");
 
 module.exports = [
   reactNativeLinearGradient,
@@ -22,4 +23,5 @@ module.exports = [
   devOnlyPackages,
   packageJsonFiles,
   devFiles,
+  deprecatedPackages,
 ];
