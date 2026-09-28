@@ -10,6 +10,7 @@ const devOnlyPackages = require("./dev-only-packages.js");
 const packageJsonFiles = require("./package-json-files.js");
 const devFiles = require("./dev-files.js");
 const deprecatedPackages = require("./deprecated-packages.js");
+const outdatedPackages = require("./outdated-packages.js");
 
 module.exports = [
   reactNativeLinearGradient,
@@ -24,4 +25,5 @@ module.exports = [
   packageJsonFiles,
   devFiles,
   deprecatedPackages,
+  outdatedPackages,
 ];
