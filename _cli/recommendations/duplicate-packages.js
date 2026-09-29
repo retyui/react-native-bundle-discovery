@@ -49,7 +49,13 @@ module.exports = {
       if (name === LODASH_FAMILY_GROUP) {
         return {
           packages,
-          message,
+          message: `${message}
+
+Or you can use \`patch-package\` to remove usage of specific package, example lodash: 
+\`\`\`diff
+-const get = require('lodash.get');
++const get = require('lodash/get');
+\`\`\``,
           docsUrl: null,
         };
       }
@@ -59,12 +65,6 @@ module.exports = {
         message: `Found ${duplicateGroups.length} duplicate packages. 
 
 Align versions or use dependency \`overrides\` (npm) / \`resolutions\` (yarn) to keep a single copy per package.
-
-Or you can use \`patch-package\` to remove usage of specific package, example lodash: 
-\`\`\`diff
--const get = require('lodash.get');
-+const get = require('lodash/get');
-\`\`\`
 
 To see more use the next command: "${require("../package.json").name} packages <file>"`,
         docsUrl: [

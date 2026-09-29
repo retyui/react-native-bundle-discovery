@@ -57,7 +57,7 @@ module.exports = {
       .join("\n");
 
     return {
-      message: `Detected ${outdatedPackages.length} outdated package(s) in the bundle, published more than ${MAX_AGE_YEARS} years ago and not on the latest version:
+      message: `Detected ${outdatedPackages.length} outdated package(s) in the bundle:
 ${details}
 
 Old package versions miss bug fixes, performance and bundle size improvements, and may contain known security issues.

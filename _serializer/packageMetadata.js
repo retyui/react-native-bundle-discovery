@@ -1,6 +1,6 @@
 const DEFAULT_REGISTRY = "https://registry.npmjs.org";
-const DEFAULT_TIMEOUT_MS = 1_000;
-const DEFAULT_CONCURRENCY = 8;
+const DEFAULT_TIMEOUT_MS = 5_000;
+const DEFAULT_CONCURRENCY = 5;
 
 // Simple in-memory cache: `${registry}|${name}` -> Promise<packument summary | null>
 // Keeps promises (not values) so concurrent lookups of the same package share one request,
