@@ -11,6 +11,7 @@ const packageJsonFiles = require("./package-json-files.js");
 const devFiles = require("./dev-files.js");
 const deprecatedPackages = require("./deprecated-packages.js");
 const outdatedPackages = require("./outdated-packages.js");
+const workletsBundleMode = require("./worklets-bundle-mode.js");
 
 module.exports = [
   reactNativeLinearGradient,
@@ -26,4 +27,5 @@ module.exports = [
   devFiles,
   deprecatedPackages,
   outdatedPackages,
+  workletsBundleMode,
 ];
