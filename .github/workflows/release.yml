@@ -28,13 +28,39 @@ jobs:
       - run: yarn install --immutable
 
       - name: Create release PR or publish to npm
+        id: changesets
         uses: changesets/action@v2
         with:
           version-script: yarn version-packages
           publish-script: yarn release
           commit-message: "chore: version packages"
           pr-title: "chore: version packages"
+          # All packages share one version (`fixed` group), so a single
+          # GitHub release + tag is created in the next step instead
+          create-github-releases: false
+          push-git-tags: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          YARN_NPM_CONFIG_PROVENANCE: "true"
+          YARN_NPM_PUBLISH_PROVENANCE: "true"
+
+      - name: Create GitHub release
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          VERSION=$(node -p "require('./packages/serializer/package.json').version")
+          PREV=$(gh release view --json tagName -q .tagName)
+          REPO_URL="https://github.com/$GITHUB_REPOSITORY"
+          {
+            echo "## What's Changed"
+            sed -n "/^## $VERSION\$/,/^## /{/^## /!p;}" packages/serializer/CHANGELOG.md
+            echo
+            echo "---"
+            echo
+            echo "**Full Changelog**: $REPO_URL/compare/$PREV...$VERSION"
+            echo "**NPM Diff**: "
+            for PKG in react-native-bundle-discovery react-native-bundle-discovery-ui react-native-bundle-discovery-cli react-native-bundle-discovery-rozenite-plugin; do
+              echo "- $PKG: [\`$PREV...$VERSION\`](https://npmfs.com/compare/$PKG/$PREV/$VERSION/)"
+            done
+          } > release-notes.md
+          gh release create "$VERSION" --target "$GITHUB_SHA" --title "Release $VERSION" --notes-file release-notes.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
