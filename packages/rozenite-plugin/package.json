@@ -1,6 +1,6 @@
 {
   "name": "react-native-bundle-discovery-rozenite-plugin",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "Bundle Discovery panel for React Native DevTools (Rozenite)",
   "repository": {
     "type": "git",
