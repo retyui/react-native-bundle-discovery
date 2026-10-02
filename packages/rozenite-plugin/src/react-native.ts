@@ -42,6 +42,7 @@ function injectBundleDiscovery<T extends MetroConfigLike>(
   const newSerializer = createSerializer({
     projectRoot: process.cwd(),
     silent: true,
+    fetchPackagesMetadata: false,
     ...options,
     outputJsonPath,
     serializer: hasSerializer ? config.serializer?.customSerializer : undefined,

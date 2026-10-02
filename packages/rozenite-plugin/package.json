@@ -7,6 +7,10 @@
     "url": "git+https://github.com/retyui/react-native-bundle-discovery.git",
     "directory": "packages/rozenite-plugin"
   },
+  "homepage": "https://github.com/retyui/react-native-bundle-discovery/tree/main/packages/rozenite-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/retyui/react-native-bundle-discovery/issues"
+  },
   "author": "David <4661784+retyui@users.noreply.github.com>",
   "license": "MIT",
   "main": "./dist/react-native.js",
@@ -22,8 +26,8 @@
   },
   "dependencies": {
     "@discoveryjs/cli": "2.14.7",
-    "react-native-bundle-discovery": "workspace:^",
-    "react-native-bundle-discovery-ui": "workspace:^"
+    "react-native-bundle-discovery": "*",
+    "react-native-bundle-discovery-ui": "*"
   },
   "publishConfig": {
     "access": "public"
