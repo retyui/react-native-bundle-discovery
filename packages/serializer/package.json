@@ -1,0 +1,38 @@
+{
+  "name": "react-native-bundle-discovery",
+  "version": "2.6.0",
+  "description": "Metro serializer and Webpack/Rspack plugin that generates a JSON report of your React Native bundle",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/retyui/react-native-bundle-discovery.git",
+    "directory": "packages/serializer"
+  },
+  "author": "David <4661784+retyui@users.noreply.github.com>",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "run -T tsdown",
+    "typecheck": "run -T tsc -p tsconfig.json",
+    "prepack": "cp ../../README.md README.md"
+  },
+  "dependencies": {
+    "acorn": "^8.18.0",
+    "acorn-walk": "^8.3.5",
+    "chalk": "^4.1.2"
+  },
+  "peerDependencies": {
+    "metro": "*"
+  },
+  "peerDependenciesMeta": {
+    "metro": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

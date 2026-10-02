@@ -208,5 +208,5 @@ those extra packages if the user asks for them.
 
 - `README.md` — full independent-tool setup docs.
 - `Re.Pack.md` — Re.Pack-specific `BundleDiscoveryPlugin` docs.
-- `_serializer/index.js` — `createSerializer` implementation.
-- `_serializer/webpack.js` — `BundleDiscoveryPlugin` implementation.
+- `packages/serializer/src/index.ts` — `createSerializer` implementation.
+- `packages/serializer/src/webpack.ts` — `BundleDiscoveryPlugin` implementation.

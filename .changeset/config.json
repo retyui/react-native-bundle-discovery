@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@4/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "retyui/react-native-bundle-discovery" }
+  ],
+  "commit": false,
+  "fixed": [
+    [
+      "react-native-bundle-discovery",
+      "react-native-bundle-discovery-ui",
+      "react-native-bundle-discovery-cli",
+      "react-native-bundle-discovery-rozenite-plugin"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [],
+  "format": false
+}

@@ -1,0 +1,33 @@
+{
+  "name": "react-native-bundle-discovery-cli",
+  "version": "2.6.0",
+  "description": "Analyze and compare React Native bundle reports in the terminal / CI",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/retyui/react-native-bundle-discovery.git",
+    "directory": "packages/cli"
+  },
+  "author": "David <4661784+retyui@users.noreply.github.com>",
+  "license": "MIT",
+  "main": "./dist/bin.js",
+  "bin": "./dist/bin.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "run -T tsdown",
+    "typecheck": "run -T tsc -p tsconfig.json",
+    "prepack": "cp ../../README.md README.md"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "minimist": "^1.2.8"
+  },
+  "devDependencies": {
+    "@react-native-bundle-discovery/shared": "workspace:*",
+    "@types/minimist": "^1.2.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

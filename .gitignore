@@ -27,9 +27,15 @@ tmp/
 .pnp.*
 
 .bundle-discovery/
-/lib/.tmp.js
 
-_serializer/README.md
-_cli/README.md
-_cli/rsdoctor.js
-_cli/utils.js
+# Build output
+dist/
+.discoveryjs-cache/
+
+# Root README is copied into published packages on pack
+packages/*/README.md
+!packages/rozenite-plugin/README.md
+
+# Generated at runtime by the Rozenite plugin
+packages/rozenite-plugin/.stats/*
+!packages/rozenite-plugin/.stats/.dir
