@@ -2420,6 +2420,7 @@ __metadata:
     "@changesets/changelog-github": "npm:^1.0.1"
     "@changesets/cli": "npm:^3.0.3"
     "@types/node": "npm:^22.0.0"
+    prettier: "npm:^3.9.6"
     tsdown: "npm:^0.23.0"
     typescript: "npm:^7.0.2"
   languageName: unknown
@@ -2430,12 +2431,12 @@ __metadata:
   resolution: "react-native-bundle-discovery-rozenite-plugin@workspace:packages/rozenite-plugin"
   dependencies:
     "@discoveryjs/cli": "npm:2.14.7"
-    react-native-bundle-discovery: "workspace:^"
-    react-native-bundle-discovery-ui: "workspace:^"
+    react-native-bundle-discovery: "npm:*"
+    react-native-bundle-discovery-ui: "npm:*"
   languageName: unknown
   linkType: soft
 
-"react-native-bundle-discovery-ui@workspace:^, react-native-bundle-discovery-ui@workspace:packages/ui":
+"react-native-bundle-discovery-ui@npm:*, react-native-bundle-discovery-ui@workspace:packages/ui":
   version: 0.0.0-use.local
   resolution: "react-native-bundle-discovery-ui@workspace:packages/ui"
   dependencies:
@@ -2456,7 +2457,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"react-native-bundle-discovery@workspace:^, react-native-bundle-discovery@workspace:packages/serializer":
+"react-native-bundle-discovery@npm:*, react-native-bundle-discovery@workspace:packages/serializer":
   version: 0.0.0-use.local
   resolution: "react-native-bundle-discovery@workspace:packages/serializer"
   dependencies:

@@ -21,7 +21,7 @@
     ".stats/.dir"
   ],
   "scripts": {
-    "build": "run -T tsdown",
+    "build": "run -T tsdown && run -T prettier --write --log-level warn --ignore-path= \"dist/**/*.js\"",
     "typecheck": "run -T tsc -p tsconfig.json"
   },
   "dependencies": {

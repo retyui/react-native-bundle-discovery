@@ -18,7 +18,7 @@
     "vendors"
   ],
   "scripts": {
-    "build": "run -T tsdown",
+    "build": "run -T tsdown && run -T prettier --write --log-level warn --ignore-path= \"dist/**/*.js\"",
     "typecheck": "run -T tsc -p tsconfig.json && run -T tsc -p src/client/tsconfig.json",
     "dev": "run -T tsdown && NODE_ENV=development discovery --config dist/discoveryrc.js",
     "prepack": "cp ../../README.md README.md"
