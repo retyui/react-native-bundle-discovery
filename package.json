@@ -22,7 +22,7 @@
     "prettier": "^3.9.6"
   },
   "peerDependencies": {
-    "metro": "*"
+    "metro": ">=0.68.0"
   },
   "peerDependenciesMeta": {
     "metro": {

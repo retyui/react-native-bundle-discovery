@@ -799,6 +799,8 @@ function formatMarkdown(comparison, checks, { limit }) {
           ]),
         ),
     ),
+  ].filter(Boolean);
+  const deprecatedSection =
     deprecated.added.length > 0
       ? mdDetails(
           `⚠️ Deprecated packages: ${deprecated.beforeCount} → ${deprecated.afterCount} (${deprecated.added.length} new)`,
@@ -814,13 +816,19 @@ function formatMarkdown(comparison, checks, { limit }) {
               ]),
             ),
         )
-      : `⚠️ Deprecated packages: ${deprecated.beforeCount} → ${deprecated.afterCount}`,
-  ].filter(Boolean);
+      : deprecated.beforeCount === 0 && deprecated.afterCount === 0
+        ? null
+        : `⚠️ Deprecated packages: ${deprecated.beforeCount} → ${deprecated.afterCount}`;
   sections.push(
     "### 📦 Packages",
-    packageSections.length > 1
-      ? packageSections.join("\n\n")
-      : `_No package changes._\n\n${packageSections.join("")}`,
+    [
+      packageSections.length > 0
+        ? packageSections.join("\n\n")
+        : "_No package changes._",
+      deprecatedSection,
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
   );
 
   const moduleSections = [
