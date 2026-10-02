@@ -1,6 +1,6 @@
 {
   "name": "react-native-bundle-discovery",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "Metro serializer and Webpack/Rspack plugin that generates a JSON report of your React Native bundle",
   "repository": {
     "type": "git",
