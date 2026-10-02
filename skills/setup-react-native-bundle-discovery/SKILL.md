@@ -76,8 +76,8 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config);
 ### If the project already has a custom serializer
 
 If `metro.config.js` already defines its own
-`config.serializer.customSerializer` (e.g. for Sentry, Reanimated, or any
-other tool), **do not replace it**. Instead, pass the existing serializer
+`config.serializer.customSerializer` (e.g. for Reanimated or any other tool;
+for Sentry see the next section), **do not replace it**. Instead, pass the existing serializer
 function through to `createSerializer` via its `serializer` option, so
 `react-native-bundle-discovery` wraps it instead of overriding it:
 
@@ -112,6 +112,42 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config);
 If `config.serializer.customSerializer` is undefined (no pre-existing custom
 serializer), the `serializer` option can simply be omitted — `createSerializer`
 falls back to Metro's default serializer automatically.
+
+### If `@sentry/react-native` is installed
+
+Check `package.json` (`dependencies` / `devDependencies`) for
+`@sentry/react-native`. If it is present, pass Sentry's default Metro
+serializer to `createSerializer` via the `serializer` option instead of
+relying on Metro's default:
+
+```js
+// metro.config.js
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const { createSerializer } = require('react-native-bundle-discovery');
+
+const config = {
+  // ...keep existing config here...
+};
+
+if (process.env.BUNDLE_ANALYZER) {
+  const {
+    createDefaultMetroSerializer,
+  } = require('@sentry/react-native/dist/js/tools/vendor/metro/utils');
+
+  config.serializer = {
+    ...config.serializer,
+    customSerializer: createSerializer({
+      projectRoot: __dirname,
+      serializer: createDefaultMetroSerializer(),
+    }),
+  };
+}
+
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+```
+
+Keep any existing Sentry wrapper (e.g. `withSentryConfig(...)` /
+`getSentryExpoConfig(...)`) exactly as it is.
 
 ## Step 3b — Re.Pack project: edit `rspack.config.mjs` (or `webpack.config.js`)
 
@@ -163,6 +199,10 @@ those extra packages if the user asks for them.
 - If the project already has its own `config.serializer.customSerializer` in
   `metro.config.js`, do not discard it — pass it to `createSerializer` as the
   `serializer` option so it keeps running.
+- If `@sentry/react-native` is installed, pass Sentry's
+  `createDefaultMetroSerializer()` (from
+  `@sentry/react-native/dist/js/tools/vendor/metro/utils`) as the
+  `serializer` option.
 
 ## References in this repo
 
