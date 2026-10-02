@@ -36,5 +36,4 @@ jobs:
           pr-title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          YARN_NPM_CONFIG_PROVENANCE: "true"
+          YARN_NPM_PUBLISH_PROVENANCE: "true"
