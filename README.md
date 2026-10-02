@@ -48,6 +48,15 @@ dependencies, inspect every module, and catch bundle size regressions in CI.
 This setup is for a standard **Metro** project.
 Using Re.Pack or Rozenite? See [Other setups](#other-setups).
 
+> [!TIP]
+> **Using an AI coding agent?** Skip the manual steps below. Point your agent (Claude Code, Cursor, Codex, etc.)
+> at the [`setup-react-native-bundle-discovery`](./skills/setup-react-native-bundle-discovery/SKILL.md) skill.
+> It installs the package and sets up Metro or Re.Pack for you:
+>
+> ```bash
+> npx skills add retyui/react-native-bundle-discovery
+> ```
+
 ### 1. Install
 
 ```bash
