@@ -32,7 +32,7 @@ dependencies, inspect every module, and catch bundle size regressions in CI.
 - 💡 Optimization recommendations (duplicates, deprecated / outdated / dev-only packages, and more)
 - 🔍 CLI to list the heaviest packages and modules
 - 🆚 Compare two reports and fail CI on bundle size regressions
-- 🧩 Works with Metro, [Re.Pack](./Re.Pack.md) and [React Native DevTools](./_rozenite/README.md) (via Rozenite)
+- 🧩 Works with Metro, [Re.Pack](./Re.Pack.md) and [React Native DevTools](./packages/rozenite-plugin/README.md) (via Rozenite)
 
 ## Packages
 
@@ -41,7 +41,7 @@ dependencies, inspect every module, and catch bundle size regressions in CI.
 | `react-native-bundle-discovery`                                          | Generates a JSON report (`metro-stats.json`) of your bundle                                     | ✅ Yes   |
 | `react-native-bundle-discovery-ui`                                       | Shows the report in the browser                                                                 | Optional |
 | `react-native-bundle-discovery-cli`                                      | Analyzes and compares reports in the terminal / CI                                              | Optional |
-| [`react-native-bundle-discovery-rozenite-plugin`](./_rozenite/README.md) | Shows the UI inside [React Native DevTools](https://reactnative.dev/docs/react-native-devtools) | Optional |
+| [`react-native-bundle-discovery-rozenite-plugin`](./packages/rozenite-plugin/README.md) | Shows the UI inside [React Native DevTools](https://reactnative.dev/docs/react-native-devtools) | Optional |
 
 ## Quick start
 
@@ -111,7 +111,7 @@ npx react-native-bundle-discovery-cli metro-stats.json  # get recommendations in
 | Setup                      | Guide                                                                                                                        |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Re.Pack (Rspack / Webpack) | [Re.Pack.md](./Re.Pack.md)                                                                                                   |
-| React Native DevTools      | [Rozenite plugin](./_rozenite/README.md)                                                                                     |
+| React Native DevTools      | [Rozenite plugin](./packages/rozenite-plugin/README.md)                                                                                     |
 | AI coding agent            | Point your agent at the [`setup-react-native-bundle-discovery`](./skills/setup-react-native-bundle-discovery/SKILL.md) skill |
 
 ## Usage

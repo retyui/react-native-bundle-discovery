@@ -1,0 +1,48 @@
+{
+  "name": "react-native-bundle-discovery-ui",
+  "version": "2.6.0",
+  "description": "Browser UI for React Native bundle reports",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/retyui/react-native-bundle-discovery.git",
+    "directory": "packages/ui"
+  },
+  "author": "David <4661784+retyui@users.noreply.github.com>",
+  "license": "MIT",
+  "main": "./dist/bin.js",
+  "bin": "./dist/bin.js",
+  "files": [
+    "dist",
+    "!dist/.tmp.js",
+    "assets",
+    "vendors"
+  ],
+  "scripts": {
+    "build": "run -T tsdown && run -T prettier --write --log-level warn --ignore-path= \"dist/**/*.js\"",
+    "typecheck": "run -T tsc -p tsconfig.json && run -T tsc -p src/client/tsconfig.json",
+    "dev": "run -T tsdown && NODE_ENV=development discovery --config dist/discoveryrc.js",
+    "prepack": "cp ../../README.md README.md"
+  },
+  "dependencies": {
+    "@discoveryjs/cli": "2.14.7",
+    "@discoveryjs/discovery": "1.0.0-beta.99",
+    "chalk": "^4.1.2",
+    "minimist": "^1.2.8",
+    "prettier": "^3.9.6"
+  },
+  "devDependencies": {
+    "@react-native-bundle-discovery/shared": "workspace:*",
+    "@types/minimist": "^1.2.5"
+  },
+  "peerDependencies": {
+    "metro": ">=0.68.0"
+  },
+  "peerDependenciesMeta": {
+    "metro": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

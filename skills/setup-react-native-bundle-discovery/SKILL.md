@@ -27,8 +27,11 @@ Inspect the repo root (and any workspace packages) for:
   `Repack.defineRspackConfig(...)` / `Repack.defineWebpackConfig(...)`.
 - **Plain Metro project**: a `metro.config.js` and no Re.Pack bundler config.
 
-If both exist, prefer the Re.Pack path (that's what actually builds the JS
-bundle). If unsure, ask the user which bundler they use.
+**Conflict rule:** if the project contains both a `metro.config.js` and a
+`rspack.config.mjs` / `webpack.config.mjs` (or `.js`), apply
+`BundleDiscoveryPlugin` to the rspack/webpack config (Step 3b) and leave
+`metro.config.js` untouched — the rspack/webpack config is what actually
+builds the JS bundle. If unsure, ask the user which bundler they use.
 
 ## Step 2 — Install the dependency
 
@@ -190,6 +193,9 @@ those extra packages if the user asks for them.
 ## Constraints / guardrails
 
 - Only add the `react-native-bundle-discovery` dependency
+- If both `metro.config.js` and `rspack.config.mjs` / `webpack.config.mjs`
+  exist, integrate only via `BundleDiscoveryPlugin` in the rspack/webpack
+  config — do not also add `createSerializer` to `metro.config.js`.
 - Always gate the integration behind `process.env.BUNDLE_ANALYZER` so normal
   builds are unaffected.
 - Never overwrite unrelated parts of `metro.config.js` / `rspack.config.mjs` /
@@ -208,5 +214,5 @@ those extra packages if the user asks for them.
 
 - `README.md` — full independent-tool setup docs.
 - `Re.Pack.md` — Re.Pack-specific `BundleDiscoveryPlugin` docs.
-- `_serializer/index.js` — `createSerializer` implementation.
-- `_serializer/webpack.js` — `BundleDiscoveryPlugin` implementation.
+- `packages/serializer/src/index.ts` — `createSerializer` implementation.
+- `packages/serializer/src/webpack.ts` — `BundleDiscoveryPlugin` implementation.

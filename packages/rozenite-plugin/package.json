@@ -1,0 +1,35 @@
+{
+  "name": "react-native-bundle-discovery-rozenite-plugin",
+  "version": "2.6.0",
+  "description": "Bundle Discovery panel for React Native DevTools (Rozenite)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/retyui/react-native-bundle-discovery.git",
+    "directory": "packages/rozenite-plugin"
+  },
+  "homepage": "https://github.com/retyui/react-native-bundle-discovery/tree/main/packages/rozenite-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/retyui/react-native-bundle-discovery/issues"
+  },
+  "author": "David <4661784+retyui@users.noreply.github.com>",
+  "license": "MIT",
+  "main": "./dist/react-native.js",
+  "types": "./dist/react-native.d.ts",
+  "files": [
+    "dist",
+    "!dist/tmp.js",
+    ".stats/.dir"
+  ],
+  "scripts": {
+    "build": "run -T tsdown && run -T prettier --write --log-level warn --ignore-path= \"dist/**/*.js\"",
+    "typecheck": "run -T tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@discoveryjs/cli": "2.14.7",
+    "react-native-bundle-discovery": "*",
+    "react-native-bundle-discovery-ui": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

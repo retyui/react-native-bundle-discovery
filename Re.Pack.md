@@ -10,7 +10,7 @@
 
 For projects using [Re.Pack](https://re-pack.dev/docs/guides/bundle-analysis) there are two ways to use `react-native-bundle-discovery`:
 
-1. As [`BundleDiscoveryPlugin`](https://github.com/retyui/react-native-bundle-discovery/blob/main/_serializer/webpack.js) Webpack/Rspack plugin
+1. As [`BundleDiscoveryPlugin`](https://github.com/retyui/react-native-bundle-discovery/blob/main/packages/serializer/src/webpack.ts) Webpack/Rspack plugin
 2. or JSON report from [`Rsdoctor`](https://rsdoctor.rs/)
 
 > 🤖 Using an AI coding agent? Point it at the [`setup-react-native-bundle-discovery`](./skills/setup-react-native-bundle-discovery/SKILL.md) Agent Skill to automatically install `react-native-bundle-discovery`

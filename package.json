@@ -1,49 +1,32 @@
 {
-  "name": "react-native-bundle-discovery-ui",
-  "version": "2.6.0",
-  "main": "lib/bin.js",
-  "bin": "lib/bin.js",
-  "repository": "git@github.com:retyui/react-native-bundle-discovery.git",
-  "author": "David <4661784+retyui@users.noreply.github.com>",
+  "name": "react-native-bundle-discovery-monorepo",
+  "private": true,
   "license": "MIT",
-  "scripts": {
-    "srv": "node ./lib/bin.js server",
-    "analyze": "node ./_cli/bin.js analyze",
-    "tmp": "yarn srv /Users/davyd.narbutovich/tmp/RNDiscovery/metro-stats.json",
-    "format": "prettier --write .",
-    "start": "NODE_ENV=development npx discovery --config .discoveryrc.js",
-    "build": "npx discovery-build --config .discoveryrc.js --output build --serve-only-assets --single-file"
-  },
-  "dependencies": {
-    "@discoveryjs/cli": "2.14.7",
-    "@discoveryjs/discovery": "1.0.0-beta.99",
-    "chalk": "^4.1.2",
-    "minimist": "^1.2.8",
-    "prettier": "^3.9.6"
-  },
-  "peerDependencies": {
-    "metro": ">=0.68.0"
-  },
-  "peerDependenciesMeta": {
-    "metro": {
-      "optional": true
-    }
-  },
-  "files": [
-    "vendors",
-    "lib",
-    "!lib/.tmp.js",
-    "views",
-    "pages",
-    "index.js",
-    "setup.js",
-    "prepare.js",
-    "queryHelpers.js",
-    ".discoveryrc.js"
-  ],
   "packageManager": "yarn@4.18.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "yarn workspaces foreach -Apt --topological-dev run build",
+    "typecheck": "yarn workspaces foreach -Ap run typecheck",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "dev:ui": "yarn workspace react-native-bundle-discovery-ui run dev",
+    "changeset": "changeset",
+    "version-packages": "changeset version && yarn install --mode=update-lockfile",
+    "release": "yarn build && changeset publish"
+  },
   "devDependencies": {
-    "acorn": "^8.18.0",
-    "acorn-walk": "^8.3.5"
+    "@biomejs/biome": "^2.5.15",
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.3",
+    "@types/node": "^22.0.0",
+    "prettier": "^3.9.6",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2"
   }
 }
