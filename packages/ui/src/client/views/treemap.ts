@@ -11,7 +11,12 @@ import { isDark } from "./_colorScheme";
 type Root = Pick<TreemapNode, "name" | "children"> & Partial<TreemapNode>;
 type Rect = HierarchyRectangularNode<Root>;
 
-const HUES = [215, 100, 40, 0, 190, 150, 25, 275, 325];
+// Vivid, well separated hues: blue, green, amber, pink-red, cyan, violet, orange, magenta, lime
+const HUES = [217, 152, 40, 352, 190, 268, 20, 322, 95];
+// Hue shift between sibling sub-folders of a package, per nesting level
+const HUE_SHIFT_STEPS = [8, 4];
+// Rectangles smaller than this are filled flat (no cushion gradient)
+const MIN_SHADED_SIZE = 6;
 const HEADER_HEIGHT = 16;
 const BREADCRUMB_HEIGHT = 26;
 const FONT = "11px system-ui, -apple-system, sans-serif";
@@ -97,9 +102,14 @@ function tooltipHTML(node: Root) {
 // descendants inherit it
 function assignHues(roots: Root[]) {
   const hues = new Map<Root, number>();
-  const inherit = (node: Root, hue: number) => {
+  // Sub-folders of a package shift the hue a bit, so big packages
+  // show their structure while keeping the package's color family
+  const inherit = (node: Root, hue: number, level = 0) => {
     hues.set(node, hue);
-    for (const child of node.children ?? []) inherit(child, hue);
+    const step = HUE_SHIFT_STEPS[level] ?? 0;
+    (node.children ?? []).forEach((child, index) => {
+      inherit(child, hue + ((index % 5) - 2) * step, level + 1);
+    });
   };
 
   let i = 0;
@@ -186,18 +196,34 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
     return hue ?? undefined;
   }
 
-  function fill(node: Rect) {
+  // `delta` shifts the lightness, used for the cushion gradient
+  function fill(node: Rect, delta = 0) {
     const hue = getHue(node);
     const depth = node.depth;
     if (hue === undefined) {
-      return dark
-        ? `hsl(0 0% ${18 + depth * 4}%)`
-        : `hsl(0 0% ${88 - depth * 4}%)`;
+      const lightness = dark ? 18 + depth * 4 : 88 - depth * 4;
+      return `hsl(0 0% ${lightness + delta}%)`;
     }
     const lightness = dark
-      ? Math.min(30 + depth * 4, 55)
-      : Math.min(52 + depth * 5, 85);
-    return `hsl(${hue} ${dark ? 45 : 60}% ${lightness}%)`;
+      ? Math.min(38 + depth * 3, 52)
+      : Math.min(54 + depth * 3, 68);
+    return `hsl(${hue} ${dark ? 65 : 80}% ${lightness + delta}%)`;
+  }
+
+  // Lighter top-left, darker bottom-right corner
+  function cushion(ctx: CanvasRenderingContext2D, node: Rect) {
+    const w = node.x1 - node.x0;
+    const h = node.y1 - node.y0;
+    if (w < MIN_SHADED_SIZE || h < MIN_SHADED_SIZE) return fill(node);
+    const gradient = ctx.createLinearGradient(
+      node.x0,
+      node.y0,
+      node.x1,
+      node.y1,
+    );
+    gradient.addColorStop(0, fill(node, 7));
+    gradient.addColorStop(1, fill(node, -7));
+    return gradient;
   }
 
   function buildHierarchy() {
@@ -251,7 +277,7 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
       }
       const w = node.x1 - node.x0;
       const h = node.y1 - node.y0;
-      ctx.fillStyle = fill(node);
+      ctx.fillStyle = cushion(ctx, node);
       ctx.fillRect(node.x0, node.y0, w, h);
       ctx.strokeRect(node.x0 + 0.5, node.y0 + 0.5, w - 1, h - 1);
 
@@ -295,7 +321,7 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
         ? dark
           ? "hsl(0 0% 30%)"
           : "hsl(0 0% 78%)"
-        : `hsl(${hue} ${dark ? 45 : 60}% ${dark ? 45 : 62}%)`;
+        : `hsl(${hue} ${dark ? 65 : 80}% ${dark ? 45 : 58}%)`;
     return `<span class="treemap-swatch" style="background:${color}"></span>`;
   }
 
