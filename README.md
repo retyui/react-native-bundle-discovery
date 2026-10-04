@@ -111,8 +111,36 @@ npx react-native-bundle-discovery-cli metro-stats.json  # get recommendations in
 | Setup                      | Guide                                                                                                                        |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Re.Pack (Rspack / Webpack) | [Re.Pack.md](./Re.Pack.md)                                                                                                   |
+| rnx-kit (esbuild, tree shaking) | [esbuild metafile](#esbuild-metafile-rnx-kit)                                                                          |
 | React Native DevTools      | [Rozenite plugin](./packages/rozenite-plugin/README.md)                                                                                     |
 | AI coding agent            | Point your agent at the [`setup-react-native-bundle-discovery`](./skills/setup-react-native-bundle-discovery/SKILL.md) skill |
+
+### esbuild metafile (rnx-kit)
+
+With [`@rnx-kit/metro-serializer-esbuild`](https://github.com/microsoft/rnx-kit/tree/main/packages/metro-serializer-esbuild) (tree shaking), ask it to write an [esbuild metafile](https://esbuild.github.io/api/#metafile) via the `treeShake` options in `package.json`:
+
+```json
+{
+  "rnx-kit": {
+    "bundle": {
+      "treeShake": {
+        "metafile": "esbuild-meta.json"
+      }
+    }
+  }
+}
+```
+
+Then create a production bundle with `react-native rnx-bundle --platform ios --dev false` (the path to the metafile is printed in the build log).
+
+The UI and CLI accept the metafile as is (sizes are after tree shaking and minification):
+
+```bash
+npx react-native-bundle-discovery-ui esbuild-meta.json
+npx react-native-bundle-discovery-cli esbuild-meta.json
+```
+
+Notes: the metafile does not include source/output code, and its paths are relative to the directory the bundle was built from (the metafile folder, its parents and the current directory are tried).
 
 ## Usage
 

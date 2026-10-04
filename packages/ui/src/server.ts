@@ -2,7 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { createServer } from "@discoveryjs/cli";
 import { silent } from "@discoveryjs/cli/lib/shared/utils.js";
-import { isRsdoctorReportPath } from "@react-native-bundle-discovery/shared";
+import {
+  isEsbuildMetafilePath,
+  isRsdoctorReportPath,
+} from "@react-native-bundle-discovery/shared";
 import chalk from "chalk";
 import config from "./discoveryrc";
 
@@ -50,7 +53,7 @@ export function serve(filePath: string, port: number, verbose: boolean) {
   const transformRcdoctor = path.join(__dirname, "rsdoctor.js");
   fs.writeFileSync(
     configFile,
-    `const {transformRSDoctorData} = require("${transformRcdoctor}");
+    `const {transformRSDoctorData, transformEsbuildMetafile} = require("${transformRcdoctor}");
 module.exports = ${JSON.stringify(
       { ...config, data: "<tmp>" },
       null,
@@ -59,7 +62,9 @@ module.exports = ${JSON.stringify(
       `"<tmp>"`,
       isRsdoctorReportPath(fullJsonPath)
         ? `() => transformRSDoctorData(require("${fullJsonPath}"))`
-        : `() => require("${fullJsonPath}")`,
+        : isEsbuildMetafilePath(fullJsonPath)
+          ? `() => transformEsbuildMetafile(require("${fullJsonPath}"), "${fullJsonPath}")`
+          : `() => require("${fullJsonPath}")`,
     )};`,
   );
 

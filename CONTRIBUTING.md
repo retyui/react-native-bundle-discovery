@@ -10,7 +10,7 @@ Yarn 4 workspaces monorepo. Every package is written in TypeScript and built to 
 | `packages/ui`               | `react-native-bundle-discovery-ui`              | Browser UI (discovery.js). `src/client` is browser code, bundled by discovery.js     |
 | `packages/cli`              | `react-native-bundle-discovery-cli`             | Terminal / CI reports                                                                |
 | `packages/rozenite-plugin`  | `react-native-bundle-discovery-rozenite-plugin` | React Native DevTools panel                                                          |
-| `packages/shared`           | — (private)                                     | Code shared by `ui` and `cli` (rsdoctor transform, report types). Inlined at build time |
+| `packages/shared`           | — (private)                                     | Code shared by `ui` and `cli` (rsdoctor / esbuild metafile transforms, report types). Inlined at build time |
 
 ## Commands
 

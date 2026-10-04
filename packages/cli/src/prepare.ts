@@ -1,11 +1,14 @@
 import {
   type BundleReport,
+  isEsbuildMetafile,
   isRsdoctorReport,
+  transformEsbuildMetafile,
   transformRSDoctorData,
 } from "@react-native-bundle-discovery/shared";
 import type { PreparedPackage, PreparedReport } from "./types";
 
 type RsdoctorData = Parameters<typeof transformRSDoctorData>[0];
+type EsbuildMetafile = Parameters<typeof transformEsbuildMetafile>[0];
 
 function normalizeReportData(
   report: unknown,
@@ -14,6 +17,9 @@ function normalizeReportData(
 ): BundleReport {
   if (isRsdoctorReport(report, reportPath, noLogs)) {
     return transformRSDoctorData(report as RsdoctorData);
+  }
+  if (isEsbuildMetafile(report, reportPath, noLogs)) {
+    return transformEsbuildMetafile(report as EsbuildMetafile, reportPath);
   }
   return report as BundleReport;
 }
