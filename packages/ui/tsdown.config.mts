@@ -21,6 +21,9 @@ export default defineConfig([
     target: "es2022",
     fixedExtension: false,
     clean: false,
-    deps: { neverBundle: [/\/vendors\//, /^prettier/], onlyBundle: false },
+    deps: {
+      neverBundle: [/\/vendors\//, /^prettier/, /^d3-/],
+      onlyBundle: false,
+    },
   },
 ]);

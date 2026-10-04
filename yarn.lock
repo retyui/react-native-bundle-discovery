@@ -727,6 +727,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/d3-hierarchy@npm:^3.1.7":
+  version: 3.1.7
+  resolution: "@types/d3-hierarchy@npm:3.1.7"
+  checksum: 10c0/873711737d6b8e7b6f1dda0bcd21294a48f75024909ae510c5d2c21fad2e72032e0958def4d9f68319d3aaac298ad09c49807f8bfc87a145a82693b5208613c7
+  languageName: node
+  linkType: hard
+
 "@types/minimist@npm:^1.2.5":
   version: 1.2.5
   resolution: "@types/minimist@npm:1.2.5"
@@ -1470,6 +1477,13 @@ __metadata:
   bin:
     cronstrue: bin/cli.js
   checksum: 10c0/f04c9720eacae8cc58ee700a33ced44947c7d722f9deb8a0d0a9a9b533f493b8c2fabed0e72e6bf9d6d1e5191b7b8325e107496ed93a85a2789e57954084b055
+  languageName: node
+  linkType: hard
+
+"d3-hierarchy@npm:^3.1.2":
+  version: 3.1.2
+  resolution: "d3-hierarchy@npm:3.1.2"
+  checksum: 10c0/6dcdb480539644aa7fc0d72dfc7b03f99dfbcdf02714044e8c708577e0d5981deb9d3e99bbbb2d26422b55bcc342ac89a0fa2ea6c9d7302e2fc0951dd96f89cf
   languageName: node
   linkType: hard
 
@@ -2443,8 +2457,10 @@ __metadata:
     "@discoveryjs/cli": "npm:2.14.7"
     "@discoveryjs/discovery": "npm:1.0.0-beta.99"
     "@react-native-bundle-discovery/shared": "workspace:*"
+    "@types/d3-hierarchy": "npm:^3.1.7"
     "@types/minimist": "npm:^1.2.5"
     chalk: "npm:^4.1.2"
+    d3-hierarchy: "npm:^3.1.2"
     minimist: "npm:^1.2.8"
     prettier: "npm:^3.9.6"
   peerDependencies:
