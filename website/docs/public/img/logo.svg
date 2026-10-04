@@ -1,8 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <title>React Native Bundle Discovery</title>
-  <path d="M32 4 56 17v30L32 60 8 47V17L32 4Z" fill="#8232FF"/>
-  <path d="M32 4 56 17 32 30 8 17 32 4Z" fill="#B48CFF"/>
-  <path d="M32 30v30L8 47V17l24 13Z" fill="#5A14C8"/>
-  <circle cx="40" cy="40" r="9" stroke="#fff" stroke-width="4"/>
-  <path d="m46.5 46.5 6 6" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+  <path d="m41 41 14 14" stroke="#5A14C8" stroke-width="9" stroke-linecap="round"/>
+  <g transform="rotate(-90 28 28)" stroke-width="9">
+    <circle cx="28" cy="28" r="18" stroke="#8232FF" stroke-dasharray="56 57.1"/>
+    <circle cx="28" cy="28" r="18" stroke="#B48CFF" stroke-dasharray="30 83.1" stroke-dashoffset="-59"/>
+    <circle cx="28" cy="28" r="18" stroke="#FF6B9A" stroke-dasharray="18 95.1" stroke-dashoffset="-92"/>
+  </g>
 </svg>
