@@ -4,10 +4,17 @@ import path from "node:path";
 const config = {
   name: "react-native-bundle-discovery",
   // Used by `yarn dev` only: loads `<repo root>/tmp/metro-stats.json`
-  data: () =>
-    require(path.resolve(__dirname, "rsdoctor.js")).withRecommendations(
+  // (and compares it with the `COMPARE=<path>` report when the env var is set)
+  data: () => {
+    const { withComparison, withRecommendations } = require(
+      path.resolve(__dirname, "rsdoctor.js"),
+    );
+    const report = withRecommendations(
       require(path.resolve(__dirname, "../../../tmp/metro-stats.json")),
-    ),
+    );
+    const before = process.env.COMPARE && path.resolve(process.env.COMPARE);
+    return before ? withComparison(report, require(before), before) : report;
+  },
   setup: path.resolve(__dirname, "client/setup.js"),
   view: {
     assets: [
@@ -23,6 +30,7 @@ const config = {
       path.resolve(__dirname, "client/views/moduleOverview.js"),
       path.resolve(__dirname, "client/views/packageOverview.js"),
       path.resolve(__dirname, "client/views/insights.js"),
+      path.resolve(__dirname, "client/views/compare.js"),
       path.resolve(__dirname, "client/views/reportBar.js"),
       path.resolve(__dirname, "client/views/treemap.js"),
       path.resolve(__dirname, "client/views/persistedFilterInput.js"),

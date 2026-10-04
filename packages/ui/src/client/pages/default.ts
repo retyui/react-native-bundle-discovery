@@ -12,6 +12,7 @@ const TABS = {
   MODULES: "modules",
   PACKAGES: "packages",
   DUPLICATES: "duplicates",
+  COMPARE: "compare",
 };
 
 function parseHashRef(url = window.location.href) {
@@ -63,6 +64,15 @@ discovery.page.define("default", [
         content: [
           "text:'Duplicates '",
           "pill-badge: modules.filter(=> duplicates).size()",
+        ],
+      },
+      {
+        value: TABS.COMPARE,
+        when: "comparison",
+        className: `main-tabs-${TABS.COMPARE}`,
+        content: [
+          "text:'Compare '",
+          `pill-badge: $d: comparison.summary.deltaInBytes; ($d > 0 ? '+' : $d < 0 ? '−' : '') + ($d < 0 ? -$d : $d).formatBytes()`,
         ],
       },
     ],
@@ -254,6 +264,17 @@ discovery.page.define("default", [
             `,
               }),
             ],
+          },
+        },
+        {
+          when: `#.id="${TABS.COMPARE}"`,
+          content: {
+            view: "block",
+            className: "tab-scroll compare",
+            content: {
+              view: "bundle-compare",
+              data: "{ comparison, modulePaths: modules.path }",
+            },
           },
         },
       ],

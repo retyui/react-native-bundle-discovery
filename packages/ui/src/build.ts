@@ -7,6 +7,7 @@ import {
 } from "@react-native-bundle-discovery/shared";
 import chalk from "chalk";
 import config from "./discoveryrc";
+import { withCompare } from "./withCompare";
 
 export function buildHtmlPage(
   filePath: string,
@@ -14,6 +15,7 @@ export function buildHtmlPage(
   clean: boolean,
   singleFile: boolean,
   verbose: boolean,
+  compareFilePath?: string,
 ) {
   if (verbose) {
     console.info(
@@ -49,6 +51,18 @@ export function buildHtmlPage(
     process.exit(1);
   }
 
+  let fullCompareJsonPath: string | null = null;
+  if (compareFilePath) {
+    const compareJsonPath = path.resolve(process.cwd(), compareFilePath);
+    try {
+      fullCompareJsonPath = require.resolve(compareJsonPath);
+    } catch (err) {
+      console.error(`❌Error loading file: ${chalk.red(compareJsonPath)}\n\n`);
+      console.error((err as Error).message);
+      process.exit(1);
+    }
+  }
+
   const configFile = path.resolve(__dirname, "./.tmp.js");
 
   if (verbose) {
@@ -60,18 +74,21 @@ export function buildHtmlPage(
   const transformRcdoctor = path.join(__dirname, "rsdoctor.js");
   fs.writeFileSync(
     configFile,
-    `const {transformRSDoctorData, transformEsbuildMetafile, withRecommendations} = require("${transformRcdoctor}");
+    `const {transformRSDoctorData, transformEsbuildMetafile, withComparison, withRecommendations} = require("${transformRcdoctor}");
 module.exports = ${JSON.stringify(
       { ...config, data: "<tmp>" },
       null,
       1,
     ).replace(
       `"<tmp>"`,
-      isRsdoctorReportPath(fullJsonPath)
-        ? `() => withRecommendations(transformRSDoctorData(require("${fullJsonPath}")))`
-        : isEsbuildMetafilePath(fullJsonPath)
-          ? `() => withRecommendations(transformEsbuildMetafile(require("${fullJsonPath}"), "${fullJsonPath}"))`
-          : `() => withRecommendations(require("${fullJsonPath}"))`,
+      `() => ${withCompare(
+        isRsdoctorReportPath(fullJsonPath)
+          ? `withRecommendations(transformRSDoctorData(require("${fullJsonPath}")))`
+          : isEsbuildMetafilePath(fullJsonPath)
+            ? `withRecommendations(transformEsbuildMetafile(require("${fullJsonPath}"), "${fullJsonPath}"))`
+            : `withRecommendations(require("${fullJsonPath}"))`,
+        fullCompareJsonPath,
+      )}`,
     )};`,
   );
 

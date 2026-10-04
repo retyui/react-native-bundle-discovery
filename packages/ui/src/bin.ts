@@ -7,10 +7,10 @@ function printHelp() {
   console.log(`react-native-bundle-discovery-ui
 
 Usage:
-  react-native-bundle-discovery-ui <file> [port] [--verbose] # <- server can be omitted
-  react-native-bundle-discovery-ui server <file> [port] [--verbose]
+  react-native-bundle-discovery-ui <file> [port] [--compare <file>] [--verbose] # <- server can be omitted
+  react-native-bundle-discovery-ui server <file> [port] [--compare <file>] [--verbose]
 
-  react-native-bundle-discovery-ui build <file> [--output <path>] [--clean] [--single-file] [--verbose]
+  react-native-bundle-discovery-ui build <file> [--compare <file>] [--output <path>] [--clean] [--single-file] [--verbose]
 
 Commands:
   server <file> [port]  Run a web server to show a Metro bundler stat report
@@ -22,6 +22,7 @@ Options:
   -c, --clean            Clean output directory before writing build files (default: true)
   -s, --single-file      Output report build as a single HTML file (default: true)
   -p, --port <port>      Port for server command (same as [port], default: 8079)
+  --compare <file>       A "before" report to compare <file> with (adds the Compare tab)
   -h, --help             Show help
 `);
 }
@@ -43,7 +44,7 @@ function main() {
       p: "port",
     },
     boolean: ["verbose", "help", "clean", "single-file"],
-    string: ["output"],
+    string: ["output", "compare"],
     default: {
       clean: true,
       "single-file": true,
@@ -74,7 +75,7 @@ function main() {
       fail(`Invalid port: ${rawPort}`);
     }
 
-    return serve(file, port, Boolean(argv.verbose));
+    return serve(file, port, Boolean(argv.verbose), argv.compare);
   }
 
   if (isBuildCommand) {
@@ -89,6 +90,7 @@ function main() {
       argv.clean,
       argv["single-file"],
       Boolean(argv.verbose),
+      argv.compare,
     );
   }
 

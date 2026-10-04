@@ -1,3 +1,4 @@
+export * from "./compare";
 export {
   isEsbuildMetafile,
   isEsbuildMetafilePath,
