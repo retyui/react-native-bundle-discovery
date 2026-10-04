@@ -3,6 +3,7 @@ import {
   getModulesTree,
   getPackage,
   getPackageList,
+  getSortableContentFilter,
   metadata,
 } from "./_common";
 
@@ -127,6 +128,7 @@ discovery.page.define("default", [
           when: `#.id="${TABS.MODULES}"`,
           content: getModulesTree({
             limit: 200,
+            sortable: true,
             data: `
               $entryPoint: $.entryPointPath;
               $totalSize: modules.sum(=>output.sizeInBytes);
@@ -138,6 +140,7 @@ discovery.page.define("default", [
               };
               modules.map(=> { 
                 ...$.$toModule(),
+                sizeInBytes: $.output.sizeInBytes,
                 isEntry: $.isEntry,
                 reasons: $.dependents.map(=> $.$toModule()),
                 duplicates: $.duplicates.map(=> $.$toModule()),
@@ -162,29 +165,31 @@ discovery.page.define("default", [
                   href: $.askChatGPTAboutPackages()
                 }`,
             },
-            {
-              view: "content-filter",
-              //
-              data: `${getPackage(`modules.filter(=> path has "node_modules")`)}.sort(pkgInstances desc, size desc)`,
+            getSortableContentFilter({
+              data: getPackage(`modules.filter(=> path has "node_modules")`),
               className: "packages-content",
-              name: "filterByPathStr",
-              content: getPackageList({
-                showCopiesBadge: true,
-                expanded: false,
-                limit: 200,
-                subLimit: 50,
-                data: ".[pkgName ~= #.filterByPathStr]",
-                itemPkgName: {
-                  view: "link",
-                  content: "text-match",
-                  data: `{
+              nameField: "pkgName",
+              sizeField: "size",
+              duplicatesCount: "(pkgInstances.size() - 1)",
+              defaultSort: "pkgInstances desc, size desc",
+              content: (listData) =>
+                getPackageList({
+                  showCopiesBadge: true,
+                  expanded: false,
+                  limit: 200,
+                  subLimit: 50,
+                  data: listData,
+                  itemPkgName: {
+                    view: "link",
+                    content: "text-match",
+                    data: `{
                           href: pkgName.pageLink("package", {}),
                           text: pkgName,
                           match: #.filterByPathStr
                         }`,
-                },
-              }),
-            },
+                  },
+                }),
+            }),
           ],
         },
         {
