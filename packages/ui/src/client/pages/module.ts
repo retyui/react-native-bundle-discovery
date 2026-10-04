@@ -45,6 +45,8 @@ discovery.page.define("module", {
     isEntry: $currentModule.isEntry,
     isInjectedByMetro: $currentModule.path = '__prelude__' or $currentModule.path has '@react-native/js-polyfills',
     isWebpackRuntime: $currentModule.path has '__runtime__',
+    // Keep in sync with IMAGE_FONT_ASSET_RE in packages/serializer
+    isImageOrFontAsset: $currentModule.path ~= /\\.(png|jpe?g|gif|webp|bmp|psd|tiff?|ico|heic|avif|ttf|otf|woff2?|eot)$/i,
   }`,
   content: [
     {
@@ -131,6 +133,7 @@ discovery.page.define("module", {
                 content: [
                   {
                     view: "block",
+                    when: "not isImageOrFontAsset",
                     className: "width-50p",
                     content: [
                       {
@@ -150,7 +153,8 @@ discovery.page.define("module", {
                   },
                   {
                     view: "block",
-                    className: "width-50p",
+                    className: (data: { isImageOrFontAsset: boolean }) =>
+                      data.isImageOrFontAsset ? "" : "width-50p",
                     content: [
                       {
                         view: "h5",

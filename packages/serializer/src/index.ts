@@ -134,14 +134,20 @@ function toPackages(modules: ReadonlyArray<MetroModule>): ReportPackage[] {
   );
 }
 
+const IMAGE_FONT_ASSET_RE =
+  /\.(png|jpe?g|gif|webp|bmp|psd|tiff?|ico|heic|avif|ttf|otf|woff2?|eot)$/i;
+
 function toModuleStruct(m: MetroModule, includeCode: boolean): ReportModule {
-  const sourceCode = m.getSource().toString("utf8");
+  // Image/font assets are binary – don't read their source
+  const sourceCode = IMAGE_FONT_ASSET_RE.test(m.path)
+    ? ""
+    : m.getSource().toString("utf8");
   const outputCode = m.output[0].data.code;
   return {
     path: m.path,
     source: {
       code: includeCode ? sourceCode : "",
-      lineCount: sourceCode.split("\n").length,
+      lineCount: sourceCode ? sourceCode.split("\n").length : 0,
       sizeInBytes: getStringSizeInBytes(sourceCode),
     },
     output: {
