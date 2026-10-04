@@ -17,7 +17,7 @@ const topMetaData = [
 ];
 
 const TABS = {
-  TREEMAP_FOAMTREE: "treemap-foamtree",
+  TREEMAP: "treemap",
   MODULES: "modules",
   PACKAGES: "packages",
   DUPLICATES: "duplicates",
@@ -34,12 +34,12 @@ discovery.page.define("default", [
     view: "tabs",
     name: "mainTabs",
     className: "main-tabs",
-    value: parseHashRef() ?? TABS.TREEMAP_FOAMTREE,
+    value: parseHashRef() ?? TABS.TREEMAP,
     tabs: [
       {
-        value: TABS.TREEMAP_FOAMTREE,
+        value: TABS.TREEMAP,
         text: "Treemap chart",
-        className: `main-tabs-${TABS.TREEMAP_FOAMTREE}`,
+        className: `main-tabs-${TABS.TREEMAP}`,
       },
       {
         value: TABS.PACKAGES,
@@ -76,7 +76,7 @@ discovery.page.define("default", [
         });
         discovery.cancelScheduledRender();
 
-        const id = discovery.pageRef ?? TABS.TREEMAP_FOAMTREE;
+        const id = discovery.pageRef ?? TABS.TREEMAP;
 
         setTimeout(() => {
           discovery.dom.root
@@ -98,28 +98,20 @@ discovery.page.define("default", [
       },
       content: [
         {
-          when: `#.id="${TABS.TREEMAP_FOAMTREE}"`,
+          when: `#.id="${TABS.TREEMAP}"`,
           content: {
             view: "content-filter",
             name: "filterByPathStr",
             debounce: 300,
-            className: "foamtree-filter",
+            className: "treemap-filter",
             content: {
-              view: "foamtree",
+              view: "treemap",
               data: `
               $root: $.rootFolder;
               $applyFilter: => #.filterByPathStr ? $.modules.filter(=> $.path ~= #.filterByPathStr) : $.modules;
-              $dataObject: $.$applyFilter()
+              $.$applyFilter()
                 .map(=> {path, size: $.output.sizeInBytes})
-                .transformFilesList($root, "foamtree");
-
-              {
-                options: { 
-                  dataObject: $dataObject,
-                  descriptionGroupSize: 0.05,
-                  descriptionGroupMinHeight: 30,
-                }
-              }
+                .transformFilesList($root, "treemap")
               `,
             },
           },

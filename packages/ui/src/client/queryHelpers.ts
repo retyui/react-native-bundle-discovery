@@ -9,14 +9,14 @@ interface TreeNode {
   files?: number;
 }
 
-interface FoamTreeGroup {
-  label: string;
-  weight: number;
+export interface TreemapNode {
+  name: string;
+  value: number;
   fullPath?: string;
   files?: number;
   type?: "file" | "folder";
   size: string;
-  groups?: FoamTreeGroup[];
+  children?: TreemapNode[];
 }
 
 interface TreemapItem {
@@ -267,33 +267,21 @@ Please do the following:
       });
     });
 
-    if (type === "foamtree") {
+    if (type === "treemap") {
       sumSizes(nodeModulesMap);
       sumSizes(sourceCodeMap);
 
-      const sourceCodeGroup = toGroups(sourceCodeMap, "Source Code");
-      const nodeModulesGroup: Partial<FoamTreeGroup> = nodeModulesMap?.children
-        ?.node_modules
-        ? toGroups(nodeModulesMap.children.node_modules, "node_modules")
-        : {};
-
-      if (!sourceCodeGroup.groups) {
-        return nodeModulesGroup;
+      const roots: TreemapNode[] = [];
+      if (Object.keys(sourceCodeMap.children).length > 0) {
+        roots.push(toTreemapNode(sourceCodeMap, "Source Code"));
       }
-      if (!nodeModulesGroup.groups) {
-        return sourceCodeGroup;
+      if (nodeModulesMap.children.node_modules) {
+        roots.push(
+          toTreemapNode(nodeModulesMap.children.node_modules, "node_modules"),
+        );
       }
 
-      const topLevelNode: {
-        groups: Partial<FoamTreeGroup>[];
-        weight?: number;
-      } = { groups: [sourceCodeGroup, nodeModulesGroup] };
-      topLevelNode.weight = topLevelNode.groups.reduce(
-        (acc, group) => acc + (group.weight as number),
-        0,
-      );
-
-      return topLevelNode;
+      return roots;
     }
 
     if (type === "highcharts-treemap") {
@@ -376,12 +364,12 @@ function sumSizes(node: TreeNode): { totalSize: number; totalFiles: number } {
   return { totalSize, totalFiles };
 }
 
-function toGroups(node: TreeNode, label: string): FoamTreeGroup {
+function toTreemapNode(node: TreeNode, name: string): TreemapNode {
   const keys = Object.keys(node.children);
 
-  const common: FoamTreeGroup = {
-    label,
-    weight: node.size,
+  const common: TreemapNode = {
+    name,
+    value: node.size,
     fullPath: node.fullPath,
     files: node.files,
     type: node.type,
@@ -395,7 +383,7 @@ function toGroups(node: TreeNode, label: string): FoamTreeGroup {
 
   // Folder
   return Object.assign(common, {
-    groups: keys.map((key) => toGroups(node.children[key], key)),
+    children: keys.map((key) => toTreemapNode(node.children[key], key)),
   });
 }
 

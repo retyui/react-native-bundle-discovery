@@ -18,7 +18,7 @@ const config = {
       path.resolve(__dirname, "../assets/highcharts.css"),
       path.resolve(__dirname, "client/views/prettify.js"),
       path.resolve(__dirname, "client/views/highcharts.js"),
-      path.resolve(__dirname, "client/views/foamtree.js"),
+      path.resolve(__dirname, "client/views/treemap.js"),
     ],
   },
 };
