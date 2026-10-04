@@ -13,6 +13,8 @@ dependencies, inspect every module, and catch bundle size regressions in CI.
 
 📖 **[retyui.github.io/bundle-discovery](https://retyui.github.io/bundle-discovery/)**
 
+🚀 **[Live demo](https://retyui.github.io/bundle-discovery-demo/)**: see the UI with a real report in compare mode.
+
 - [Quick start](https://retyui.github.io/bundle-discovery/docs/getting-started/quick-start)
 - [UI](https://retyui.github.io/bundle-discovery/docs/guides/ui) and [CLI](https://retyui.github.io/bundle-discovery/docs/guides/cli)
 - [Bundle size checks in CI](https://retyui.github.io/bundle-discovery/docs/guides/ci)

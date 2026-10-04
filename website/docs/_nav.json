@@ -3,5 +3,9 @@
     "text": "Docs",
     "link": "/docs/getting-started/introduction",
     "activeMatch": "^/docs/"
+  },
+  {
+    "text": "Live demo",
+    "link": "https://retyui.github.io/bundle-discovery-demo/"
   }
 ]

@@ -15,6 +15,8 @@ npx react-native-bundle-discovery-ui pr-stats.json --compare main-stats.json
 
 ![Bundle Discovery UI: Treemap, Insights and Packages tabs](/img/overview.jpg)
 
+See it in action in the [live demo](https://retyui.github.io/bundle-discovery-demo/) (a static build with `--compare`).
+
 The top bar shows the platform, whether the bundle is a production/minified build (warns about dev or
 unminified bundles), the total size split into your code and `node_modules`, and the report build date.
 

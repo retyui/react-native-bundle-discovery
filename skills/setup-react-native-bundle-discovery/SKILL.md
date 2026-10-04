@@ -212,7 +212,7 @@ those extra packages if the user asks for them.
 
 ## References in this repo
 
-- `README.md` — full independent-tool setup docs.
-- `Re.Pack.md` — Re.Pack-specific `BundleDiscoveryPlugin` docs.
+- https://retyui.github.io/bundle-discovery/ — full setup docs.
+- https://retyui.github.io/bundle-discovery/docs/guides/repack — Re.Pack-specific `BundleDiscoveryPlugin` docs.
 - `packages/serializer/src/index.ts` — `createSerializer` implementation.
 - `packages/serializer/src/webpack.ts` — `BundleDiscoveryPlugin` implementation.

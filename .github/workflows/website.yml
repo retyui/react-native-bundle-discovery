@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build & deploy to retyui.github.io/bundle-discovery
+    name: Build & deploy website and demo to retyui.github.io
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -27,6 +27,11 @@ jobs:
 
       - run: yarn website:build
 
+      - run: yarn build
+
+      - name: Build demo report
+        run: node packages/ui/dist/bin.js build assets/demo-after.json --compare assets/demo-before.json --output demo-build --clean
+
       - name: Checkout retyui/retyui.github.io
         uses: actions/checkout@v7
         with:
@@ -36,17 +41,18 @@ jobs:
           ssh-key: ${{ secrets.GH_PAGES_DEPLOY_KEY }}
           path: gh-pages
 
-      - name: Copy build into bundle-discovery/
+      - name: Copy builds into bundle-discovery/ and bundle-discovery-demo/
         run: |
-          rm -rf gh-pages/bundle-discovery
+          rm -rf gh-pages/bundle-discovery gh-pages/bundle-discovery-demo
           cp -R website/doc_build gh-pages/bundle-discovery
+          cp -R demo-build gh-pages/bundle-discovery-demo
 
       - name: Commit & push
         working-directory: gh-pages
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A bundle-discovery
+          git add -A bundle-discovery bundle-discovery-demo
           if git diff --cached --quiet; then
             echo "No changes to deploy"
             exit 0

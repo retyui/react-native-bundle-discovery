@@ -9,6 +9,9 @@ hero:
       text: Quick Start
       link: /docs/getting-started/quick-start
     - theme: alt
+      text: Live demo
+      link: https://retyui.github.io/bundle-discovery-demo/
+    - theme: alt
       text: GitHub
       link: https://github.com/retyui/react-native-bundle-discovery
 features:
