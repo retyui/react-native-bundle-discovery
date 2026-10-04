@@ -39,7 +39,7 @@ discovery.view.define(
     // `el` is a fragment (`tag: false`), grab the input before it's mounted
     inputEl = el.querySelector("input");
   },
-  // no wrapper element, so `.packages-content > .view-input` styles still apply
+  // no wrapper element, so the input stays a direct grid item of `.sortable-content-filter`
   // (cast: discovery.js typings require all options here)
   { tag: false } as never,
 );

@@ -1,7 +1,9 @@
 import path from "node:path";
+import {
+  type PreparedReport,
+  prepareReport,
+} from "@react-native-bundle-discovery/shared";
 import chalk from "chalk";
-import { prepareReport } from "./prepare";
-import type { PreparedReport } from "./types";
 
 export function readBuildReport(
   filePath: string,

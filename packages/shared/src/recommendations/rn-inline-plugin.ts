@@ -1,0 +1,62 @@
+import { getReactNativeVersion, isVersionGte } from "../versions";
+import type { PreparedReport, Recommendation } from "./types";
+
+const TARGET_MODULE_PATH =
+  "react-native/Libraries/Components/Pressable/useAndroidRippleForView.js";
+const ANDROID_PLATFORM_CHECK_PATTERN = /['"]android['"]===\w\.default\.OS/;
+const DOCS_URL = "https://github.com/react/react-native/pull/57848";
+// Measured dead code size per bundle platform
+const SAVED_BYTES: Record<string, number> = {
+  ios: Math.round(17.76 * 1024),
+  android: Math.round(19.61 * 1024),
+};
+
+function findAffectedModules(report: PreparedReport) {
+  const modules = report.modules;
+  return modules.find((module) => {
+    return (
+      module?.path?.includes(TARGET_MODULE_PATH) &&
+      ANDROID_PLATFORM_CHECK_PATTERN.test(module?.output?.code ?? "")
+    );
+  });
+}
+
+const recommendation: Recommendation = {
+  id: "rn-inline-platform-plugin",
+  title: "Remove platform-specific dead code from production bundle",
+  check: (report) => {
+    const packages = report.packages;
+    const reactNativeVersion = getReactNativeVersion(packages);
+
+    // Issue is fixed in React Native 0.88.0, so we can skip the recommendation for versions >= 0.88.0
+    // skip old RN versions `0.84.x and below` as babel config has changed too much and can cause regression issues for those versions.
+    if (
+      isVersionGte(reactNativeVersion, "0.88.0") ||
+      !isVersionGte(reactNativeVersion, "0.85.0")
+    ) {
+      return null;
+    }
+
+    const affectedModule = findAffectedModules(report);
+    if (!affectedModule) {
+      return null;
+    }
+
+    return {
+      message: `Detected dead code for ${report?.transformOptions?.platform === "android" ? "iOS" : "Android"} platform. 
+
+You can save bundle size by removing that code as ${report?.transformOptions?.platform === "android" ? "iOS" : "Android"} code won't be executed on ${report?.transformOptions?.platform === "android" ? "Android" : "iOS"} platform.
+
+🍏 iOS: -17.76 KB
+🤖 Android: -19.61 KB
+
+To fix the issue you can bump \`@react-native/babel-preset\` to \`0.88.x\` or \`rc\` (if \`0.88.x\` not released yet).`,
+      packages: ["@react-native/babel-preset"],
+      docsUrl: DOCS_URL,
+      sizeInBytes: SAVED_BYTES[report?.transformOptions?.platform],
+      modules: [affectedModule.path],
+    };
+  },
+};
+
+export default recommendation;

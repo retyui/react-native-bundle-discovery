@@ -62,7 +62,7 @@ function runServer(): void {
     configFile,
     `module.exports = ${JSON.stringify(config, null, 1).replace(
       '"tmp"',
-      `() => require("${outputJsonPath}")`,
+      `() => require("${require.resolve("react-native-bundle-discovery-ui/dist/rsdoctor.js")}").withRecommendations(require("${outputJsonPath}"))`,
     )}`,
   );
 

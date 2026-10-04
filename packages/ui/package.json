@@ -14,8 +14,7 @@
   "files": [
     "dist",
     "!dist/.tmp.js",
-    "assets",
-    "vendors"
+    "assets"
   ],
   "scripts": {
     "build": "run -T tsdown && run -T prettier --write --log-level warn --ignore-path= \"dist/**/*.js\"",
@@ -28,6 +27,7 @@
     "@discoveryjs/discovery": "1.0.0-beta.99",
     "chalk": "^4.1.2",
     "d3-hierarchy": "^3.1.2",
+    "diff": "^8.0.4",
     "minimist": "^1.2.8",
     "prettier": "^3.9.6"
   },

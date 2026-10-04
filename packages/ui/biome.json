@@ -3,12 +3,6 @@
   "root": false,
   "extends": "//",
   "files": {
-    "includes": [
-      "**",
-      "!dist",
-      "!node_modules",
-      "!vendors",
-      "!assets/highcharts.css"
-    ]
+    "includes": ["**", "!dist", "!node_modules"]
   }
 }

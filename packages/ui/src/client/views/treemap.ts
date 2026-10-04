@@ -4,17 +4,98 @@ import {
   treemap,
   treemapSquarify,
 } from "d3-hierarchy";
+import { DUPLICATE_ISSUE } from "../issues";
 import type { TreemapNode } from "../queryHelpers";
 import { isDark } from "./_colorScheme";
 
 type Root = Pick<TreemapNode, "name" | "children"> & Partial<TreemapNode>;
 type Rect = HierarchyRectangularNode<Root>;
 
-const HUES = [215, 100, 40, 0, 190, 150, 25, 275, 325];
+// HSL color, lightness is for the light theme (the dark theme darkens it)
+type Tone = { h: number; s: number; l: number };
+
+// d3's default categorical palette (d3.schemeCategory10) as HSL
+const PALETTE: Tone[] = [
+  { h: 205, s: 71, l: 41 }, // #1f77b4 blue
+  { h: 28, s: 100, l: 53 }, // #ff7f0e orange
+  { h: 120, s: 57, l: 40 }, // #2ca02c green
+  { h: 360, s: 69, l: 50 }, // #d62728 red
+  { h: 271, s: 39, l: 57 }, // #9467bd purple
+  { h: 10, s: 30, l: 42 }, // #8c564b brown
+  { h: 318, s: 66, l: 68 }, // #e377c2 pink
+  { h: 0, s: 0, l: 50 }, // #7f7f7f gray
+  { h: 60, s: 70, l: 44 }, // #bcbd22 olive
+  { h: 186, s: 80, l: 45 }, // #17becf cyan
+];
+const TONE = {
+  blue: PALETTE[0],
+  orange: PALETTE[1],
+  green: PALETTE[2],
+  red: PALETTE[3],
+  purple: PALETTE[4],
+  olive: PALETTE[8],
+};
+// Labels switch to white on fills darker than this
+const LIGHT_LABEL_BELOW = 52;
+// Hue shift between sibling sub-folders of a package, per nesting level
+const HUE_SHIFT_STEPS = [8, 4];
+// Rectangles smaller than this are filled flat (no cushion gradient)
+const MIN_SHADED_SIZE = 6;
 const HEADER_HEIGHT = 16;
 const BREADCRUMB_HEIGHT = 26;
 const FONT = "11px system-ui, -apple-system, sans-serif";
 const MAX_SCALE = 64;
+
+type ColorBy = "package" | "type" | "issues";
+const COLOR_BY_OPTIONS: { value: ColorBy; text: string }[] = [
+  { value: "package", text: "Package" },
+  { value: "type", text: "File type" },
+  { value: "issues", text: "Issues" },
+];
+// File extension -> tone, `null` tone is gray
+const TYPE_TONES: { text: string; exts: string[]; tone: Tone | null }[] = [
+  { text: "js", exts: ["js", "jsx", "mjs", "cjs"], tone: TONE.olive },
+  { text: "ts", exts: ["ts", "tsx"], tone: TONE.blue },
+  { text: "json", exts: ["json"], tone: TONE.orange },
+  {
+    text: "images",
+    exts: ["png", "jpg", "jpeg", "gif", "webp", "svg"],
+    tone: TONE.purple,
+  },
+  { text: "other", exts: [], tone: null },
+];
+const ISSUE_TONES: { text: string; tone: Tone | null }[] = [
+  { text: "Duplicate", tone: TONE.red },
+  { text: "Can be removed", tone: TONE.orange },
+  { text: "No issues", tone: null },
+];
+// Kept between re-renders (e.g. when the filter changes)
+let colorBy: ColorBy = "package";
+
+function getTypeTone(name: string) {
+  const dot = name.lastIndexOf(".");
+  const ext = dot === -1 ? "js" : name.slice(dot + 1).toLowerCase();
+  return (
+    TYPE_TONES.find((t) => t.exts.includes(ext)) ??
+    TYPE_TONES[TYPE_TONES.length - 1]
+  ).tone;
+}
+
+function getIssueTone(issues: string[] | undefined) {
+  if (!issues?.length) return null;
+  return issues.includes(DUPLICATE_ISSUE)
+    ? ISSUE_TONES[0].tone
+    : ISSUE_TONES[1].tone;
+}
+
+// Saturation and lightness for the current theme and nesting depth
+function shade(tone: Tone, depth: number, dark: boolean) {
+  // Nested folders get only slightly lighter, so tones stay rich
+  const lift = Math.min(depth * 1.5, 6);
+  return dark
+    ? { h: tone.h, s: Math.max(tone.s - 6, 0), l: tone.l - 10 + lift / 2 }
+    : { h: tone.h, s: tone.s, l: tone.l + lift };
+}
 
 function escapeHTML(str: string) {
   return str.replace(
@@ -42,27 +123,44 @@ function tooltipHTML(node: Root) {
     node.type === "folder"
       ? `<b>Files</b>: ${node.files}`
       : `<b>Path</b>: ${escapeHTML(node.fullPath ?? "")}`,
-  ].join("<br/>");
+    node.issues?.length
+      ? `<b>Issues</b>: ${node.issues.map(escapeHTML).join(", ")}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("<br/>");
 }
 
 // Each package/folder at the first branching level gets its own hue,
 // descendants inherit it
-function assignHues(roots: Root[]) {
-  const hues = new Map<Root, number>();
-  const inherit = (node: Root, hue: number) => {
-    hues.set(node, hue);
-    for (const child of node.children ?? []) inherit(child, hue);
+function assignTones(roots: Root[]) {
+  const tones = new Map<Root, Tone>();
+  // Sub-folders of a package shift the hue a bit, so big packages
+  // show their structure while keeping the package's color family
+  const inherit = (node: Root, tone: Tone, level = 0) => {
+    tones.set(node, tone);
+    const step = HUE_SHIFT_STEPS[level] ?? 0;
+    (node.children ?? []).forEach((child, index) => {
+      inherit(
+        child,
+        { ...tone, h: tone.h + ((index % 5) - 2) * step },
+        level + 1,
+      );
+    });
   };
 
-  let i = 0;
-  for (const root of roots) {
+  // The heaviest package gets the first (hero) color, then the accents
+  const packages = roots.flatMap((root) => {
     let node = root;
     while (node.children?.length === 1) node = node.children[0];
-    for (const child of node.children ?? []) {
-      inherit(child, HUES[i++ % HUES.length]);
-    }
-  }
-  return hues;
+    return node.children ?? [];
+  });
+  packages
+    .sort((a, b) => (b.value ?? 0) - (a.value ?? 0))
+    .forEach((node, i) => {
+      inherit(node, PALETTE[i % PALETTE.length]);
+    });
+  return tones;
 }
 
 function truncate(
@@ -84,7 +182,7 @@ function truncate(
 
 function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
   const dark = isDark();
-  let hues = new Map<Root, number>();
+  let tones = new Map<Root, Tone>();
   const fullRoot: Root = { name: "Bundle", children: roots };
 
   host.style.position = "relative";
@@ -95,18 +193,25 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
   for (const canvas of [base, overlay]) {
     canvas.style.position = "absolute";
     canvas.style.left = "0";
-    canvas.style.top = "0";
+    canvas.style.top = `${BREADCRUMB_HEIGHT}px`;
   }
   overlay.style.cursor = "pointer";
   overlay.style.touchAction = "none";
 
+  const header = document.createElement("div");
+  header.className = "treemap-header";
+
   const breadcrumb = document.createElement("div");
   breadcrumb.className = "treemap-breadcrumb";
+
+  const controls = document.createElement("div");
+  controls.className = "treemap-controls";
+  header.append(breadcrumb, controls);
 
   const tooltip = document.createElement("div");
   tooltip.className = "treemap-tooltip";
 
-  host.append(base, overlay, breadcrumb, tooltip);
+  host.append(header, base, overlay, tooltip);
 
   // Path from the full root to the zoomed-in node
   let focusPath: Root[] = [fullRoot];
@@ -121,25 +226,52 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
   let offsetX = 0;
   let offsetY = 0;
 
-  function fill(node: Rect) {
-    const hue = hues.get(node.data);
-    const depth = node.depth;
-    if (hue === undefined) {
-      return dark
-        ? `hsl(0 0% ${18 + depth * 4}%)`
-        : `hsl(0 0% ${88 - depth * 4}%)`;
-    }
-    const lightness = dark
-      ? Math.min(30 + depth * 4, 55)
-      : Math.min(52 + depth * 5, 85);
-    return `hsl(${hue} ${dark ? 45 : 60}% ${lightness}%)`;
+  function getTone(node: Rect) {
+    if (colorBy === "package") return tones.get(node.data);
+    if (node.children) return undefined;
+    const tone =
+      colorBy === "type"
+        ? getTypeTone(node.data.name)
+        : getIssueTone(node.data.issues);
+    return tone ?? undefined;
+  }
+
+  // Lightness of the fill (before the cushion gradient)
+  function fillLightness(node: Rect) {
+    const tone = getTone(node);
+    if (!tone) return dark ? 18 + node.depth * 4 : 88 - node.depth * 4;
+    return shade(tone, node.depth, dark).l;
+  }
+
+  // `delta` shifts the lightness, used for the cushion gradient
+  function fill(node: Rect, delta = 0) {
+    const tone = getTone(node);
+    if (!tone) return `hsl(0 0% ${fillLightness(node) + delta}%)`;
+    const { h, s, l } = shade(tone, node.depth, dark);
+    return `hsl(${h} ${s}% ${l + delta}%)`;
+  }
+
+  // Lighter top-left, darker bottom-right corner
+  function cushion(ctx: CanvasRenderingContext2D, node: Rect) {
+    const w = node.x1 - node.x0;
+    const h = node.y1 - node.y0;
+    if (w < MIN_SHADED_SIZE || h < MIN_SHADED_SIZE) return fill(node);
+    const gradient = ctx.createLinearGradient(
+      node.x0,
+      node.y0,
+      node.x1,
+      node.y1,
+    );
+    gradient.addColorStop(0, fill(node, 7));
+    gradient.addColorStop(1, fill(node, -7));
+    return gradient;
   }
 
   function buildHierarchy() {
     const focus = focusPath[focusPath.length - 1];
     // At the top, color packages inside "Source Code"/"node_modules";
     // when zoomed in, color the children of the zoomed folder
-    hues = assignHues(focusPath.length === 1 ? roots : [focus]);
+    tones = assignTones(focusPath.length === 1 ? roots : [focus]);
     root = hierarchy(focus)
       .sum((d) => (d.children?.length ? 0 : (d.value ?? 0)))
       .sort((a, b) => (b.value ?? 0) - (a.value ?? 0)) as Rect;
@@ -186,7 +318,7 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
       }
       const w = node.x1 - node.x0;
       const h = node.y1 - node.y0;
-      ctx.fillStyle = fill(node);
+      ctx.fillStyle = cushion(ctx, node);
       ctx.fillRect(node.x0, node.y0, w, h);
       ctx.strokeRect(node.x0 + 0.5, node.y0 + 0.5, w - 1, h - 1);
 
@@ -197,7 +329,8 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
       if (isFolder && h <= HEADER_HEIGHT * 2) continue;
       const label = truncate(ctx, node.data.name, w - 8);
       if (!label) continue;
-      ctx.fillStyle = dark ? "#eee" : "#111";
+      ctx.fillStyle =
+        dark || fillLightness(node) < LIGHT_LABEL_BELOW ? "#f4f4f6" : "#16161a";
       ctx.font = isFolder ? `bold ${FONT}` : FONT;
       ctx.fillText(label, node.x0 + 4, node.y0 + HEADER_HEIGHT / 2 + 1);
       ctx.font = FONT;
@@ -222,6 +355,40 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
       hovered.x1 - hovered.x0 - 2,
       hovered.y1 - hovered.y0 - 2,
     );
+  }
+
+  function swatch(tone: Tone | null) {
+    const color =
+      tone === null
+        ? dark
+          ? "hsl(0 0% 30%)"
+          : "hsl(0 0% 78%)"
+        : (({ h, s, l }) => `hsl(${h} ${s}% ${l}%)`)(shade(tone, 2, dark));
+    return `<span class="treemap-swatch" style="background:${color}"></span>`;
+  }
+
+  function renderControls() {
+    const legend =
+      colorBy === "type" ? TYPE_TONES : colorBy === "issues" ? ISSUE_TONES : [];
+    controls.innerHTML = `
+      <span class="treemap-legend">${legend
+        .map((item) => `<span>${swatch(item.tone)}${item.text}</span>`)
+        .join("")}</span>
+      <span class="treemap-color-by-label">Color by:</span>`;
+    const group = document.createElement("span");
+    group.className = "view-toggle-group treemap-color-by";
+    for (const option of COLOR_BY_OPTIONS) {
+      const toggle = document.createElement("span");
+      toggle.className = `view-toggle onclick${option.value === colorBy ? " checked" : ""}`;
+      toggle.textContent = option.text;
+      toggle.onclick = () => {
+        colorBy = option.value;
+        renderControls();
+        draw();
+      };
+      group.append(toggle);
+    }
+    controls.append(group);
   }
 
   function renderBreadcrumb() {
@@ -347,7 +514,7 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
         ? event.offsetY - tooltip.offsetHeight - 8
         : event.offsetY + 12;
     tooltip.style.left = `${Math.max(left, 0)}px`;
-    tooltip.style.top = `${Math.max(top, 0)}px`;
+    tooltip.style.top = `${Math.max(top, 0) + BREADCRUMB_HEIGHT}px`;
   });
 
   overlay.addEventListener("mouseleave", () => {
@@ -393,7 +560,10 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
       }
-      if (!root) buildHierarchy();
+      if (!root) {
+        buildHierarchy();
+        renderControls();
+      }
       clampOffset();
       layout();
       draw();

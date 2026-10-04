@@ -10,7 +10,6 @@
       "**",
       "!**/dist",
       "!**/node_modules",
-      "!packages/ui/vendors",
       "!packages/rozenite-plugin/public",
       "!.changeset/*.md"
     ]

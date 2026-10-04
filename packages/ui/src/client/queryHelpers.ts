@@ -1,3 +1,4 @@
+import type { RecommendationFinding } from "@react-native-bundle-discovery/shared";
 import type { PreparedModule, PreparedReport } from "./prepare";
 
 interface TreeNode {
@@ -7,6 +8,7 @@ interface TreeNode {
   fullPath?: string;
   type?: "file" | "folder";
   files?: number;
+  issues?: string[];
 }
 
 export interface TreemapNode {
@@ -16,24 +18,86 @@ export interface TreemapNode {
   files?: number;
   type?: "file" | "folder";
   size: string;
+  issues?: string[];
   children?: TreemapNode[];
 }
 
-interface TreemapItem {
-  id: string;
-  name: string;
-  parent?: string;
-  value?: number;
-  color?: string;
-}
+export type Severity = "high" | "medium" | "low";
+
+// A finding is "high" when it saves at least 1% of the bundle
+const HIGH_SEVERITY_SHARE = 0.01;
+const TOP_LIST_SIZE = 8;
 
 interface NetworkGraphParams {
   maxParentDepth?: number | string;
   omitVisitedModules?: boolean;
 }
 
-type GraphModule = Pick<PreparedModule, "path" | "dependents">;
+type GraphModule = Pick<
+  PreparedModule,
+  "path" | "dependents" | "output" | "isEntry"
+>;
+
+export interface ImportGraphNode {
+  id: string;
+  size: number;
+  /** Distance from the current module (0 - the module itself) */
+  level: number;
+  isCurrent: boolean;
+  /** Not imported by anything, e.g. the entry point */
+  isRoot: boolean;
+  isNodeModule: boolean;
+}
+
+export interface ImportGraphLink {
+  /** The importing module */
+  source: string;
+  /** The imported module */
+  target: string;
+}
 type PluralForms = [singular: string, plural: string];
+
+const isNodeModule = (m: PreparedModule) => m.path.includes("node_modules/");
+const moduleSize = (m: PreparedModule) => m.output.sizeInBytes;
+
+function toListModule(m: PreparedModule) {
+  return {
+    ext: helpers.getFileExtension(m.path),
+    name: m.path,
+    size: helpers.formatBytes(moduleSize(m)),
+    sizeInBytes: moduleSize(m),
+    isEntry: !!m.isEntry,
+  };
+}
+
+// "react-native@0.80.0" -> "react-native", "@babel/runtime@7.0.0" -> "@babel/runtime"
+function stripVersion(id: string) {
+  const at = id.lastIndexOf("@");
+  return at > 0 ? id.slice(0, at) : id;
+}
+
+// Package names to link to: `packages` is a list of `name@version` or a
+// free-form text (duplicates: "lodash x2:\n - lodash@4.17.21 (...)")
+function getFindingPackageNames(packages: RecommendationFinding["packages"]) {
+  if (!packages) return [];
+  if (typeof packages === "string") {
+    return [packages.split(/ x\d+:/)[0].trim()].filter(Boolean);
+  }
+  return Array.from(new Set(packages.map(stripVersion)));
+}
+
+const modulesByAbsolutePath = new WeakMap<
+  PreparedReport,
+  Map<string, PreparedModule>
+>();
+function getModulesByAbsolutePath(report: PreparedReport) {
+  let map = modulesByAbsolutePath.get(report);
+  if (!map) {
+    map = new Map(report.modules.map((m) => [m.absolutePath, m]));
+    modulesByAbsolutePath.set(report, map);
+  }
+  return map;
+}
 
 const helpers = {
   prettifyMap: new Map<string, string>(),
@@ -59,17 +123,6 @@ const helpers = {
       .catch(() => {
         return sourceStr;
       });
-  },
-  askChatGPTAboutPackages() {
-    const prompt = `I have a list of JavaScript packages from my React Native bundle (see below). I want to optimize bundle size by identifying similar or redundant packages — such as multiple versions of similar libraries (e.g., lodash, lodash-es, underscore, etc.), duplicate utilities, or overlapping functionality (e.g., date libraries like moment, dayjs, date-fns).
-
-Please do the following:
-
-1. Group similar or overlapping packages together.
-2. For each group, suggest which one to keep and which ones to consider removing.
-3. For each group, provide a regex string that can be used to filter those packages from the list (e.g., in grep, find, or search tools).
-4. Keep the output concise and copy-paste friendly.`;
-    return `https://chat.openai.com/?prompt=${encodeURIComponent(prompt)}`;
   },
   plural(count: number, [singular, plural]: PluralForms) {
     return count === 1 ? singular : plural;
@@ -120,6 +173,7 @@ Please do the following:
       [];
     let entryPointPath: string | null = null;
     const data: [parentId: string, id: string][] = [];
+    const nodes: ImportGraphNode[] = [];
 
     while (queue.length > 0) {
       const {
@@ -140,6 +194,16 @@ Please do the following:
         }
         visited.add(id);
       }
+
+      nodes.push({
+        id,
+        size: currentModule.output.sizeInBytes,
+        level,
+        isCurrent: level === 0,
+        isRoot:
+          !!currentModule.isEntry || currentModule.dependents.length === 0,
+        isNodeModule: id.includes("node_modules/"),
+      });
 
       if (parentId) {
         const isEntryPoint = currentModule.dependents.length === 0;
@@ -170,7 +234,12 @@ Please do the following:
       }
     }
 
-    return { entryPointPath, data };
+    const links: ImportGraphLink[] = data.map(([parentId, id]) => ({
+      source: id,
+      target: parentId,
+    }));
+
+    return { entryPointPath, data, nodes, links };
   },
 
   getExtColor(extName: string) {
@@ -329,18 +398,327 @@ Please do the following:
       duplicatesSize: module.duplicates.reduce((acc, m) => acc + size(m), 0),
     };
   },
+  // Data for the report bar on top of the default page
+  reportSummary(report: PreparedReport) {
+    let totalSize = 0;
+    let nodeModulesSize = 0;
+    for (const m of report.modules) {
+      totalSize += moduleSize(m);
+      if (isNodeModule(m)) nodeModulesSize += moduleSize(m);
+    }
+    const options = report.transformOptions;
+    return {
+      platform: options?.platform ?? null,
+      // `null` when the report has no such info (e.g. non-Metro reports)
+      dev: typeof options?.dev === "boolean" ? options.dev : null,
+      minify: typeof options?.minify === "boolean" ? options.minify : null,
+      totalSize,
+      sourceSize: totalSize - nodeModulesSize,
+      nodeModulesSize,
+      date: report.date ?? null,
+    };
+  },
+  // Everything the "Insights" tab needs, in one pass
+  bundleInsights(report: PreparedReport) {
+    const totalSize = report.modules.reduce((acc, m) => acc + moduleSize(m), 0);
+    const share = (bytes: number) => (totalSize ? bytes / totalSize : 0);
+    const modulesByPath = new Map(report.modules.map((m) => [m.path, m]));
+
+    // Packages: grouped by name, all copies together
+    const packages = new Map<string, { size: number; copies: Set<string> }>();
+    let nodeModulesSize = 0;
+    const ownModules: PreparedModule[] = [];
+    for (const m of report.modules) {
+      if (!isNodeModule(m)) {
+        ownModules.push(m);
+        continue;
+      }
+      nodeModulesSize += moduleSize(m);
+      const name = helpers.getModulesName(m.path);
+      const marker = `node_modules/${name}/`;
+      const pkg = packages.get(name) ?? { size: 0, copies: new Set() };
+      pkg.size += moduleSize(m);
+      pkg.copies.add(m.path.slice(0, m.path.lastIndexOf(marker)));
+      packages.set(name, pkg);
+    }
+    const sourceSize = totalSize - nodeModulesSize;
+    const largestPackage = Math.max(
+      0,
+      ...[...packages.values()].map((p) => p.size),
+    );
+    const largestOwnModule = Math.max(0, ...ownModules.map(moduleSize));
+
+    // Findings: the heaviest savings first, a module is counted only once
+    // in the total, even if several findings are about it
+    const countedModules = new Set<string>();
+    let potentialSavings = 0;
+    const findings = (report.recommendations ?? [])
+      .map((finding) => {
+        const savings = finding.sizeInBytes ?? 0;
+        const affected = (finding.modules ?? [])
+          .map((path) => modulesByPath.get(path))
+          .filter((m): m is PreparedModule => !!m)
+          .sort((a, b) => moduleSize(b) - moduleSize(a));
+        const severity: Severity =
+          savings && share(savings) >= HIGH_SEVERITY_SHARE
+            ? "high"
+            : savings
+              ? "medium"
+              : "low";
+        return {
+          ...finding,
+          severity,
+          savings,
+          savingsShare: share(savings),
+          packageNames: getFindingPackageNames(finding.packages),
+          // Duplicates list copies with versions & paths as text
+          packagesText:
+            typeof finding.packages === "string" ? finding.packages : null,
+          docsUrls: [finding.docsUrl ?? []].flat(),
+          affected: affected.map(toListModule),
+          affectedSize: affected.reduce((acc, m) => acc + moduleSize(m), 0),
+        };
+      })
+      .sort((a, b) => b.savings - a.savings);
+
+    for (const finding of findings) {
+      if (!finding.savings) continue;
+      const overlap = finding.affected
+        .filter((m) => countedModules.has(m.name))
+        .reduce((acc, m) => acc + m.sizeInBytes, 0);
+      potentialSavings += Math.max(finding.savings - overlap, 0);
+      for (const m of finding.affected) countedModules.add(m.name);
+    }
+
+    const duplicatePackages = [...packages.values()].filter(
+      (p) => p.copies.size > 1,
+    ).length;
+
+    return {
+      platform: report.transformOptions?.platform,
+      isDev: report.transformOptions?.dev !== false,
+      hasRecommendations: report.recommendations !== null,
+      totalSize,
+      modulesCount: report.modules.length,
+      sourceSize,
+      sourceShare: share(sourceSize),
+      ownModulesCount: ownModules.length,
+      nodeModulesSize,
+      nodeModulesShare: share(nodeModulesSize),
+      packagesCount: packages.size,
+      duplicatePackages,
+      duplicateModules: report.modules.filter((m) => m.duplicates.length)
+        .length,
+      potentialSavings,
+      potentialSavingsShare: share(potentialSavings),
+      findings,
+      findingsWithSavings: findings.filter((f) => f.savings).length,
+      topPackages: [...packages.entries()]
+        .sort((a, b) => b[1].size - a[1].size)
+        .slice(0, TOP_LIST_SIZE)
+        .map(([name, pkg]) => ({
+          name,
+          size: pkg.size,
+          share: share(pkg.size),
+          bar: largestPackage ? pkg.size / largestPackage : 0,
+          copies: pkg.copies.size,
+        })),
+      topPackagesShare: share(
+        [...packages.values()]
+          .map((p) => p.size)
+          .sort((a, b) => b - a)
+          .slice(0, 5)
+          .reduce((acc, size) => acc + size, 0),
+      ),
+      topOwnModules: [...ownModules]
+        .sort((a, b) => moduleSize(b) - moduleSize(a))
+        .slice(0, TOP_LIST_SIZE)
+        .map((m) => ({
+          name: m.path,
+          size: moduleSize(m),
+          share: share(moduleSize(m)),
+          bar: largestOwnModule ? moduleSize(m) / largestOwnModule : 0,
+        })),
+    };
+  },
+  // Everything the package page header, stat cards and tabs need, in one pass
+  packageOverview(report: PreparedReport, name: string) {
+    const isOwn = (m: PreparedModule) =>
+      isNodeModule(m) && helpers.getModulesName(m.path) === name;
+    const files = report.modules.filter(isOwn);
+    if (files.length === 0) return null;
+
+    const marker = `node_modules/${name}/`;
+    const instancePath = (m: PreparedModule) =>
+      m.path.slice(0, m.path.lastIndexOf(marker) + marker.length - 1);
+    const instances = new Map<string, PreparedModule[]>();
+    for (const m of files) {
+      const path = instancePath(m);
+      instances.set(path, [...(instances.get(path) ?? []), m]);
+    }
+
+    const totalSize = report.modules.reduce((acc, m) => acc + moduleSize(m), 0);
+    const size = files.reduce((acc, m) => acc + moduleSize(m), 0);
+    const packageSizes = new Map<string, number>();
+    for (const m of report.modules) {
+      if (!isNodeModule(m)) continue;
+      const pkgName = helpers.getModulesName(m.path);
+      packageSizes.set(
+        pkgName,
+        (packageSizes.get(pkgName) ?? 0) + moduleSize(m),
+      );
+    }
+    const largestPackage = Math.max(...packageSizes.values());
+    const rank = [...packageSizes.values()].filter((s) => s > size).length + 1;
+
+    const copies = [...instances.entries()]
+      .map(([path, modules]) => {
+        const info = report.packages.find((p) => p.path === path);
+        return {
+          path,
+          version: info?.version,
+          metadata: info?.metadata ?? null,
+          size: modules.reduce((acc, m) => acc + moduleSize(m), 0),
+          files: modules.length,
+        };
+      })
+      .sort((a, b) => b.size - a.size);
+
+    // Modules outside of the package that import its files
+    const fileSet = new Set(files);
+    const importers = new Map<PreparedModule, Set<PreparedModule>>();
+    for (const m of files) {
+      for (const dependent of m.dependents) {
+        if (fileSet.has(dependent)) continue;
+        importers.set(
+          dependent,
+          (importers.get(dependent) ?? new Set()).add(m),
+        );
+      }
+    }
+    const importerPackages = new Set(
+      [...importers.keys()].map((m) =>
+        isNodeModule(m) ? helpers.getModulesName(m.path) : "",
+      ),
+    );
+
+    const largestFile = files.reduce((a, b) =>
+      moduleSize(b) > moduleSize(a) ? b : a,
+    );
+    const withMetadata = copies.find((c) => c.metadata)?.metadata ?? null;
+    const findings = (report.recommendations ?? []).filter((f) =>
+      getFindingPackageNames(f.packages).includes(name),
+    );
+
+    return {
+      name,
+      paths: copies.map((c) => c.path),
+      versions: Array.from(
+        new Set(copies.map((c) => c.version).filter(Boolean)),
+      ) as string[],
+      size,
+      bundleShare: totalSize ? size / totalSize : 0,
+      largestShare: largestPackage ? size / largestPackage : 0,
+      rank,
+      packagesCount: packageSizes.size,
+      filesCount: files.length,
+      largestFile: largestFile.path,
+      largestFileSize: moduleSize(largestFile),
+      copies,
+      copiesSavings: size - copies[0].size,
+      deprecated: copies.filter((c) => c.metadata?.deprecated),
+      latestVersion: withMetadata?.latestVersion ?? null,
+      isOutdated: copies.some((c) => c.metadata && !c.metadata.isLatest),
+      publishedAt: withMetadata?.createdAt ?? null,
+      importedBy: importers.size,
+      importerPackages:
+        importerPackages.size - (importerPackages.has("") ? 1 : 0),
+      importedByOwnCode: importerPackages.has(""),
+      importers: [...importers.entries()]
+        .map(([m, imported]) => ({
+          ...toListModule(m),
+          imports: [...imported].map(toListModule),
+        }))
+        .sort((a, b) => b.sizeInBytes - a.sizeInBytes),
+      findings: findings.map((f) => ({ id: f.id, title: f.title })),
+    };
+  },
+  // Shortest import chain from the entry point to the first module of the package:
+  // answers "Why is this package in my bundle?"
+  importChain(report: PreparedReport, pkgName: string) {
+    const isTarget = (m: PreparedModule) =>
+      isNodeModule(m) && helpers.getModulesName(m.path) === pkgName;
+    const byAbsolutePath = getModulesByAbsolutePath(report);
+
+    const search = (starts: PreparedModule[]) => {
+      const prev = new Map<PreparedModule, PreparedModule | null>();
+      const queue = [...starts];
+      for (const start of starts) prev.set(start, null);
+      while (queue.length) {
+        const current = queue.shift() as PreparedModule;
+        if (isTarget(current)) {
+          const chain: PreparedModule[] = [];
+          for (
+            let m: PreparedModule | null = current;
+            m;
+            m = prev.get(m) ?? null
+          ) {
+            chain.unshift(m);
+          }
+          return chain;
+        }
+        for (const dependency of current.dependencies) {
+          const next = byAbsolutePath.get(dependency.absolutePath);
+          if (next && !prev.has(next)) {
+            prev.set(next, current);
+            queue.push(next);
+          }
+        }
+      }
+      return null;
+    };
+
+    const entry = report.modules.filter((m) => m.isEntry);
+    let chain = search(entry);
+    let fromEntry = true;
+    if (!chain) {
+      // e.g. polyfills that the bundler runs before the entry point
+      chain = search(report.modules.filter((m) => m.dependents.length === 0));
+      fromEntry = false;
+    }
+    if (!chain) return null;
+
+    return {
+      fromEntry,
+      steps: chain.map((m, index) => {
+        const pkg = isNodeModule(m) ? helpers.getModulesName(m.path) : null;
+        const prevModule = chain[index - 1];
+        const prevPkg =
+          prevModule && isNodeModule(prevModule)
+            ? helpers.getModulesName(prevModule.path)
+            : null;
+        return {
+          ...toListModule(m),
+          pkg,
+          // The step where the chain enters another package
+          entersPackage: index > 0 && pkg !== prevPkg ? pkg : null,
+          isTarget: index === chain.length - 1,
+        };
+      }),
+    };
+  },
   isPackageImport(moduleName?: string | null) {
     return moduleName?.[0] !== ".";
   },
   transformFilesList(
-    files: { path: string; size: number }[],
+    files: { path: string; size: number; issues?: string[] }[],
     rootFolder: string,
     type: string,
   ) {
     const nodeModulesMap: TreeNode = { children: {}, size: 0 };
     const sourceCodeMap: TreeNode = { children: {}, size: 0 };
 
-    files.forEach(({ path, size }) => {
+    files.forEach(({ path, size, issues }) => {
       if (path === "__prelude__") {
         path = "node_modules/__prelude__";
       }
@@ -366,6 +744,7 @@ Please do the following:
           current[part].size = size;
           current[part].path = shortPath;
           current[part].fullPath = path;
+          current[part].issues = issues;
         }
 
         current = current[part].children;
@@ -389,70 +768,9 @@ Please do the following:
       return roots;
     }
 
-    if (type === "highcharts-treemap") {
-      const ROOT_ID_1 = "~";
-      const ROOT_ID_2 = ".";
-      return (
-        [
-          { id: ROOT_ID_1, name: "node_modules" },
-          { id: ROOT_ID_2, name: "Source Code" },
-        ] as TreemapItem[]
-      )
-        .concat(flattenTree(nodeModulesMap.children.node_modules, ROOT_ID_1))
-        .concat(flattenTree(sourceCodeMap, ROOT_ID_2));
-    }
-
     throw new Error(`Unsupported type: ${type}`);
   },
 };
-
-function flattenTree(
-  node: TreeNode,
-  parentId: string,
-  prevWasSkipped = false,
-  lvl = 0,
-  result: TreemapItem[] = [],
-  overrideParentId?: string,
-): TreemapItem[] {
-  const nodeChildrenCount = Object.keys(node.children);
-
-  for (const key of nodeChildrenCount) {
-    const childNode = node.children[key];
-    const childId = `${parentId}/${key}`;
-    const childrenCount = Object.keys(childNode.children).length;
-    const hasChildren = childrenCount > 0;
-    const item: TreemapItem = {
-      id: childId,
-      name: prevWasSkipped ? parentId : key,
-      parent: overrideParentId ?? parentId,
-    };
-
-    if (!hasChildren) {
-      item.value = childNode.size;
-    }
-
-    if (lvl === 0) {
-      item.color = Highcharts.getOptions().colors[randomInt(0, 9)];
-    }
-
-    const skipThisNode = nodeChildrenCount.length === 1 && childrenCount === 1;
-
-    if (!skipThisNode) {
-      result.push(item);
-    }
-
-    flattenTree(
-      childNode,
-      childId,
-      skipThisNode,
-      lvl + 1,
-      result,
-      skipThisNode ? (overrideParentId ?? parentId) : undefined,
-    );
-  }
-
-  return result;
-}
 
 function sumSizes(node: TreeNode): { totalSize: number; totalFiles: number } {
   const isFile = Object.keys(node.children).length === 0;
@@ -479,6 +797,7 @@ function toTreemapNode(node: TreeNode, name: string): TreemapNode {
     files: node.files,
     type: node.type,
     size: helpers.formatBytes(node.size),
+    issues: node.issues,
   };
 
   if (keys.length === 0) {
@@ -490,10 +809,6 @@ function toTreemapNode(node: TreeNode, name: string): TreemapNode {
   return Object.assign(common, {
     children: keys.map((key) => toTreemapNode(node.children[key], key)),
   });
-}
-
-function randomInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 const nm = "node_modules/";

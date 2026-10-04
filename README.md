@@ -29,18 +29,20 @@ dependencies, inspect every module, and catch bundle size regressions in CI.
 ## Features
 
 - 📊 Interactive UI to explore packages, modules and their source/bundled code
-- 💡 Optimization recommendations (duplicates, deprecated / outdated / dev-only packages, and more)
+- 💡 Optimization recommendations ranked by estimated savings (duplicates, deprecated / outdated / dev-only packages, and more)
+- 🗺️ Treemap colored by package, file type or issues, and an "Imported by" graph for every module
+- ❓ "Why is this in my bundle?": the shortest import chain to any package
 - 🔍 CLI to list the heaviest packages and modules
-- 🆚 Compare two reports and fail CI on bundle size regressions
+- 🆚 Compare two reports in the UI (with per-module code diffs) or in CI, and fail on bundle size regressions
 - 🧩 Works with Metro, [Re.Pack](./Re.Pack.md) and [React Native DevTools](./packages/rozenite-plugin/README.md) (via Rozenite)
 
 ## Packages
 
-| Package                                                                  | What it does                                                                                    | Required |
-| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | -------- |
-| `react-native-bundle-discovery`                                          | Generates a JSON report (`metro-stats.json`) of your bundle                                     | ✅ Yes   |
-| `react-native-bundle-discovery-ui`                                       | Shows the report in the browser                                                                 | Optional |
-| `react-native-bundle-discovery-cli`                                      | Analyzes and compares reports in the terminal / CI                                              | Optional |
+| Package                                                                                 | What it does                                                                                    | Required |
+| --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | -------- |
+| `react-native-bundle-discovery`                                                         | Generates a JSON report (`metro-stats.json`) of your bundle                                     | ✅ Yes   |
+| `react-native-bundle-discovery-ui`                                                      | Shows the report in the browser                                                                 | Optional |
+| `react-native-bundle-discovery-cli`                                                     | Analyzes and compares reports in the terminal / CI                                              | Optional |
 | [`react-native-bundle-discovery-rozenite-plugin`](./packages/rozenite-plugin/README.md) | Shows the UI inside [React Native DevTools](https://reactnative.dev/docs/react-native-devtools) | Optional |
 
 ## Quick start
@@ -108,12 +110,12 @@ npx react-native-bundle-discovery-cli metro-stats.json  # get recommendations in
 
 ## Other setups
 
-| Setup                      | Guide                                                                                                                        |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Re.Pack (Rspack / Webpack) | [Re.Pack.md](./Re.Pack.md)                                                                                                   |
-| rnx-kit (esbuild, tree shaking) | [esbuild metafile](#esbuild-metafile-rnx-kit)                                                                          |
-| React Native DevTools      | [Rozenite plugin](./packages/rozenite-plugin/README.md)                                                                                     |
-| AI coding agent            | Point your agent at the [`setup-react-native-bundle-discovery`](./skills/setup-react-native-bundle-discovery/SKILL.md) skill |
+| Setup                           | Guide                                                                                                                        |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Re.Pack (Rspack / Webpack)      | [Re.Pack.md](./Re.Pack.md)                                                                                                   |
+| rnx-kit (esbuild, tree shaking) | [esbuild metafile](#esbuild-metafile-rnx-kit)                                                                                |
+| React Native DevTools           | [Rozenite plugin](./packages/rozenite-plugin/README.md)                                                                      |
+| AI coding agent                 | Point your agent at the [`setup-react-native-bundle-discovery`](./skills/setup-react-native-bundle-discovery/SKILL.md) skill |
 
 ### esbuild metafile (rnx-kit)
 
@@ -154,7 +156,30 @@ npx react-native-bundle-discovery-ui metro-stats.json [--port <port>]
 
 # Build a static HTML report (default output: .bundle-discovery)
 npx react-native-bundle-discovery-ui build metro-stats.json [--output <path>]
+
+# Compare with a "before" report (works with both commands, adds the Compare tab)
+npx react-native-bundle-discovery-ui pr-stats.json --compare main-stats.json
 ```
+
+The top bar shows the platform, whether the bundle is a production/minified build (warns about dev or
+unminified bundles), the total size split into your code and `node_modules`, and the report build date.
+
+| Tab        | What it shows                                                                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Insights   | Summary cards, heaviest packages and own modules, and the [CLI](#cli) recommendations ranked by estimated savings (production reports only)       |
+| Treemap    | Bundle treemap, colored by package, file type or issues (duplicates / removable code)                                                             |
+| Packages   | All packages with total size of the filtered list, sortable by size, name or duplicates                                                           |
+| Modules    | All modules with total size of the filtered list, sortable by size, name or duplicates                                                            |
+| Duplicates | Duplicate packages and modules with possible savings                                                                                              |
+| Compare    | Only with `--compare`: size, module/package count changes, new duplicates and deprecated packages, version changes, added/removed/changed modules |
+
+- **Package page**: versions, status and recommendation chips, bundle share and rank, copies with possible
+  savings, and tabs for files, importers, the shortest import chain ("Why is this in my bundle?") and versions.
+- **Module page**: package/version and status chips, size share and rank, transform delta, an "Imported by"
+  graph (zoom/pan, click to open a module), imports, and source/bundled code. In compare mode, the **Diff** tab
+  shows source and output changes against the "before" report.
+
+The Compare tab uses the same comparison as [`cli compare`](#cli).
 
 ### CLI
 
@@ -168,8 +193,9 @@ Requires `react-native-bundle-discovery-cli`. Run any command with `--help` to s
 | `compare`  | Compare two reports                           |
 
 ```bash
-# Recommended optimizations
-npx react-native-bundle-discovery-cli metro-stats.json
+# Recommended optimizations, each with an estimated saving
+# (with --format json each finding also has `sizeInBytes` and the affected `modules`)
+npx react-native-bundle-discovery-cli metro-stats.json [--format json|default]
 
 # All packages
 npx react-native-bundle-discovery-cli packages metro-stats.json [--sort size|name] [--format json|table|default]

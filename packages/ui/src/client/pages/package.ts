@@ -1,8 +1,8 @@
 import {
-  externalLinkHtml,
   getCopyToClipboardButton,
   getPackage,
   getPackageList,
+  getTreeModule,
 } from "./_common";
 
 discovery.page.define("package", {
@@ -10,245 +10,216 @@ discovery.page.define("package", {
   data: `
     // Tmp variables
     $currentPkgName: #.id;
-    ${getPackage(`$pkg: modules.filter(=> path has "node_modules" and path has $currentPkgName)`)}[0];
-    $copies: $pkg.pkgInstances.size() - 1;
-    $ver: $pkg.pkgInstances[0].version;
+    ${getPackage(`$pkg: modules.filter(=> path has "node_modules" and path.getModulesName() = $currentPkgName)`)}[0];
 
     // Return value
-    { 
-      ...$, 
-      currentPkgHasCopies: $copies > 0,
-      currentPkgCopiesCount: $copies,
-      currentPkgVersion: $ver,
-      currentPkgWithUniqVer: $pkg.pkgName + ($copies = 0 ? '@' + $ver : ''),
-      currentPkgWithUniqVerNpm: $pkg.pkgName + ($copies = 0 ? '/v/' + $ver : ''),
+    {
+      ...$,
       currentPkg: $pkg,
-      currentPkgInstancesWithMetadata: $pkg.pkgInstances.[metadata],
-      currentPkgDeprecated: $pkg.pkgInstances.[metadata.deprecated],
-      currentPkgOutdated: $pkg.pkgInstances.[metadata and not metadata.isLatest],
-      currentPkgLatestVersion: $pkg.pkgInstances.metadata.latestVersion[0],
+      overview: $.packageOverview($currentPkgName),
+      currentPkgImportChain: $.importChain($currentPkgName),
     }
   `,
   content: [
-    // TODO uncomment for debugging
-    // {
-    //   view: "struct",
-    //   data: "$.currentPkg",
-    // },
-
+    {
+      view: "alert-warning",
+      when: "not overview",
+      data: "'Package ' + #.id + ' is not found in the bundle'",
+    },
     {
       view: "block",
+      when: "overview",
+      className: "mo-wrap",
       content: [
-        {
-          view: "h1",
-          className: "inline-block no-margin",
-          content: `badge: {
-            text: $.currentPkgWithUniqVer,
-            color: "#fffb5a",
-          }`,
-        },
-        {
-          when: "$.currentPkgCopiesCount > 0",
-          view: "h2",
-          className: "inline-block no-margin",
-          content: [
-            `badge: {
-              text: '+' + $.currentPkgCopiesCount, 
-              postfix: $.currentPkgCopiesCount = 1 ? 'copy' : 'copies',
-              color: "rgba(255, 0, 0, 0.35)"
-            }`,
-          ],
-        },
-        {
-          when: "$.currentPkgDeprecated",
-          view: "h2",
-          className: "inline-block no-margin",
-          content: `badge: { text: 'deprecated', color: "rgba(255, 0, 0, 0.35)" }`,
-        },
-        {
-          when: "$.currentPkgOutdated",
-          view: "h2",
-          className: "inline-block no-margin",
-          content: `badge: {
-            prefix: 'latest',
-            text: 'v' + $.currentPkgLatestVersion,
-            color: "rgba(255, 165, 0, 0.35)"
-          }`,
-        },
+        { view: "package-overview", data: "overview" },
         getCopyToClipboardButton({
-          textToCopy: `$.currentPkg.pkgName`,
-          className: "m-l-0_5em",
+          textToCopy: "#.id",
+          className: "mo-copy",
         }),
       ],
     },
 
     {
-      when: "$.currentPkgDeprecated",
       view: "list",
-      data: "$.currentPkgDeprecated",
+      when: "overview.deprecated",
+      data: "overview.deprecated",
       item: {
         view: "alert-danger",
+        className: "m-v-8",
         content: [
           "html: '<b>Deprecated</b> '",
-          "text: 'v' + version + (#.data.currentPkgHasCopies ? ' (' + pkgName + ')' : '') + ': '",
+          "text: 'v' + version + (#.data.overview.copies.size() > 1 ? ' (' + path + ')' : '') + ': '",
           "text: metadata.deprecated",
         ],
       },
     },
 
-    "html: '<br>'",
-
     {
-      view: "block",
-      content: [
-        "text: 'Links: '",
+      view: "tabs",
+      when: "overview",
+      name: "tabs",
+      className: "mo-tabs",
+      tabs: [
         {
-          view: "link",
-          external: true,
-          data: `{ href: "https://www.npmjs.com/package/" + currentPkgWithUniqVerNpm }`,
-          content: [
-            "text: 'npmjs.com'",
-            `html: '<span class="my-icon-inline my-icon-12">${externalLinkHtml}</span>'`,
-          ],
-        },
-        "text: ' '",
-        {
-          view: "link",
-          external: true,
-          data: `{ href: "https://bundlephobia.com/package/" + currentPkgWithUniqVer }`,
-          content: [
-            "text: 'bundlephobia.com'",
-            `html: '<span class="my-icon-inline my-icon-12">${externalLinkHtml}</span>'`,
-          ],
-        },
-        "text: ' '",
-        {
-          view: "link",
-          external: true,
-          data: `{ href: "https://packagephobia.com/result?p=" + currentPkgWithUniqVer }`,
-          content: [
-            "text: 'packagephobia.com'",
-            `html: '<span class="my-icon-inline my-icon-12">${externalLinkHtml}</span>'`,
-          ],
+          value: "files",
+          content: ["text:'Files '", "pill-badge: overview.filesCount"],
         },
         {
-          view: "link",
-          external: true,
-          data: `{ href: "https://bundlejs.com/?q=" + currentPkgWithUniqVer, q: currentPkgWithUniqVer }`,
-          content: [
-            {
-              view: "html",
-              data: `'<img class="bundlejs-badge-img" src="https://deno.bundlejs.com/?q=' + q + '&badge=detailed" />'`,
-            },
-          ],
+          value: "importers",
+          content: ["text:'Imported by '", "pill-badge: overview.importedBy"],
+        },
+        {
+          value: "why",
+          when: "currentPkgImportChain",
+          text: "Why bundled",
+        },
+        {
+          value: "versions",
+          when: "overview.copies.[metadata]",
+          content: ["text:'Versions '", "pill-badge: overview.copies.size()"],
         },
       ],
-    },
-
-    {
-      when: "$.currentPkgInstancesWithMetadata",
-      view: "block",
-      content: [
-        "h3: 'Versions'",
-        {
-          view: "table",
-          data: "$.currentPkgInstancesWithMetadata",
-          cols: [
-            { header: "Path", content: "text: pkgName" },
-            {
-              header: "Version",
-              content: "pill-badge:{ text: 'v' + version, color: '#0af' }",
-            },
-            {
-              header: "Published",
-              data: "metadata.createdAt",
-              content: [
-                "text: formatDate()",
-                "text: ' '",
-                "pill-badge:{ text: timeAgo() }",
-              ],
-            },
-            {
-              header: "Latest",
+      content: {
+        view: "switch",
+        content: [
+          {
+            when: '#.tabs="files"',
+            content: getPackageList({
+              data: "$.currentPkg",
+              itemPkgName: "text: pkgName",
+              showCopiesBadge: false,
+              expanded: true,
+            }),
+          },
+          {
+            when: '#.tabs="importers"',
+            content: [
+              {
+                view: "text",
+                className: "why-hint",
+                data: "'Modules outside of the package that import its files:'",
+              },
+              {
+                view: "list",
+                data: "overview.importers",
+                emptyText:
+                  "Nothing imports it: the bundler loads it before the app code (e.g. polyfills)",
+                item: {
+                  view: "tree",
+                  expanded: false,
+                  itemConfig: {
+                    content: [
+                      ...getTreeModule(),
+                      "pill-badge: imports.size().pluralBadge(['import', 'imports'])",
+                    ],
+                    children: "imports",
+                    itemConfig: {
+                      view: "tree-leaf",
+                      content: getTreeModule(),
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            when: '#.tabs="why"',
+            content: {
+              view: "block",
+              data: "$.currentPkgImportChain",
+              className: "why",
               content: [
                 {
-                  view: "link",
-                  external: true,
-                  data: `{
-                    href: "https://www.npmjs.com/package/" + #.data.currentPkg.pkgName + "/v/" + metadata.latestVersion,
-                    text: 'v' + metadata.latestVersion,
-                  }`,
+                  view: "text",
+                  className: "why-hint",
+                  data: `fromEntry
+                    ? 'The shortest import chain from the entry point:'
+                    : 'Not imported from the entry point: the bundler runs it before the app code (e.g. polyfills). The shortest chain:'`,
+                },
+                {
+                  view: "list",
+                  data: "steps",
+                  className: "why-chain",
+                  item: {
+                    view: "block",
+                    className:
+                      "=isTarget ? 'why-step why-step-target' : 'why-step'",
+                    content: [
+                      ...getTreeModule(),
+                      {
+                        view: "pill-badge",
+                        when: "entersPackage",
+                        className: "why-enters",
+                        data: "{ prefix: 'enters', text: entersPackage, color: 'rgba(0, 170, 255, 0.25)' }",
+                      },
+                    ],
+                  },
                 },
               ],
-            },
-            {
-              header: "Status",
-              content: {
-                view: "switch",
-                content: [
-                  {
-                    when: "metadata.deprecated",
-                    content: `badge: { text: 'deprecated', color: "rgba(255, 0, 0, 0.35)" }`,
-                  },
-                  {
-                    when: "metadata.isLatest",
-                    content: `badge: { text: 'latest', color: "rgba(120, 177, 9, 0.35)" }`,
-                  },
-                  {
-                    content: `badge: { text: 'outdated', color: "rgba(255, 165, 0, 0.35)" }`,
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      ],
-    },
-
-    "html: '<hr>'",
-
-    {
-      view: "block",
-      content: getPackageList({
-        data: "$.currentPkg",
-        itemPkgName: "text: pkgName",
-        showCopiesBadge: false,
-        expanded: true,
-      }),
-
-      /*[
-        {
-          view: "list",
-          data: "$.currentPkg",
-          item: {
-            view: "tree",
-            expanded: true,
-            itemConfig: {
-              content: [
-                "text: pkgName",
-                "text: ' '",
-                "pill-badge:{ text: size.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
-              ],
-              children: `$.pkgInstances`,
-              itemConfig: {
-                view: "tree-leaf",
-                content: [
-                  //
-                  "text:pkgName",
-                  "text:' '",
-                  "pill-badge:{ text: 'v' + version, color: '#0af' }",
-                  "pill-badge:{ text: size.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
-                ],
-                children: `$.modules`,
-                itemConfig: {
-                  view: "tree-leaf",
-                  content: getTreeModule({ hasPercent: false }),
-                },
-              },
             },
           },
-        },
-      ]*/
+          {
+            when: '#.tabs="versions"',
+            content: {
+              view: "table",
+              data: "overview.copies.[metadata]",
+              cols: [
+                { header: "Path", content: "text: path" },
+                {
+                  header: "Version",
+                  content: "pill-badge:{ text: 'v' + version, color: '#0af' }",
+                },
+                {
+                  header: "Size",
+                  content:
+                    "pill-badge:{ text: size.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
+                },
+                {
+                  header: "Published",
+                  data: "metadata.createdAt",
+                  content: [
+                    "text: formatDate()",
+                    "text: ' '",
+                    "pill-badge:{ text: timeAgo() }",
+                  ],
+                },
+                {
+                  header: "Latest",
+                  content: [
+                    {
+                      view: "link",
+                      external: true,
+                      data: `{
+                        href: "https://www.npmjs.com/package/" + #.id + "/v/" + metadata.latestVersion,
+                        text: 'v' + metadata.latestVersion,
+                      }`,
+                    },
+                  ],
+                },
+                {
+                  header: "Status",
+                  content: {
+                    view: "switch",
+                    content: [
+                      {
+                        when: "metadata.deprecated",
+                        content: `badge: { text: 'deprecated', color: "rgba(255, 0, 0, 0.35)" }`,
+                      },
+                      {
+                        when: "metadata.isLatest",
+                        content: `badge: { text: 'latest', color: "rgba(120, 177, 9, 0.35)" }`,
+                      },
+                      {
+                        content: `badge: { text: 'outdated', color: "rgba(255, 165, 0, 0.35)" }`,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
     },
   ],
 });

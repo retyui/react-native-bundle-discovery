@@ -1,26 +1,18 @@
 import {
-  getCopyToClipboardButton,
+  getInsightsTab,
   getModulesTree,
   getPackage,
   getPackageList,
   getSortableContentFilter,
-  metadata,
 } from "./_common";
 
-const topMetaData = [
-  metadata.platform,
-  metadata.size,
-  metadata.source_code_size,
-  metadata.node_modules_size,
-  metadata.is_dev,
-  metadata.is_minified,
-];
-
 const TABS = {
+  INSIGHTS: "insights",
   TREEMAP: "treemap",
   MODULES: "modules",
   PACKAGES: "packages",
   DUPLICATES: "duplicates",
+  COMPARE: "compare",
 };
 
 function parseHashRef(url = window.location.href) {
@@ -28,14 +20,26 @@ function parseHashRef(url = window.location.href) {
 }
 
 discovery.page.define("default", [
-  ...topMetaData,
+  { view: "report-bar", className: "report-bar", data: "$.reportSummary()" },
 
   {
     view: "tabs",
     name: "mainTabs",
     className: "main-tabs",
-    value: parseHashRef() ?? TABS.TREEMAP,
+    value: parseHashRef() ?? TABS.INSIGHTS,
     tabs: [
+      {
+        value: TABS.INSIGHTS,
+        className: `main-tabs-${TABS.INSIGHTS}`,
+        content: [
+          "text:'Insights '",
+          {
+            view: "pill-badge",
+            when: "recommendations",
+            data: "recommendations.size()",
+          },
+        ],
+      },
       {
         value: TABS.TREEMAP,
         text: "Treemap chart",
@@ -56,10 +60,26 @@ discovery.page.define("default", [
       },
       {
         value: TABS.DUPLICATES,
+        when: "modules.filter(=> duplicates)",
         className: `main-tabs-${TABS.DUPLICATES}`,
         content: [
-          "text:'Duplicate modules '",
+          "text:'Duplicates '",
           "pill-badge: modules.filter(=> duplicates).size()",
+        ],
+      },
+      {
+        value: TABS.COMPARE,
+        when: "comparison",
+        className: `main-tabs-${TABS.COMPARE}`,
+        content: [
+          "text:'Compare '",
+          {
+            view: "pill-badge",
+            data: "comparison.summary.deltaInBytes",
+            className: (delta: number) =>
+              `cmp-tab-delta-${delta > 0 ? "bad" : delta < 0 ? "good" : "ok"}`,
+            text: `=($ > 0 ? '+' : $ < 0 ? '−' : '') + ($ < 0 ? -$ : $).formatBytes()`,
+          },
         ],
       },
     ],
@@ -76,7 +96,7 @@ discovery.page.define("default", [
         });
         discovery.cancelScheduledRender();
 
-        const id = discovery.pageRef ?? TABS.TREEMAP;
+        const id = discovery.pageRef ?? TABS.INSIGHTS;
 
         setTimeout(() => {
           discovery.dom.root
@@ -98,6 +118,10 @@ discovery.page.define("default", [
       },
       content: [
         {
+          when: `#.id="${TABS.INSIGHTS}"`,
+          content: getInsightsTab(),
+        },
+        {
           when: `#.id="${TABS.TREEMAP}"`,
           content: {
             view: "content-filter",
@@ -110,7 +134,7 @@ discovery.page.define("default", [
               $root: $.rootFolder;
               $applyFilter: => #.filterByPathStr ? $.modules.filter(=> $.path ~= #.filterByPathStr) : $.modules;
               $.$applyFilter()
-                .map(=> {path, size: $.output.sizeInBytes})
+                .map(=> {path, size: $.output.sizeInBytes, issues})
                 .transformFilesList($root, "treemap")
               `,
             },
@@ -143,20 +167,6 @@ discovery.page.define("default", [
         {
           when: `#.id="${TABS.PACKAGES}"`,
           content: [
-            getCopyToClipboardButton({
-              text: "Copy list",
-              className: "copy-before-ask-chatgpt",
-              textToCopy: `"- " + modules.filter(=> path has "node_modules").group(=> path.getModulesName()).map(=> $.key).join("\\n- ")`,
-            }),
-            {
-              view: "link",
-              className: "ask-chatgpt view-button",
-              text: "and Ask ChatGPT",
-              external: true,
-              data: `{
-                  href: $.askChatGPTAboutPackages()
-                }`,
-            },
             getSortableContentFilter({
               data: getPackage(`modules.filter(=> path has "node_modules")`),
               className: "packages-content",
@@ -186,8 +196,63 @@ discovery.page.define("default", [
         },
         {
           when: `#.id="${TABS.DUPLICATES}"`,
-          content: getModulesTree({
+          content: {
+            view: "block",
+            className: "tab-scroll",
             data: `
+              $allPackages: (${getPackage(`modules.filter(=> path has "node_modules")`)});
+              {
+                ...$,
+                duplicatePackages: $allPackages
+                  .[pkgInstances.size() > 1]
+                  // Keeping only the heaviest copy saves the rest
+                  .({ ...$, savings: size - pkgInstances.sort(size desc)[0].size })
+                  .sort(savings desc),
+              }
+            `,
+            content: [
+              {
+                view: "h3",
+                className: "dup-title",
+                content: [
+                  "text: 'Duplicate packages '",
+                  "pill-badge: duplicatePackages.size()",
+                  {
+                    view: "pill-badge",
+                    when: "duplicatePackages",
+                    data: "{ text: '~' + duplicatePackages.sum(=> savings).formatBytes(), postfix: 'can be saved', color: 'rgba(120, 177, 9, 0.35)' }",
+                  },
+                ],
+              },
+              {
+                view: "context",
+                when: "duplicatePackages",
+                content: getPackageList({
+                  showCopiesBadge: true,
+                  expanded: false,
+                  data: "duplicatePackages",
+                  itemPkgName: {
+                    view: "link",
+                    data: `{ href: pkgName.pageLink("package", {}), text: pkgName }`,
+                  },
+                }),
+              },
+              {
+                view: "text",
+                when: "not duplicatePackages",
+                className: "dup-empty",
+                data: "'✅ Every package is bundled only once'",
+              },
+              {
+                view: "h3",
+                className: "dup-title",
+                content: [
+                  "text: 'Duplicate modules '",
+                  "pill-badge: modules.filter(=> duplicates).size()",
+                ],
+              },
+              getModulesTree({
+                data: `
               // values
               $duplicatesOnly: modules.filter(=> duplicates);
               $totalSize: $duplicatesOnly.sum(=>output.sizeInBytes);
@@ -204,7 +269,20 @@ discovery.page.define("default", [
                 duplicates: $.duplicates.map(=> $.$toModule()),
               })
             `,
-          }),
+              }),
+            ],
+          },
+        },
+        {
+          when: `#.id="${TABS.COMPARE}"`,
+          content: {
+            view: "block",
+            className: "tab-scroll compare",
+            content: {
+              view: "bundle-compare",
+              data: "{ comparison, modulePaths: modules.path }",
+            },
+          },
         },
       ],
     },

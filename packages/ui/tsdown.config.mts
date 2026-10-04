@@ -22,7 +22,7 @@ export default defineConfig([
     fixedExtension: false,
     clean: false,
     deps: {
-      neverBundle: [/\/vendors\//, /^prettier/, /^d3-/],
+      neverBundle: [/^prettier/, /^d3-/],
       onlyBundle: false,
     },
   },
