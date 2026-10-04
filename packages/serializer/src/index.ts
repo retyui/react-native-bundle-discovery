@@ -3,7 +3,7 @@ import { existsSync, writeFileSync } from "node:fs";
 import { parse, resolve } from "node:path";
 import chalk from "chalk";
 import pkg from "../package.json";
-import { withPackagesMetadata } from "./packageMetadata";
+import { keepProcessAlive, withPackagesMetadata } from "./packageMetadata";
 import type {
   BundleReport,
   ReportModule,
@@ -287,7 +287,7 @@ function createSerializer(
 
     // Keeps the Node.js process alive until the report is written
     // (otherwise it can exit while metadata requests are still pending)
-    const keepAlive = setInterval(() => {}, 1000);
+    const releaseKeepAlive = keepProcessAlive();
 
     // Graph/modules are read synchronously before the first `await`,
     // so the report is not affected by later Metro graph mutations
@@ -302,7 +302,7 @@ function createSerializer(
       silent,
       options,
       fetchPackagesMetadata,
-    }).finally(() => clearInterval(keepAlive));
+    }).finally(releaseKeepAlive);
 
     return code;
   }

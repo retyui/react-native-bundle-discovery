@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import chalk from "chalk";
 import pkg from "../package.json";
-import { withPackagesMetadata } from "./packageMetadata";
+import { keepProcessAlive, withPackagesMetadata } from "./packageMetadata";
 import { parseBundle } from "./parseUtils";
 import type {
   CodeInfo,
@@ -168,7 +168,7 @@ export class BundleDiscoveryPlugin {
 
       // Keeps the Node.js process alive until the report is written
       // (otherwise it can exit while metadata requests are still pending)
-      const keepAlive = setInterval(() => {}, 1000);
+      const releaseKeepAlive = keepProcessAlive();
 
       this.writeReport(statsJson, outputPath)
         .catch((error: Error) => {
@@ -176,7 +176,7 @@ export class BundleDiscoveryPlugin {
             `${chalk.yellow(`[${NAME}]`)}: Failed to create JSON report: ${error.message}`,
           );
         })
-        .finally(() => clearInterval(keepAlive));
+        .finally(releaseKeepAlive);
     });
   }
 

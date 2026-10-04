@@ -1,8 +1,8 @@
 import type { PackageMetadata } from "./types";
 
 const DEFAULT_REGISTRY = "https://registry.npmjs.org";
-const DEFAULT_TIMEOUT_MS = 5_000;
-const DEFAULT_CONCURRENCY = 5;
+const DEFAULT_TIMEOUT_MS = 6_000;
+const DEFAULT_CONCURRENCY = 4;
 
 interface Packument {
   "dist-tags"?: Record<string, string>;
@@ -188,4 +188,20 @@ export async function withPackagesMetadata<
       return { ...pkg, metadata: null };
     }
   });
+}
+
+/**
+ * Keeps the Node.js process alive until the returned `release` is called
+ * or `maxMs` elapses, whichever comes first
+ */
+export function keepProcessAlive(maxMs = 30_000): () => void {
+  const keepAlive = setInterval(() => {}, 1000);
+  const timeout = setTimeout(() => clearInterval(keepAlive), maxMs);
+  // The timeout itself must not keep the process alive
+  timeout.unref();
+
+  return () => {
+    clearInterval(keepAlive);
+    clearTimeout(timeout);
+  };
 }
