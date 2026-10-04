@@ -4,7 +4,8 @@
   "license": "MIT",
   "packageManager": "yarn@4.18.0",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "website"
   ],
   "engines": {
     "node": ">=20"
@@ -18,7 +19,9 @@
     "dev:ui": "yarn workspace react-native-bundle-discovery-ui run dev",
     "changeset": "changeset",
     "version-packages": "changeset version && yarn install --mode=update-lockfile",
-    "release": "yarn build && changeset publish"
+    "release": "yarn build && changeset publish",
+    "website:dev": "yarn workspace react-native-bundle-discovery-website run dev",
+    "website:build": "yarn workspace react-native-bundle-discovery-website run build:website"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",

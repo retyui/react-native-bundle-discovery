@@ -1,0 +1,32 @@
+# React Native DevTools (Rozenite)
+
+Use the UI inside [React Native DevTools](https://reactnative.dev/docs/react-native-devtools). The plugin is built on top of [Rozenite](https://www.rozenite.dev/).
+
+![Rozenite plugin](/img/rozenite.png)
+
+## Install
+
+```bash
+yarn dlx rozenite@latest init # init rozenite in your project (https://www.rozenite.dev/docs/getting-started)
+yarn add -D react-native-bundle-discovery-rozenite-plugin
+```
+
+Then update `metro.config.js`:
+
+```diff title="metro.config.js"
+const { withRozenite } = require('@rozenite/metro');
++const { withRozeniteBundleDiscoveryPlugin } = require('react-native-bundle-discovery-rozenite-plugin');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+
+const config = {};
+
+module.exports = withRozenite(
+  mergeConfig(getDefaultConfig(__dirname), config),
+  {
++    enhanceMetroConfig: config => withRozeniteBundleDiscoveryPlugin(config, { /* Your Bundle Discovery Options */ }),
+    enabled: true,
+  },
+);
+```
+
+Now run `yarn start` and open [React Native DevTools](https://reactnative.dev/docs/react-native-devtools).

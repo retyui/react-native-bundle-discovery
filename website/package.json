@@ -1,0 +1,18 @@
+{
+  "name": "react-native-bundle-discovery-website",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rspress dev",
+    "build:website": "rspress build",
+    "preview": "rspress preview"
+  },
+  "dependencies": {
+    "@callstack/rspress-preset": "0.6.6",
+    "@rspress/core": "^2.0.23"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

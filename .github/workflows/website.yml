@@ -1,0 +1,55 @@
+name: Website
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build & deploy to retyui.github.io/bundle-discovery
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - run: corepack enable
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: yarn
+
+      - run: yarn install --immutable
+
+      - run: yarn website:build
+
+      - name: Checkout retyui/retyui.github.io
+        uses: actions/checkout@v7
+        with:
+          repository: retyui/retyui.github.io
+          ref: master
+          # Deploy key with write access, added to retyui/retyui.github.io
+          ssh-key: ${{ secrets.GH_PAGES_DEPLOY_KEY }}
+          path: gh-pages
+
+      - name: Copy build into bundle-discovery/
+        run: |
+          rm -rf gh-pages/bundle-discovery
+          cp -R website/doc_build gh-pages/bundle-discovery
+
+      - name: Commit & push
+        working-directory: gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A bundle-discovery
+          if git diff --cached --quiet; then
+            echo "No changes to deploy"
+            exit 0
+          fi
+          git commit -m "bundle-discovery: deploy ${GITHUB_REPOSITORY}@${GITHUB_SHA::7}"
+          git push origin master

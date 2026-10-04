@@ -1,0 +1,10 @@
+[
+  "ui",
+  "cli",
+  "ci",
+  { "type": "divider" },
+  "repack",
+  "rnx-kit",
+  "rozenite",
+  "ai-agent"
+]
