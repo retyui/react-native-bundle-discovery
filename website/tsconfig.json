@@ -11,5 +11,5 @@
     "resolveJsonModule": true,
     "moduleResolution": "bundler"
   },
-  "include": ["docs", "rspress.config.ts"]
+  "include": ["docs", "theme", "rspress.config.ts"]
 }

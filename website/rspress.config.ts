@@ -1,3 +1,4 @@
+import path from "node:path";
 import { withCallstackPreset } from "@callstack/rspress-preset";
 
 export default () =>
@@ -13,7 +14,7 @@ export default () =>
         icon: "/img/logo.svg",
         logoLight: "/img/logo.svg",
         logoDark: "/img/logo.svg",
-        ogImage: "/img/ui.png",
+        ogImage: "/img/overview.jpg",
         rootDir: "docs",
         rootUrl: "https://retyui.github.io/bundle-discovery/",
         socials: {
@@ -23,5 +24,6 @@ export default () =>
     },
     {
       base: "/bundle-discovery/",
+      globalStyles: path.join(import.meta.dirname, "theme/styles.css"),
     },
   );

@@ -13,7 +13,7 @@ npx react-native-bundle-discovery-ui build metro-stats.json [--output <path>]
 npx react-native-bundle-discovery-ui pr-stats.json --compare main-stats.json
 ```
 
-![Bundle Discovery UI](/img/ui.png)
+![Bundle Discovery UI: Treemap, Insights and Packages tabs](/img/overview.jpg)
 
 The top bar shows the platform, whether the bundle is a production/minified build (warns about dev or
 unminified bundles), the total size split into your code and `node_modules`, and the report build date.

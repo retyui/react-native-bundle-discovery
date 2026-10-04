@@ -3,7 +3,7 @@
 Visualize and analyze the JS bundle of your React Native app. Find heavy packages, duplicates and deprecated
 dependencies, inspect every module, and catch bundle size regressions in CI.
 
-![Bundle Discovery UI](/img/ui.png)
+![Bundle Discovery UI: Treemap, Insights and Packages tabs](/img/overview.jpg)
 
 ## Features
 

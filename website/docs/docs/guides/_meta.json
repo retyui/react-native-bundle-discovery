@@ -1,10 +1,1 @@
-[
-  "ui",
-  "cli",
-  "ci",
-  { "type": "divider" },
-  "repack",
-  "rnx-kit",
-  "rozenite",
-  "ai-agent"
-]
+["ui", "cli", "ci", "repack", "rnx-kit", "rozenite", "ai-agent"]
