@@ -28,20 +28,33 @@ export type Severity = "high" | "medium" | "low";
 const HIGH_SEVERITY_SHARE = 0.01;
 const TOP_LIST_SIZE = 8;
 
-interface TreemapItem {
-  id: string;
-  name: string;
-  parent?: string;
-  value?: number;
-  color?: string;
-}
-
 interface NetworkGraphParams {
   maxParentDepth?: number | string;
   omitVisitedModules?: boolean;
 }
 
-type GraphModule = Pick<PreparedModule, "path" | "dependents">;
+type GraphModule = Pick<
+  PreparedModule,
+  "path" | "dependents" | "output" | "isEntry"
+>;
+
+export interface ImportGraphNode {
+  id: string;
+  size: number;
+  /** Distance from the current module (0 - the module itself) */
+  level: number;
+  isCurrent: boolean;
+  /** Not imported by anything, e.g. the entry point */
+  isRoot: boolean;
+  isNodeModule: boolean;
+}
+
+export interface ImportGraphLink {
+  /** The importing module */
+  source: string;
+  /** The imported module */
+  target: string;
+}
 type PluralForms = [singular: string, plural: string];
 
 const isNodeModule = (m: PreparedModule) => m.path.includes("node_modules/");
@@ -171,6 +184,7 @@ Please do the following:
       [];
     let entryPointPath: string | null = null;
     const data: [parentId: string, id: string][] = [];
+    const nodes: ImportGraphNode[] = [];
 
     while (queue.length > 0) {
       const {
@@ -191,6 +205,16 @@ Please do the following:
         }
         visited.add(id);
       }
+
+      nodes.push({
+        id,
+        size: currentModule.output.sizeInBytes,
+        level,
+        isCurrent: level === 0,
+        isRoot:
+          !!currentModule.isEntry || currentModule.dependents.length === 0,
+        isNodeModule: id.includes("node_modules/"),
+      });
 
       if (parentId) {
         const isEntryPoint = currentModule.dependents.length === 0;
@@ -221,7 +245,12 @@ Please do the following:
       }
     }
 
-    return { entryPointPath, data };
+    const links: ImportGraphLink[] = data.map(([parentId, id]) => ({
+      source: id,
+      target: parentId,
+    }));
+
+    return { entryPointPath, data, nodes, links };
   },
 
   getExtColor(extName: string) {
@@ -628,70 +657,9 @@ Please do the following:
       return roots;
     }
 
-    if (type === "highcharts-treemap") {
-      const ROOT_ID_1 = "~";
-      const ROOT_ID_2 = ".";
-      return (
-        [
-          { id: ROOT_ID_1, name: "node_modules" },
-          { id: ROOT_ID_2, name: "Source Code" },
-        ] as TreemapItem[]
-      )
-        .concat(flattenTree(nodeModulesMap.children.node_modules, ROOT_ID_1))
-        .concat(flattenTree(sourceCodeMap, ROOT_ID_2));
-    }
-
     throw new Error(`Unsupported type: ${type}`);
   },
 };
-
-function flattenTree(
-  node: TreeNode,
-  parentId: string,
-  prevWasSkipped = false,
-  lvl = 0,
-  result: TreemapItem[] = [],
-  overrideParentId?: string,
-): TreemapItem[] {
-  const nodeChildrenCount = Object.keys(node.children);
-
-  for (const key of nodeChildrenCount) {
-    const childNode = node.children[key];
-    const childId = `${parentId}/${key}`;
-    const childrenCount = Object.keys(childNode.children).length;
-    const hasChildren = childrenCount > 0;
-    const item: TreemapItem = {
-      id: childId,
-      name: prevWasSkipped ? parentId : key,
-      parent: overrideParentId ?? parentId,
-    };
-
-    if (!hasChildren) {
-      item.value = childNode.size;
-    }
-
-    if (lvl === 0) {
-      item.color = Highcharts.getOptions().colors[randomInt(0, 9)];
-    }
-
-    const skipThisNode = nodeChildrenCount.length === 1 && childrenCount === 1;
-
-    if (!skipThisNode) {
-      result.push(item);
-    }
-
-    flattenTree(
-      childNode,
-      childId,
-      skipThisNode,
-      lvl + 1,
-      result,
-      skipThisNode ? (overrideParentId ?? parentId) : undefined,
-    );
-  }
-
-  return result;
-}
 
 function sumSizes(node: TreeNode): { totalSize: number; totalFiles: number } {
   const isFile = Object.keys(node.children).length === 0;
@@ -730,10 +698,6 @@ function toTreemapNode(node: TreeNode, name: string): TreemapNode {
   return Object.assign(common, {
     children: keys.map((key) => toTreemapNode(node.children[key], key)),
   });
-}
-
-function randomInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 const nm = "node_modules/";

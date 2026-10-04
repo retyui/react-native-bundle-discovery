@@ -253,6 +253,7 @@ discovery.page.define("module", {
                     entryPointPath: $tmp.entryPointPath,
                     limit: $limit,
                     data: $tmp.data,
+                    graph: { nodes: $tmp.nodes, links: $tmp.links },
                     isGraphTooBig: $tmp.data.size() > $limit,
                   }`,
                   content: [
@@ -278,54 +279,9 @@ discovery.page.define("module", {
                       content: [
                         {
                           when: "not isGraphTooBig",
-                          view: "highcharts",
-                          data: `{
-                        options: {
-                          chart: {
-                            type: "networkgraph",
-                            height: "500px",
-                          },
-                          title: {
-                            text: "Import Dependency Graph",
-                            align: "left",
-                          },
-                          subtitle: {
-                            text: "It shows which modules import this file (Red - current module, Gold - entry point)",
-                            align: "left",
-                          },
-                          plotOptions: {
-                            networkgraph: {
-                              keys: ["from", "to"],
-                              layoutAlgorithm: {
-                                enableSimulation: true,
-                                friction: -0.9,
-                                gravitationalConstant: 0.06,
-                              },
-                            },
-                          },
-                          series: [
-                            {
-                              accessibility: {
-                                enabled: false,
-                              },
-                              dataLabels: {
-                                enabled: true,
-                                linkFormat: "",
-                                style: {
-                                  fontSize: "0.8em",
-                                  fontWeight: "normal",
-                                },
-                              },
-                              id: "lang-tree",
-                              data: $.data,
-                              nodes:[
-                                { id: $.currentModule.path, marker: { radius: 15, fillColor: 'red' }, },
-                                { id: $.entryPointPath, marker: { radius: 15, fillColor: 'gold' } }
-                              ].filter(=> id),
-                            },
-                          ],
-                        },
-                      }`,
+                          view: "import-graph",
+                          className: "ig",
+                          data: "graph",
                         },
 
                         {

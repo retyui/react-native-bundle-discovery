@@ -570,3 +570,65 @@ a.mo-chip:hover {
 .why-step-target {
   font-weight: 600;
 }
+
+/* Module page: "Imported by" graph */
+.ig {
+  position: relative;
+  min-width: 0;
+}
+.ig-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 8px 0;
+  font-size: 12px;
+}
+.ig-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-radius: 50%;
+  vertical-align: -1px;
+}
+.ig-hint {
+  opacity: 0.6;
+}
+.ig-svg {
+  display: block;
+  width: 100%;
+  border: 1px solid rgb(128 128 128 / 22%);
+  border-radius: 12px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.ig-svg:active {
+  cursor: grabbing;
+}
+.ig-links path {
+  fill: none;
+  stroke: rgb(128 128 128 / 45%);
+  stroke-width: 1.2;
+}
+.ig-arrow {
+  fill: rgb(128 128 128 / 70%);
+}
+.ig-node {
+  cursor: pointer;
+}
+.ig-node text {
+  fill: currentColor;
+  font-size: 11px;
+  paint-order: stroke;
+  stroke: var(--discovery-background-color);
+  stroke-width: 3px;
+}
+.ig-has-hover .ig-node:not(.ig-active),
+.ig-has-hover .ig-links path:not(.ig-active) {
+  opacity: 0.2;
+}
+.ig-links path.ig-active {
+  stroke: rgb(128 128 128 / 90%);
+  stroke-width: 2;
+}

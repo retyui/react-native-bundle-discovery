@@ -14,8 +14,7 @@
   "files": [
     "dist",
     "!dist/.tmp.js",
-    "assets",
-    "vendors"
+    "assets"
   ],
   "scripts": {
     "build": "run -T tsdown && run -T prettier --write --log-level warn --ignore-path= \"dist/**/*.js\"",
