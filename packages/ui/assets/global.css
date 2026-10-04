@@ -155,6 +155,28 @@ hr {
 .packages-content > .view-input {
   padding-left: 265px;
 }
+.sortable-content-filter {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  column-gap: 1em;
+  align-items: center;
+  height: 100%;
+}
+.sort-toggle-group .view-toggle.checked {
+  cursor: pointer;
+}
+.sortable-content-filter > .filtered-size {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-bottom: 0.5em;
+}
+.sortable-content-filter > .content {
+  grid-row: 3;
+  grid-column: 1 / -1;
+  align-self: stretch;
+}
 .copy-before-ask-chatgpt {
   width: 95px;
   background-position: left center;

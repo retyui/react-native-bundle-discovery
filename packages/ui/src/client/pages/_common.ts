@@ -33,6 +33,113 @@ function getPackage(entry: string) {
      }))`;
 }
 
+type SortOption = { value: string; text: string };
+type SortToggleConfig = {
+  name: string;
+  onInit?: (value: string | null, name: string) => void;
+  onChange?: (value: string | null, name: string) => void;
+};
+
+// Like "toggle-group", but a click on the checked toggle unsets the value
+function renderSortToggleGroup(
+  el: HTMLElement,
+  config: SortToggleConfig,
+  options: SortOption[],
+) {
+  let current: string | null = null;
+  const label = document.createElement("div");
+  label.className = "view-toggle-group-before";
+  label.textContent = "Sort by:";
+  el.classList.add("view-toggle-group", "sort-toggle-group");
+  el.append(label);
+
+  const toggles = options.map(({ value, text }) => {
+    const toggle = document.createElement("div");
+    toggle.className = "view-toggle onclick";
+    toggle.textContent = text;
+    toggle.addEventListener("click", () => {
+      current = current === value ? null : value;
+      toggles.forEach((t, i) => {
+        t.classList.toggle("checked", options[i].value === current);
+      });
+      config.onChange?.(current, config.name);
+    });
+    return el.appendChild(toggle);
+  });
+
+  config.onInit?.(current, config.name);
+}
+
+// Same as "content-filter", but with a "Sort by" toggle and a filtered size badge.
+// Only the list (`.content`) scrolls, the filter/sort controls stay on top.
+function getSortableContentFilter({
+  data,
+  className,
+  nameField,
+  sizeField,
+  duplicatesCount,
+  defaultSort,
+  content,
+}: {
+  data: string;
+  className?: string;
+  nameField: string; // jora field to filter & sort by name
+  sizeField: string; // jora field with size in bytes
+  duplicatesCount: string; // jora expression with number of duplicates
+  defaultSort?: string; // jora sort() args used when "Sort by" is unset
+  content: (listData: string) => SingleViewConfig;
+}): SingleViewConfig {
+  const filtered = `.[${nameField} ~= #.filterByPathStr]`;
+
+  return {
+    view: "block",
+    data,
+    className: `view-content-filter sortable-content-filter ${className ?? ""}`,
+    content: {
+      view: "context",
+      modifiers: [
+        {
+          view: "input",
+          name: "filterByPathStr",
+          type: "regexp",
+          placeholder: "Filter",
+        },
+        {
+          view: renderSortToggleGroup,
+          name: "sortBy",
+          data: `
+            $hasDuplicates: .[${duplicatesCount} > 0];
+            [
+              { value: 'size', text: 'Size' },
+              { value: 'name', text: 'Name' },
+              { value: 'duplicates', text: 'Duplicates' },
+            ].[value != 'duplicates' or $hasDuplicates]
+          `,
+        },
+      ],
+      content: [
+        {
+          view: "badge",
+          when: `#.filterByPathStr and ${filtered}`,
+          className: "filtered-size",
+          data: `{ text: 'Filtered size: ' + ${filtered}.sum(=> ${sizeField}).formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }`,
+        },
+        {
+          view: "block",
+          className: "content",
+          content: content(`
+            $filtered: ${filtered};
+            #.sortBy = 'name' ? $filtered.sort(${nameField} asc)
+            : #.sortBy = 'duplicates' ? $filtered.sort(${duplicatesCount} desc, ${sizeField} desc)
+            : #.sortBy = 'size' ? $filtered.sort(${sizeField} desc)
+            : ${defaultSort ? `$filtered.sort(${defaultSort})` : "$filtered"}
+          `),
+        },
+      ],
+    },
+  };
+}
+
 const metadataTooltip = {
   view: "text",
   when: "metadata.createdAt",
@@ -200,28 +307,26 @@ function getTreeModule({
 function getModulesTree({
   data,
   limit,
+  sortable,
 }: {
   data: string;
   limit?: number | false;
+  sortable?: boolean;
 }): SingleViewConfig {
   if (!data) {
     throw new Error("[getModulesTree]: data is required");
   }
-  return {
-    view: "content-filter",
-    data,
-    name: "filterByPathStr",
-    content: {
-      view: "list",
-      limit,
-      data: ".[name ~= #.filterByPathStr]",
-      emptyText: "⚠️ No modules found",
-      item: {
-        view: "tree",
-        expanded: false,
-        itemConfig: {
-          content: getTreeModule({ hasTextMatch: true }),
-          children: `
+  const getList = (listData: string): SingleViewConfig => ({
+    view: "list",
+    limit,
+    data: listData,
+    emptyText: "⚠️ No modules found",
+    item: {
+      view: "tree",
+      expanded: false,
+      itemConfig: {
+        content: getTreeModule({ hasTextMatch: true }),
+        children: `
             [
                {
                  title:'Imported by modules',
@@ -235,46 +340,62 @@ function getModulesTree({
                }
             ].filter(=> $.data.size() > 0)
           `,
-          itemConfig: {
-            view: "switch",
-            content: [
-              {
-                when: 'type="reasons"',
-                content: {
+        itemConfig: {
+          view: "switch",
+          content: [
+            {
+              when: 'type="reasons"',
+              content: {
+                view: "tree-leaf",
+                content: [
+                  "text:title",
+                  "text:' '",
+                  "badge:{ text: $.data.size() }",
+                ],
+                children: `$.data`,
+                itemConfig: {
                   view: "tree-leaf",
-                  content: [
-                    "text:title",
-                    "text:' '",
-                    "badge:{ text: $.data.size() }",
-                  ],
-                  children: `$.data`,
-                  itemConfig: {
-                    view: "tree-leaf",
-                    content: getTreeModule(),
-                  },
+                  content: getTreeModule(),
                 },
               },
-              {
-                when: 'type="duplicates"',
-                content: {
+            },
+            {
+              when: 'type="duplicates"',
+              content: {
+                view: "tree-leaf",
+                content: [
+                  "text:title",
+                  "text:' '",
+                  "badge:{ text: $.data.size() }",
+                ],
+                children: `$.data`,
+                itemConfig: {
                   view: "tree-leaf",
-                  content: [
-                    "text:title",
-                    "text:' '",
-                    "badge:{ text: $.data.size() }",
-                  ],
-                  children: `$.data`,
-                  itemConfig: {
-                    view: "tree-leaf",
-                    content: getTreeModule(),
-                  },
+                  content: getTreeModule(),
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       },
     },
+  });
+
+  if (sortable) {
+    return getSortableContentFilter({
+      data,
+      nameField: "name",
+      sizeField: "sizeInBytes",
+      duplicatesCount: "duplicates.size()",
+      content: getList,
+    });
+  }
+
+  return {
+    view: "content-filter",
+    data,
+    name: "filterByPathStr",
+    content: getList(".[name ~= #.filterByPathStr]"),
   };
 }
 
@@ -358,6 +479,7 @@ export {
   getModulesTree,
   getPackage,
   getPackageList,
+  getSortableContentFilter,
   getTreeModule,
   metadata,
 };
