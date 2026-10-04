@@ -41,20 +41,20 @@ discovery.page.define("module", {
     $currentModule: $.modules.[path = #.id].pick(0); 
     ...$, 
     currentModule: $currentModule,
+    overview: $.moduleOverview(#.id),
     isEntry: $currentModule.isEntry,
     isInjectedByMetro: $currentModule.path = '__prelude__' or $currentModule.path has '@react-native/js-polyfills',
     isWebpackRuntime: $currentModule.path has '__runtime__',
   }`,
   content: [
     {
-      view: "h2",
+      view: "block",
+      className: "mo-wrap",
       content: [
-        //
-        'text: "Module: "',
-        "text: $.currentModule.path",
+        { view: "module-overview", data: "overview" },
         getCopyToClipboardButton({
           textToCopy: `$.currentModule.path`,
-          className: "m-l-0_5em",
+          className: "mo-copy",
         }),
       ],
     },
@@ -63,20 +63,26 @@ discovery.page.define("module", {
       view: "tabs",
       name: "tabs",
       // value: "networkGraph", //FIXME
+      className: "mo-tabs",
       tabs: [
         {
           value: "mcontent",
-          text: "Module content",
+          text: "Code",
+        },
+        {
+          value: "mimports",
+          when: "overview.imports",
+          content: ["text:'Imports '", "pill-badge: overview.imports.size()"],
         },
         {
           value: "networkGraph",
           when: "not isInjectedByMetro and not isEntry and not isWebpackRuntime",
-          text: "Imported by modules",
+          content: ["text:'Imported by '", "pill-badge: overview.importedBy"],
         },
         {
           value: "mduplicates",
           when: "not isInjectedByMetro and not isEntry and not isWebpackRuntime and currentModule.duplicates",
-          text: "Duplicates",
+          content: ["text:'Duplicates '", "pill-badge: overview.duplicates"],
         },
       ],
       content: {
@@ -127,7 +133,14 @@ discovery.page.define("module", {
                     view: "block",
                     className: "width-50p",
                     content: [
-                      "h5: 'Source'",
+                      {
+                        view: "h5",
+                        className: "mo-pane-title",
+                        content: [
+                          "text: 'Source'",
+                          "text: ' · ' + overview.sourceLines.pluralWithCount(['line', 'lines']) + ' · ' + overview.sourceSize.formatBytes()",
+                        ],
+                      },
                       {
                         view: "source",
                         syntax: "ts",
@@ -141,7 +154,11 @@ discovery.page.define("module", {
                     content: [
                       {
                         view: "h5",
-                        content: 'text:"Output"',
+                        className: "mo-pane-title",
+                        content: [
+                          "text: 'Output'",
+                          "text: ' · ' + overview.outputLines.pluralWithCount(['line', 'lines']) + ' · ' + overview.outputSize.formatBytes()",
+                        ],
                       },
                       {
                         view: "context",
@@ -168,6 +185,44 @@ discovery.page.define("module", {
                 ],
               },
             ],
+          },
+          {
+            when: '#.tabs="mimports"',
+            content: {
+              view: "content-filter",
+              data: "overview.imports",
+              name: "filterByPathStr",
+              content: {
+                view: "list",
+                data: ".[name ~= #.filterByPathStr or specifier ~= #.filterByPathStr]",
+                emptyText: "This module doesn't import anything",
+                item: {
+                  view: "block",
+                  className: "mo-import",
+                  content: [
+                    {
+                      view: "text-match",
+                      className: "mo-import-specifier",
+                      data: "{ text: specifier, match: #.filterByPathStr }",
+                    },
+                    "html: '<span class=\"mo-arrow\">→</span>'",
+                    {
+                      view: "switch",
+                      content: [
+                        {
+                          when: "missing",
+                          content: [
+                            "text: name",
+                            "badge: { text: 'not in bundle', color: 'rgba(128,128,128,.25)' }",
+                          ],
+                        },
+                        { content: getTreeModule({ hasTextMatch: true }) },
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
           },
           {
             when: '#.tabs="networkGraph"',

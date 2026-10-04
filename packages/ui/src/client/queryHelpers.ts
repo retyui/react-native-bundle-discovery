@@ -1,4 +1,4 @@
-import type { PreparedModule } from "./prepare";
+import type { PreparedModule, PreparedReport } from "./prepare";
 
 interface TreeNode {
   size: number;
@@ -223,6 +223,111 @@ Please do the following:
       sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
       i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
+  },
+  // Everything the module page header and stat cards need, in one pass
+  moduleOverview(report: PreparedReport, id: string) {
+    const module = report.modules.find((m) => m.path === id);
+    if (!module) return null;
+
+    const size = (m: PreparedModule) => m.output.sizeInBytes;
+    const totalSize = report.modules.reduce((acc, m) => acc + size(m), 0);
+    const largest = report.modules.reduce(
+      (acc, m) => Math.max(acc, size(m)),
+      0,
+    );
+    const rank =
+      report.modules.filter((m) => size(m) > size(module)).length + 1;
+    const byAbsolutePath = new Map(
+      report.modules.map((m) => [m.absolutePath, m]),
+    );
+
+    const slash = module.path.lastIndexOf("/");
+    const toModule = (m: PreparedModule) => ({
+      ext: helpers.getFileExtension(m.path),
+      name: m.path,
+      size: helpers.formatBytes(size(m)),
+      sizeInBytes: size(m),
+      isEntry: m.isEntry,
+    });
+
+    let pkg = null;
+    if (module.path.includes("node_modules/")) {
+      const name = helpers.getModulesName(module.path);
+      const marker = `node_modules/${name}/`;
+      const path = module.path.slice(
+        0,
+        module.path.lastIndexOf(marker) + marker.length - 1,
+      );
+      const info = report.packages.find((p) => p.path === path);
+      const files = report.modules.filter((m) => m.path.startsWith(`${path}/`));
+      const pkgSize = files.reduce((acc, m) => acc + size(m), 0);
+      pkg = {
+        name,
+        path,
+        version: info?.version,
+        metadata: info?.metadata,
+        size: pkgSize,
+        files: files.length,
+        share: pkgSize ? size(module) / pkgSize : 0,
+      };
+    }
+
+    const imports = module.dependencies
+      .map((d) => {
+        const m = byAbsolutePath.get(d.absolutePath);
+        return m
+          ? { specifier: d.name, ...toModule(m), missing: false }
+          : {
+              specifier: d.name,
+              ext: helpers.getFileExtension(d.path),
+              name: d.path,
+              size: "",
+              sizeInBytes: -1,
+              isEntry: false,
+              missing: true,
+            };
+      })
+      .sort((a, b) => b.sizeInBytes - a.sizeInBytes);
+
+    const importerPackages = new Set(
+      module.dependents.map((m) =>
+        m.path.includes("node_modules/") ? helpers.getModulesName(m.path) : "",
+      ),
+    );
+
+    return {
+      path: module.path,
+      dir: module.path.slice(0, slash + 1),
+      file: module.path.slice(slash + 1),
+      ext: helpers.getFileExtension(module.path),
+      isEntry: !!module.isEntry,
+      // Code added by the bundler itself (the same rules as the page warnings)
+      injectedBy:
+        module.path === "__runtime__"
+          ? "Webpack/Rspack"
+          : module.path === "__prelude__" ||
+              module.path.includes("@react-native/js-polyfills") ||
+              module.path.includes("metro-runtime")
+            ? "Metro"
+            : null,
+      outputSize: size(module),
+      sourceSize: module.source.sizeInBytes,
+      outputLines: module.output.lineCount,
+      sourceLines: module.source.lineCount,
+      totalSize,
+      bundleShare: totalSize ? size(module) / totalSize : 0,
+      largestShare: largest ? size(module) / largest : 0,
+      rank,
+      modulesCount: report.modules.length,
+      pkg,
+      imports,
+      missingImports: imports.filter((i) => i.missing).length,
+      importedBy: module.dependents.length,
+      importerPackages: importerPackages.size,
+      importedByOwnCode: importerPackages.has(""),
+      duplicates: module.duplicates.length,
+      duplicatesSize: module.duplicates.reduce((acc, m) => acc + size(m), 0),
+    };
   },
   isPackageImport(moduleName?: string | null) {
     return moduleName?.[0] !== ".";

@@ -215,3 +215,161 @@ hr {
   margin-bottom: -5px;
   margin-left: 10px;
 }
+
+/* Module page */
+.mo-wrap {
+  position: relative;
+  margin-bottom: 20px;
+}
+.mo-copy {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+.mo-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 18px 64px 18px 20px;
+  border: 1px solid rgb(128 128 128 / 22%);
+  border-radius: 14px;
+  background: linear-gradient(
+    135deg,
+    rgb(120 90 230 / 10%),
+    rgb(0 170 255 / 6%) 60%,
+    transparent
+  );
+}
+.mo-ext {
+  flex: none;
+  min-width: 44px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  text-align: center;
+  font: 600 12px / 1 var(--discovery-monospace-font-family);
+  text-transform: uppercase;
+}
+.mo-title {
+  min-width: 0;
+}
+.mo-dir {
+  opacity: 0.6;
+  font: 13px / 1.4 var(--discovery-monospace-font-family);
+  overflow-wrap: anywhere;
+}
+.mo-file {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.mo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.mo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgb(128 128 128 / 15%);
+  color: inherit;
+  text-decoration: none;
+}
+a.mo-chip:hover {
+  background: rgb(128 128 128 / 28%);
+}
+.mo-chip-pkg {
+  background: rgb(0 170 255 / 18%);
+}
+.mo-chip-src {
+  background: rgb(148 111 234 / 25%);
+}
+.mo-chip-entry {
+  background: rgb(255 200 0 / 35%);
+}
+.mo-chip-warn {
+  background: rgb(255 165 0 / 28%);
+}
+.mo-chip-danger {
+  background: rgb(220 50 60 / 22%);
+}
+.mo-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.mo-card {
+  padding: 14px 16px;
+  border: 1px solid rgb(128 128 128 / 22%);
+  border-radius: 12px;
+  background: var(--discovery-background-color);
+}
+.mo-card-accent {
+  border-color: rgb(120 90 230 / 45%);
+}
+.mo-card-danger {
+  border-color: rgb(220 50 60 / 45%);
+  background: rgb(220 50 60 / 6%);
+}
+.mo-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+.mo-card-value {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.mo-card-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+.mo-good {
+  color: #1a9b4b;
+  font-weight: 600;
+}
+.mo-bad {
+  color: #d1343e;
+  font-weight: 600;
+}
+.mo-bar {
+  height: 4px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: rgb(128 128 128 / 18%);
+  overflow: hidden;
+}
+.mo-bar > div {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #7c5ce6, #00aaff);
+}
+.mo-pane-title {
+  opacity: 0.85;
+}
+.mo-import {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 4px;
+  border-bottom: 1px solid rgb(128 128 128 / 12%);
+}
+.mo-import-specifier {
+  font-family: var(--discovery-monospace-font-family);
+  font-weight: 600;
+}
+.mo-arrow {
+  opacity: 0.4;
+}
