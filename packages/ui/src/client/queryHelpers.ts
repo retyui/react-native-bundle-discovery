@@ -124,17 +124,6 @@ const helpers = {
         return sourceStr;
       });
   },
-  askChatGPTAboutPackages() {
-    const prompt = `I have a list of JavaScript packages from my React Native bundle (see below). I want to optimize bundle size by identifying similar or redundant packages — such as multiple versions of similar libraries (e.g., lodash, lodash-es, underscore, etc.), duplicate utilities, or overlapping functionality (e.g., date libraries like moment, dayjs, date-fns).
-
-Please do the following:
-
-1. Group similar or overlapping packages together.
-2. For each group, suggest which one to keep and which ones to consider removing.
-3. For each group, provide a regex string that can be used to filter those packages from the list (e.g., in grep, find, or search tools).
-4. Keep the output concise and copy-paste friendly.`;
-    return `https://chat.openai.com/?prompt=${encodeURIComponent(prompt)}`;
-  },
   plural(count: number, [singular, plural]: PluralForms) {
     return count === 1 ? singular : plural;
   },
@@ -530,6 +519,108 @@ Please do the following:
           share: share(moduleSize(m)),
           bar: largestOwnModule ? moduleSize(m) / largestOwnModule : 0,
         })),
+    };
+  },
+  // Everything the package page header, stat cards and tabs need, in one pass
+  packageOverview(report: PreparedReport, name: string) {
+    const isOwn = (m: PreparedModule) =>
+      isNodeModule(m) && helpers.getModulesName(m.path) === name;
+    const files = report.modules.filter(isOwn);
+    if (files.length === 0) return null;
+
+    const marker = `node_modules/${name}/`;
+    const instancePath = (m: PreparedModule) =>
+      m.path.slice(0, m.path.lastIndexOf(marker) + marker.length - 1);
+    const instances = new Map<string, PreparedModule[]>();
+    for (const m of files) {
+      const path = instancePath(m);
+      instances.set(path, [...(instances.get(path) ?? []), m]);
+    }
+
+    const totalSize = report.modules.reduce((acc, m) => acc + moduleSize(m), 0);
+    const size = files.reduce((acc, m) => acc + moduleSize(m), 0);
+    const packageSizes = new Map<string, number>();
+    for (const m of report.modules) {
+      if (!isNodeModule(m)) continue;
+      const pkgName = helpers.getModulesName(m.path);
+      packageSizes.set(
+        pkgName,
+        (packageSizes.get(pkgName) ?? 0) + moduleSize(m),
+      );
+    }
+    const largestPackage = Math.max(...packageSizes.values());
+    const rank = [...packageSizes.values()].filter((s) => s > size).length + 1;
+
+    const copies = [...instances.entries()]
+      .map(([path, modules]) => {
+        const info = report.packages.find((p) => p.path === path);
+        return {
+          path,
+          version: info?.version,
+          metadata: info?.metadata ?? null,
+          size: modules.reduce((acc, m) => acc + moduleSize(m), 0),
+          files: modules.length,
+        };
+      })
+      .sort((a, b) => b.size - a.size);
+
+    // Modules outside of the package that import its files
+    const fileSet = new Set(files);
+    const importers = new Map<PreparedModule, Set<PreparedModule>>();
+    for (const m of files) {
+      for (const dependent of m.dependents) {
+        if (fileSet.has(dependent)) continue;
+        importers.set(
+          dependent,
+          (importers.get(dependent) ?? new Set()).add(m),
+        );
+      }
+    }
+    const importerPackages = new Set(
+      [...importers.keys()].map((m) =>
+        isNodeModule(m) ? helpers.getModulesName(m.path) : "",
+      ),
+    );
+
+    const largestFile = files.reduce((a, b) =>
+      moduleSize(b) > moduleSize(a) ? b : a,
+    );
+    const withMetadata = copies.find((c) => c.metadata)?.metadata ?? null;
+    const findings = (report.recommendations ?? []).filter((f) =>
+      getFindingPackageNames(f.packages).includes(name),
+    );
+
+    return {
+      name,
+      paths: copies.map((c) => c.path),
+      versions: Array.from(
+        new Set(copies.map((c) => c.version).filter(Boolean)),
+      ) as string[],
+      size,
+      bundleShare: totalSize ? size / totalSize : 0,
+      largestShare: largestPackage ? size / largestPackage : 0,
+      rank,
+      packagesCount: packageSizes.size,
+      filesCount: files.length,
+      largestFile: largestFile.path,
+      largestFileSize: moduleSize(largestFile),
+      copies,
+      copiesSavings: size - copies[0].size,
+      deprecated: copies.filter((c) => c.metadata?.deprecated),
+      latestVersion: withMetadata?.latestVersion ?? null,
+      isOutdated: copies.some((c) => c.metadata && !c.metadata.isLatest),
+      publishedAt: withMetadata?.createdAt ?? null,
+      importedBy: importers.size,
+      importerPackages:
+        importerPackages.size - (importerPackages.has("") ? 1 : 0),
+      importedByOwnCode: importerPackages.has(""),
+      importers: [...importers.entries()]
+        .map(([m, imported]) => ({
+          ...toListModule(m),
+          imports: [...imported].map(toListModule),
+        }))
+        .sort((a, b) => b.sizeInBytes - a.sizeInBytes),
+      findings: findings.map((f) => ({ id: f.id, title: f.title })),
     };
   },
   // Shortest import chain from the entry point to the first module of the package:

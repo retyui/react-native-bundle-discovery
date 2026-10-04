@@ -21,6 +21,7 @@ const config = {
       path.resolve(__dirname, "client/views/prettify.js"),
       path.resolve(__dirname, "client/views/importGraph.js"),
       path.resolve(__dirname, "client/views/moduleOverview.js"),
+      path.resolve(__dirname, "client/views/packageOverview.js"),
       path.resolve(__dirname, "client/views/insights.js"),
       path.resolve(__dirname, "client/views/treemap.js"),
       path.resolve(__dirname, "client/views/persistedFilterInput.js"),

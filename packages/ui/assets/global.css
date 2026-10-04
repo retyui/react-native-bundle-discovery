@@ -115,20 +115,6 @@ hr {
 .width-50p {
   width: 50%;
 }
-.my-icon {
-  display: block;
-  height: 100%;
-  width: 100%;
-}
-.my-icon-inline {
-  display: inline-block;
-  vertical-align: middle;
-  margin-left: 4px;
-}
-.my-icon-12 {
-  width: 12px;
-  height: 12px;
-}
 .no-margin {
   margin: 0;
 }
@@ -189,33 +175,9 @@ hr {
   margin-top: -26px;
   z-index: 1;
 }
-.ask-chatgpt {
-  color: var(--discovery-view-button-color, #000);
-  text-decoration: none;
-  vertical-align: middle;
-  position: absolute;
-  z-index: 9;
-  margin-top: 12px;
-  /* biome-ignore lint/complexity/noImportantStyles: overrides discovery.js styles */
-  margin-left: 105px !important;
-  height: 35px;
-}
-.ask-chatgpt::before {
-  content: "”";
-  font-size: 2em;
-  vertical-align: middle;
-  font-family: math;
-  margin-right: 0.2em;
-  display: inline-block;
-  height: 15px;
-}
-/* biome-ignore lint/style/noDescendingSpecificity: order is intentional, kept as is */
-.packages-content > .view-input {
-  padding-left: 265px;
-}
 .sortable-content-filter {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr;
   grid-template-rows: auto auto minmax(0, 1fr);
   column-gap: 1em;
   align-items: center;
@@ -234,20 +196,6 @@ hr {
   grid-row: 3;
   grid-column: 1 / -1;
   align-self: stretch;
-}
-.copy-before-ask-chatgpt {
-  width: 95px;
-  background-position: left center;
-  padding-left: 25px;
-  position: absolute;
-  z-index: 9;
-  margin-top: 12px;
-  height: 35px;
-}
-.bundlejs-badge-img {
-  line-height: 0;
-  margin-bottom: -5px;
-  margin-left: 10px;
 }
 
 /* Module page */
@@ -631,4 +579,27 @@ a.mo-chip:hover {
 .ig-links path.ig-active {
   stroke: rgb(128 128 128 / 90%);
   stroke-width: 2;
+}
+
+/* Package page */
+.po-icon {
+  background: rgb(203 56 55 / 22%);
+  text-transform: none;
+}
+.po-links {
+  margin-top: 6px;
+  align-items: center;
+}
+.mo-chip-link {
+  background: transparent;
+  border: 1px solid rgb(128 128 128 / 30%);
+}
+a.mo-chip-link:hover {
+  background: rgb(128 128 128 / 12%);
+}
+.po-badge {
+  line-height: 0;
+}
+.po-badge img {
+  height: 20px;
 }

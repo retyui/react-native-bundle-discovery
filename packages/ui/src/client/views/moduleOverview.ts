@@ -1,14 +1,14 @@
 import type helpers from "../queryHelpers";
-import { card, escapeHTML, formatBytes, formatPercent, plural } from "./_html";
+import {
+  card,
+  chip,
+  escapeHTML,
+  formatBytes,
+  formatPercent,
+  plural,
+} from "./_html";
 
 type Overview = NonNullable<ReturnType<typeof helpers.moduleOverview>>;
-
-function chip(html: string, kind = "", href?: string) {
-  const cls = `mo-chip${kind ? ` mo-chip-${kind}` : ""}`;
-  return href
-    ? `<a class="${cls}" href="${escapeHTML(href)}">${html}</a>`
-    : `<span class="${cls}">${html}</span>`;
-}
 
 function renderHeader(o: Overview) {
   const chips = [

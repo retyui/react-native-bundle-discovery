@@ -1,5 +1,4 @@
 import {
-  getCopyToClipboardButton,
   getInsightsTab,
   getModulesTree,
   getPackage,
@@ -161,20 +160,6 @@ discovery.page.define("default", [
         {
           when: `#.id="${TABS.PACKAGES}"`,
           content: [
-            getCopyToClipboardButton({
-              text: "Copy list",
-              className: "copy-before-ask-chatgpt",
-              textToCopy: `"- " + modules.filter(=> path has "node_modules").group(=> path.getModulesName()).map(=> $.key).join("\\n- ")`,
-            }),
-            {
-              view: "link",
-              className: "ask-chatgpt view-button",
-              text: "and Ask ChatGPT",
-              external: true,
-              data: `{
-                  href: $.askChatGPTAboutPackages()
-                }`,
-            },
             getSortableContentFilter({
               data: getPackage(`modules.filter(=> path has "node_modules")`),
               className: "packages-content",

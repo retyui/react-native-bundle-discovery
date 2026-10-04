@@ -57,3 +57,10 @@ export function card({
       }
     </div>`;
 }
+
+export function chip(html: string, kind = "", href?: string) {
+  const cls = `mo-chip${kind ? ` mo-chip-${kind}` : ""}`;
+  return href
+    ? `<a class="${cls}" href="${escapeHTML(href)}">${html}</a>`
+    : `<span class="${cls}">${html}</span>`;
+}
