@@ -99,9 +99,9 @@ function getSortableContentFilter({
       view: "context",
       modifiers: [
         {
-          view: "input",
+          view: "persisted-filter-input",
+          persistKey: `${className}:${nameField}`,
           name: "filterByPathStr",
-          type: "regexp",
           placeholder: "Filter",
         },
         {

@@ -20,6 +20,7 @@ const config = {
       path.resolve(__dirname, "client/views/highcharts.js"),
       path.resolve(__dirname, "client/views/moduleOverview.js"),
       path.resolve(__dirname, "client/views/treemap.js"),
+      path.resolve(__dirname, "client/views/persistedFilterInput.js"),
     ],
   },
 };
