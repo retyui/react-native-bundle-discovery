@@ -1,5 +1,3 @@
-const platformColor = `transformOptions.platform = 'android' ? 'rgba(194, 239, 116, .4)' : 'rgba(119, 31, 218, .4)'`;
-
 type SingleViewConfig = DiscoveryViewConfig;
 type ViewConfig = SingleViewConfig | string;
 
@@ -400,47 +398,6 @@ function getModulesTree({
   };
 }
 
-const metadata: Record<string, SingleViewConfig> = {
-  platform: {
-    when: "transformOptions.platform",
-    view: "badge",
-    data: `{ prefix: 'Platform: ', text: transformOptions.platform, color: ${platformColor} }`,
-  },
-  size: {
-    when: "modules.filter(=> $.path has 'node_modules').size()",
-    view: "badge",
-    data: `{ prefix: 'Size: ', text: modules.sum(=>output.sizeInBytes).formatBytes(), color: ${platformColor} }`,
-  },
-  node_modules_size: {
-    when: "modules.filter(=> $.path has 'node_modules').size()",
-    view: "badge",
-    data: `
-        $totalSize: modules.sum(=>output.sizeInBytes);
-        $thirdPartySize: modules.filter(=> $.path has 'node_modules').sum(=>output.sizeInBytes);
-        { prefix: 'node_modules: ', text: $thirdPartySize.formatBytes(), postfix: ($thirdPartySize / $totalSize).percent(1), color: 'rgba(255, 0, 0, 0.35)' }`,
-  },
-  source_code_size: {
-    when: "modules.filter(=> $.path has 'node_modules').size()",
-    view: "badge",
-    data: `
-        // vars
-        $totalSize: modules.sum(=>output.sizeInBytes);
-        $thirdPartySize: modules.filter(=> $.path has 'node_modules').sum(=>output.sizeInBytes);
-        // return data
-        { prefix: 'Source code: ', text: ($totalSize - $thirdPartySize).formatBytes(), postfix: (($totalSize - $thirdPartySize) / $totalSize).percent(1), color: 'rgba(148, 111, 234, 0.5)' }`,
-  },
-  is_dev: {
-    when: "transformOptions.dev != null",
-    view: "badge",
-    data: "{ prefix: '__DEV__: ', text: transformOptions.dev }",
-  },
-  is_minified: {
-    when: "transformOptions.minify != null",
-    view: "badge",
-    data: "{ prefix: 'Minify: ', text: transformOptions.minify }",
-  },
-};
-
 const SEVERITY_BADGE = `{
   text: severity = 'high' ? 'High impact' : severity = 'medium' ? 'Saves size' : 'Advice',
   color: severity = 'high' ? 'rgba(220, 50, 60, 0.3)' : severity = 'medium' ? 'rgba(255, 165, 0, 0.35)' : 'rgba(0, 170, 255, 0.25)',
@@ -597,5 +554,4 @@ export {
   getPackageList,
   getSortableContentFilter,
   getTreeModule,
-  metadata,
 };

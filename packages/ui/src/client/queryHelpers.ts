@@ -398,6 +398,26 @@ const helpers = {
       duplicatesSize: module.duplicates.reduce((acc, m) => acc + size(m), 0),
     };
   },
+  // Data for the report bar on top of the default page
+  reportSummary(report: PreparedReport) {
+    let totalSize = 0;
+    let nodeModulesSize = 0;
+    for (const m of report.modules) {
+      totalSize += moduleSize(m);
+      if (isNodeModule(m)) nodeModulesSize += moduleSize(m);
+    }
+    const options = report.transformOptions;
+    return {
+      platform: options?.platform ?? null,
+      // `null` when the report has no such info (e.g. non-Metro reports)
+      dev: typeof options?.dev === "boolean" ? options.dev : null,
+      minify: typeof options?.minify === "boolean" ? options.minify : null,
+      totalSize,
+      sourceSize: totalSize - nodeModulesSize,
+      nodeModulesSize,
+      date: report.date ?? null,
+    };
+  },
   // Everything the "Insights" tab needs, in one pass
   bundleInsights(report: PreparedReport) {
     const totalSize = report.modules.reduce((acc, m) => acc + moduleSize(m), 0);

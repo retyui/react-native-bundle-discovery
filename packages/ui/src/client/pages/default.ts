@@ -4,17 +4,7 @@ import {
   getPackage,
   getPackageList,
   getSortableContentFilter,
-  metadata,
 } from "./_common";
-
-const topMetaData = [
-  metadata.platform,
-  metadata.size,
-  metadata.source_code_size,
-  metadata.node_modules_size,
-  metadata.is_dev,
-  metadata.is_minified,
-];
 
 const TABS = {
   INSIGHTS: "insights",
@@ -29,7 +19,7 @@ function parseHashRef(url = window.location.href) {
 }
 
 discovery.page.define("default", [
-  ...topMetaData,
+  { view: "report-bar", className: "report-bar", data: "$.reportSummary()" },
 
   {
     view: "tabs",

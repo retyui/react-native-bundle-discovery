@@ -603,3 +603,94 @@ a.mo-chip-link:hover {
 .po-badge img {
   height: 20px;
 }
+
+/* Report bar on top of the default page */
+.report-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 24px;
+  /* leave room for the discovery.js nav buttons on the right */
+  padding-right: 170px;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.rb-build {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+.rb-chip {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgb(128 128 128 / 15%);
+}
+.rb-chip-platform {
+  font-weight: 600;
+  background: rgb(120 90 230 / 18%);
+}
+.rb-chip-ok {
+  color: #1a9b4b;
+  background: rgb(26 155 75 / 12%);
+}
+.rb-chip-warn {
+  color: #b35c00;
+  font-weight: 600;
+  background: rgb(255 165 0 / 25%);
+  cursor: help;
+}
+.rb-size {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+.rb-total {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.rb-split {
+  display: flex;
+  flex: none;
+  width: 100px;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgb(128 128 128 / 15%);
+}
+.rb-split-own,
+.rb-dot-own {
+  background: #8e6fe0;
+}
+.rb-split-nm,
+.rb-dot-nm {
+  background: #2b9fd8;
+}
+.rb-legend {
+  display: flex;
+  gap: 12px;
+  opacity: 0.8;
+}
+.rb-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 5px;
+  border-radius: 50%;
+}
+/* The least important part: shrinks first */
+.rb-date {
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.6;
+  font-size: 12px;
+}
+@media (max-width: 1000px) {
+  .rb-date {
+    display: none;
+  }
+}
