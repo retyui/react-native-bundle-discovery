@@ -1,5 +1,11 @@
 # react-native-bundle-discovery-cli
 
+## 2.8.0
+
+### Minor Changes
+
+- [`64fd3fd`](https://github.com/retyui/react-native-bundle-discovery/commit/64fd3fdb878fa539ed3c9f032588c61d301f61d1) Thanks [@retyui](https://github.com/retyui)! - Support [esbuild metafile](https://esbuild.github.io/api/#metafile) as input (e.g. from `@rnx-kit/metro-serializer-esbuild` with the `metafile` option), with module sizes after tree shaking.
+
 ## 2.7.0
 
 ### Minor Changes

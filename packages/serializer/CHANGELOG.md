@@ -1,5 +1,11 @@
 # react-native-bundle-discovery
 
+## 2.8.0
+
+### Patch Changes
+
+- [`3b2640f`](https://github.com/retyui/react-native-bundle-discovery/commit/3b2640ff010dd28e9f1dc3c1351d0b856b31cd1f) Thanks [@retyui](https://github.com/retyui)! - Limit process keep-alive while writing the report to 30s
+
 ## 2.7.0
 
 ### Minor Changes
