@@ -1,11 +1,10 @@
-import type { PreparedReport, Recommendation } from "../types";
+import { getModulesSavings } from "./savings";
+import type { PreparedReport, Recommendation } from "./types";
 
 function findBundledDependencyPackageJsonFiles(report: PreparedReport) {
-  const modules = report.modules;
-
-  return modules
-    .map((module) => module?.path)
-    .filter((modulePath) => modulePath?.endsWith("package.json"));
+  return report.modules.filter((module) =>
+    module?.path?.endsWith("package.json"),
+  );
 }
 
 const recommendation: Recommendation = {
@@ -18,7 +17,10 @@ const recommendation: Recommendation = {
       return null;
     }
 
-    const sample = packageJsonFiles.slice(0, 3).join("\n - ");
+    const sample = packageJsonFiles
+      .slice(0, 3)
+      .map((module) => module.path)
+      .join("\n - ");
     return {
       message: `Detected ${packageJsonFiles.length} dependency package.json file(s) in the bundle.
 They are often used to get only the package \`version/name\` but all other fields are not needed in the bundle.
@@ -27,6 +29,7 @@ Example paths:\n - ${sample}
 `,
       packages: [],
       docsUrl: null,
+      ...getModulesSavings(packageJsonFiles),
     };
   },
 };

@@ -3,4 +3,5 @@
 export {
   transformEsbuildMetafile,
   transformRSDoctorData,
+  withRecommendations,
 } from "@react-native-bundle-discovery/shared";

@@ -1,5 +1,7 @@
-import type { PreparedReport, Recommendation } from "../types";
-import { getReactNativeVersion, isVersionGte } from "../utils";
+import type { ReportModule } from "../types";
+import { getReactNativeVersion, isVersionGte } from "../versions";
+import { getModulesSavings } from "./savings";
+import type { PreparedReport, Recommendation } from "./types";
 
 const rn74PlusDevOnlyPackages = [
   "prop-types",
@@ -38,10 +40,11 @@ const devOnlyPackages = [
 function findBundledDevPackages(
   report: PreparedReport,
   _devOnlyPackages: string[],
-): string[] {
+): { names: string[]; modules: ReportModule[] } {
   const packages = report.packages;
   const modules = report.modules;
   const matches = new Set<string>();
+  const matchedModules: ReportModule[] = [];
 
   for (const pkg of packages) {
     if (
@@ -67,18 +70,19 @@ function findBundledDevPackages(
           (pkg) => pkg?.name === pkgName,
         )?.version;
         matches.add(pkgVersion ? `${pkgName}@${pkgVersion}` : pkgName);
+        matchedModules.push(module);
       }
     }
   }
 
-  return Array.from(matches);
+  return { names: Array.from(matches), modules: matchedModules };
 }
 
 const recommendation: Recommendation = {
   id: "dev-only-packages-in-production-bundle",
   title: "Remove dev-only packages from production bundle",
   check: (report) => {
-    const bundledDevPackages = findBundledDevPackages(
+    const { names: bundledDevPackages, modules } = findBundledDevPackages(
       report,
       isVersionGte(getReactNativeVersion(report.packages), "0.74.0")
         ? [...devOnlyPackages, ...rn74PlusDevOnlyPackages]
@@ -110,6 +114,7 @@ if (__DEV__) {
       `,
       packages: bundledDevPackages,
       docsUrl: "https://reactnative.dev/docs/global-__DEV__",
+      ...getModulesSavings(modules),
     };
   },
 };

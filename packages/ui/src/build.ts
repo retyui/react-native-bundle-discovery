@@ -60,7 +60,7 @@ export function buildHtmlPage(
   const transformRcdoctor = path.join(__dirname, "rsdoctor.js");
   fs.writeFileSync(
     configFile,
-    `const {transformRSDoctorData, transformEsbuildMetafile} = require("${transformRcdoctor}");
+    `const {transformRSDoctorData, transformEsbuildMetafile, withRecommendations} = require("${transformRcdoctor}");
 module.exports = ${JSON.stringify(
       { ...config, data: "<tmp>" },
       null,
@@ -68,10 +68,10 @@ module.exports = ${JSON.stringify(
     ).replace(
       `"<tmp>"`,
       isRsdoctorReportPath(fullJsonPath)
-        ? `() => transformRSDoctorData(require("${fullJsonPath}"))`
+        ? `() => withRecommendations(transformRSDoctorData(require("${fullJsonPath}")))`
         : isEsbuildMetafilePath(fullJsonPath)
-          ? `() => transformEsbuildMetafile(require("${fullJsonPath}"), "${fullJsonPath}")`
-          : `() => require("${fullJsonPath}")`,
+          ? `() => withRecommendations(transformEsbuildMetafile(require("${fullJsonPath}"), "${fullJsonPath}"))`
+          : `() => withRecommendations(require("${fullJsonPath}"))`,
     )};`,
   );
 

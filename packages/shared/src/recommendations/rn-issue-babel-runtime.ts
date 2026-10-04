@@ -1,5 +1,5 @@
-import type { ReportModule } from "@react-native-bundle-discovery/shared";
-import type { Recommendation } from "../types";
+import type { ReportModule } from "../types";
+import type { Recommendation } from "./types";
 
 const babelRuntimeInlineCode = [
   // uncompressed
@@ -66,6 +66,8 @@ module.exports = {
         ? [`@babel/runtime@${babelRuntimeVersion}`]
         : [],
       docsUrl: "https://github.com/react/react-native/issues/57123",
+      // Saved size is unknown: helpers are moved to `@babel/runtime`, not removed
+      modules: inlinedHelpersModules.map((module) => module.path),
     };
   },
 };

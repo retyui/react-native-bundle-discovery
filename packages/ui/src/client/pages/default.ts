@@ -1,5 +1,6 @@
 import {
   getCopyToClipboardButton,
+  getInsightsTab,
   getModulesTree,
   getPackage,
   getPackageList,
@@ -17,6 +18,7 @@ const topMetaData = [
 ];
 
 const TABS = {
+  INSIGHTS: "insights",
   TREEMAP: "treemap",
   MODULES: "modules",
   PACKAGES: "packages",
@@ -34,8 +36,20 @@ discovery.page.define("default", [
     view: "tabs",
     name: "mainTabs",
     className: "main-tabs",
-    value: parseHashRef() ?? TABS.TREEMAP,
+    value: parseHashRef() ?? TABS.INSIGHTS,
     tabs: [
+      {
+        value: TABS.INSIGHTS,
+        className: `main-tabs-${TABS.INSIGHTS}`,
+        content: [
+          "text:'Insights '",
+          {
+            view: "pill-badge",
+            when: "recommendations",
+            data: "recommendations.size()",
+          },
+        ],
+      },
       {
         value: TABS.TREEMAP,
         text: "Treemap chart",
@@ -58,7 +72,7 @@ discovery.page.define("default", [
         value: TABS.DUPLICATES,
         className: `main-tabs-${TABS.DUPLICATES}`,
         content: [
-          "text:'Duplicate modules '",
+          "text:'Duplicates '",
           "pill-badge: modules.filter(=> duplicates).size()",
         ],
       },
@@ -76,7 +90,7 @@ discovery.page.define("default", [
         });
         discovery.cancelScheduledRender();
 
-        const id = discovery.pageRef ?? TABS.TREEMAP;
+        const id = discovery.pageRef ?? TABS.INSIGHTS;
 
         setTimeout(() => {
           discovery.dom.root
@@ -98,6 +112,10 @@ discovery.page.define("default", [
       },
       content: [
         {
+          when: `#.id="${TABS.INSIGHTS}"`,
+          content: getInsightsTab(),
+        },
+        {
           when: `#.id="${TABS.TREEMAP}"`,
           content: {
             view: "content-filter",
@@ -110,7 +128,7 @@ discovery.page.define("default", [
               $root: $.rootFolder;
               $applyFilter: => #.filterByPathStr ? $.modules.filter(=> $.path ~= #.filterByPathStr) : $.modules;
               $.$applyFilter()
-                .map(=> {path, size: $.output.sizeInBytes})
+                .map(=> {path, size: $.output.sizeInBytes, issues})
                 .transformFilesList($root, "treemap")
               `,
             },
@@ -186,8 +204,63 @@ discovery.page.define("default", [
         },
         {
           when: `#.id="${TABS.DUPLICATES}"`,
-          content: getModulesTree({
+          content: {
+            view: "block",
+            className: "tab-scroll",
             data: `
+              $allPackages: (${getPackage(`modules.filter(=> path has "node_modules")`)});
+              {
+                ...$,
+                duplicatePackages: $allPackages
+                  .[pkgInstances.size() > 1]
+                  // Keeping only the heaviest copy saves the rest
+                  .({ ...$, savings: size - pkgInstances.sort(size desc)[0].size })
+                  .sort(savings desc),
+              }
+            `,
+            content: [
+              {
+                view: "h3",
+                className: "dup-title",
+                content: [
+                  "text: 'Duplicate packages '",
+                  "pill-badge: duplicatePackages.size()",
+                  {
+                    view: "pill-badge",
+                    when: "duplicatePackages",
+                    data: "{ text: '~' + duplicatePackages.sum(=> savings).formatBytes(), postfix: 'can be saved', color: 'rgba(120, 177, 9, 0.35)' }",
+                  },
+                ],
+              },
+              {
+                view: "context",
+                when: "duplicatePackages",
+                content: getPackageList({
+                  showCopiesBadge: true,
+                  expanded: false,
+                  data: "duplicatePackages",
+                  itemPkgName: {
+                    view: "link",
+                    data: `{ href: pkgName.pageLink("package", {}), text: pkgName }`,
+                  },
+                }),
+              },
+              {
+                view: "text",
+                when: "not duplicatePackages",
+                className: "dup-empty",
+                data: "'✅ Every package is bundled only once'",
+              },
+              {
+                view: "h3",
+                className: "dup-title",
+                content: [
+                  "text: 'Duplicate modules '",
+                  "pill-badge: modules.filter(=> duplicates).size()",
+                ],
+              },
+              getModulesTree({
+                data: `
               // values
               $duplicatesOnly: modules.filter(=> duplicates);
               $totalSize: $duplicatesOnly.sum(=>output.sizeInBytes);
@@ -204,7 +277,9 @@ discovery.page.define("default", [
                 duplicates: $.duplicates.map(=> $.$toModule()),
               })
             `,
-          }),
+              }),
+            ],
+          },
         },
       ],
     },

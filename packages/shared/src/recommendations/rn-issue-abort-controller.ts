@@ -1,5 +1,6 @@
-import type { Recommendation } from "../types";
-import { getReactNativeVersion, isVersionGte } from "../utils";
+import { getReactNativeVersion, isVersionGte } from "../versions";
+import { getPackagesSavings } from "./savings";
+import type { Recommendation } from "./types";
 
 const recommendation: Recommendation = {
   id: "rn-issue-abort-controller-polyfill",
@@ -36,6 +37,7 @@ so you can remove the \`${abortControllerPkgs.map((pkg) => pkg.name).join(", ")}
       ],
       docsUrl:
         "https://github.com/react/react-native/commit/6f3375a140b10cffe9bed3dd72a017ece97bbbba",
+      ...getPackagesSavings(report, abortControllerPkgs),
     };
   },
 };

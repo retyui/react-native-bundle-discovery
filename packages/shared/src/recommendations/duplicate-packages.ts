@@ -1,6 +1,8 @@
-import { name as packageName } from "../../package.json";
-import { getPackageGroups, LODASH_FAMILY_GROUP } from "../packages";
-import type { Recommendation } from "../types";
+import { getPackageGroups, LODASH_FAMILY_GROUP } from "../packageGroups";
+import { getPackagesSavings } from "./savings";
+import type { Recommendation } from "./types";
+
+const cliPackageName = "react-native-bundle-discovery-cli";
 
 const recommendation: Recommendation = {
   id: "duplicate-packages",
@@ -30,6 +32,15 @@ const recommendation: Recommendation = {
       const hasSimpleLodash = entries.some((e) => e.name === "lodash");
       const hasUnderscore = entries.some((e) => e.name === "underscore");
       const hasRamda = entries.some((e) => e.name === "ramda");
+      // Keep the heaviest copy, the rest can be removed (a report can list
+      // the same package path twice, it is not a copy then)
+      const [kept, ...otherEntries] = [...entries].sort(
+        (a, b) => b.sizeInBytes - a.sizeInBytes,
+      );
+      const extraCopies = otherEntries.filter(
+        (entry) => entry.absolutePath !== kept.absolutePath,
+      );
+      const savings = getPackagesSavings(report, extraCopies);
 
       const message = [
         hasDotLodash &&
@@ -59,6 +70,7 @@ Or you can use \`patch-package\` to remove usage of specific package, example lo
 +const get = require('lodash/get');
 \`\`\``,
           docsUrl: null,
+          ...savings,
         };
       }
 
@@ -68,11 +80,12 @@ Or you can use \`patch-package\` to remove usage of specific package, example lo
 
 Align versions or use dependency \`overrides\` (npm) / \`resolutions\` (yarn) to keep a single copy per package.
 
-To see more use the next command: "${packageName} packages <file>"`,
+To see more use the next command: "${cliPackageName} packages <file>"`,
         docsUrl: [
           "https://docs.npmjs.com/cli/v10/configuring-npm/package-json#overrides",
           "https://classic.yarnpkg.com/lang/en/docs/selective-version-resolutions/",
         ],
+        ...savings,
       };
     });
   },

@@ -1,9 +1,10 @@
-import type { Recommendation } from "../types";
 import {
   formatRnVersionToDocsFormat,
   getReactNativeVersion,
   isVersionGte,
-} from "../utils";
+} from "../versions";
+import { getPackagesSavings } from "./savings";
+import type { Recommendation } from "./types";
 
 const recommendation: Recommendation = {
   id: "linear-gradient-vs-background-image",
@@ -44,6 +45,7 @@ and migrate to a simple View with a \`${backgroundImageProp}\` style prop.`,
         `react-native@${reactNativeVersion}`,
       ],
       docsUrl: `https://reactnative.dev/docs/${formatRnVersionToDocsFormat(reactNativeVersion)}/view-style-props#${docsAnchor}`,
+      ...getPackagesSavings(report, gradientPkgs),
     };
   },
 };

@@ -1,4 +1,4 @@
-import type { PreparedReport, Recommendation } from "../types";
+import type { PreparedReport, Recommendation } from "./types";
 
 interface OutdatedPackage {
   id: string;

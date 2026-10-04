@@ -1,13 +1,12 @@
-import type { PreparedReport, Recommendation } from "../types";
+import { getModulesSavings } from "./savings";
+import type { PreparedReport, Recommendation } from "./types";
 
 const devFileNamePattern = /\b(development|debug|dev|storybook)\b/i;
 
-function findDevFilesInBundle(report: PreparedReport): string[] {
-  const modules = report.modules;
-
-  return modules
-    .map((module) => module?.path?.replace(report.rootFolder, ""))
-    .filter((modulePath) => devFileNamePattern?.test(modulePath));
+function findDevFilesInBundle(report: PreparedReport) {
+  return report.modules.filter((module) =>
+    devFileNamePattern.test(module?.path?.replace(report.rootFolder, "")),
+  );
 }
 
 const recommendation: Recommendation = {
@@ -20,7 +19,10 @@ const recommendation: Recommendation = {
       return null;
     }
 
-    const sample = devFiles.slice(0, 5).join("\n - ");
+    const sample = devFiles
+      .slice(0, 5)
+      .map((module) => module.path.replace(report.rootFolder, ""))
+      .join("\n - ");
 
     return {
       message: `Detected ${devFiles.length} dev/debug file(s) in the production bundle.
@@ -28,6 +30,7 @@ Files matching development|debug|dev|storybook should be excluded from release b
 Example paths:\n - ${sample}`,
       packages: [],
       docsUrl: null,
+      ...getModulesSavings(devFiles),
     };
   },
 };

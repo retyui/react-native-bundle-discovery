@@ -1,4 +1,5 @@
-import type { PreparedReport, Recommendation } from "../types";
+import { getModulesSavings } from "./savings";
+import type { PreparedReport, Recommendation } from "./types";
 
 const OTHER_PLATFORM: Record<string, string | undefined> = {
   ios: "android",
@@ -8,15 +9,13 @@ const OTHER_PLATFORM: Record<string, string | undefined> = {
 // e.g. `is-android`, `isAndroid`, `is-ios`, `isIOS`
 const PLATFORM_CHECK_PATTERN = /is[-_]?(android|ios)/gi;
 
-function findWrongPlatformFiles(
-  report: PreparedReport,
-  otherPlatform: string,
-): string[] {
-  return report.modules
-    .map((m) => m.path.replace(`${report.rootFolder}/`, ""))
-    .filter((modulePath) =>
-      modulePath?.replace(PLATFORM_CHECK_PATTERN, "").includes(otherPlatform),
-    );
+function findWrongPlatformFiles(report: PreparedReport, otherPlatform: string) {
+  return report.modules.filter((module) =>
+    module.path
+      .replace(`${report.rootFolder}/`, "")
+      .replace(PLATFORM_CHECK_PATTERN, "")
+      .includes(otherPlatform),
+  );
 }
 
 const recommendation: Recommendation = {
@@ -36,7 +35,10 @@ const recommendation: Recommendation = {
       return null;
     }
 
-    const sample = wrongFiles.slice(0, 5).join("\n - ");
+    const sample = wrongFiles
+      .slice(0, 5)
+      .map((module) => module.path.replace(`${report.rootFolder}/`, ""))
+      .join("\n - ");
 
     return {
       message: `Detected ${wrongFiles.length} file(s) with "${otherPlatform}" in the path in the ${platform} bundle.
@@ -44,6 +46,7 @@ These files are likely not used on ${platform} and can be excluded to save bundl
 Example paths:\n - ${sample}`,
       packages: [],
       docsUrl: null,
+      ...getModulesSavings(wrongFiles),
     };
   },
 };

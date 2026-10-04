@@ -413,7 +413,10 @@ const metadata: Record<string, SingleViewConfig> = {
   node_modules_size: {
     when: "modules.filter(=> $.path has 'node_modules').size()",
     view: "badge",
-    data: "{ prefix: 'node_modules: ', text: modules.filter(=> $.path has 'node_modules').sum(=>output.sizeInBytes).formatBytes(), color: 'rgba(255, 0, 0, 0.35)' }",
+    data: `
+        $totalSize: modules.sum(=>output.sizeInBytes);
+        $thirdPartySize: modules.filter(=> $.path has 'node_modules').sum(=>output.sizeInBytes);
+        { prefix: 'node_modules: ', text: $thirdPartySize.formatBytes(), postfix: ($thirdPartySize / $totalSize).percent(1), color: 'rgba(255, 0, 0, 0.35)' }`,
   },
   source_code_size: {
     when: "modules.filter(=> $.path has 'node_modules').size()",
@@ -423,7 +426,7 @@ const metadata: Record<string, SingleViewConfig> = {
         $totalSize: modules.sum(=>output.sizeInBytes);
         $thirdPartySize: modules.filter(=> $.path has 'node_modules').sum(=>output.sizeInBytes);
         // return data
-        { prefix: 'Source code: ', text: ($totalSize - $thirdPartySize).formatBytes(), color: 'rgba(148, 111, 234, 0.5)' }`,
+        { prefix: 'Source code: ', text: ($totalSize - $thirdPartySize).formatBytes(), postfix: (($totalSize - $thirdPartySize) / $totalSize).percent(1), color: 'rgba(148, 111, 234, 0.5)' }`,
   },
   is_dev: {
     when: "transformOptions.dev != null",
@@ -436,6 +439,120 @@ const metadata: Record<string, SingleViewConfig> = {
     data: "{ prefix: 'Minify: ', text: transformOptions.minify }",
   },
 };
+
+const SEVERITY_BADGE = `{
+  text: severity = 'high' ? 'High impact' : severity = 'medium' ? 'Saves size' : 'Advice',
+  color: severity = 'high' ? 'rgba(220, 50, 60, 0.3)' : severity = 'medium' ? 'rgba(255, 165, 0, 0.35)' : 'rgba(0, 170, 255, 0.25)',
+}`;
+
+// One recommendation from the shared rules (the same as `analyze` CLI command)
+const findingItem: SingleViewConfig = {
+  view: "expand",
+  className: "='in-finding in-finding-' + severity",
+  header: [
+    { view: "pill-badge", className: "in-severity", data: SEVERITY_BADGE },
+    "text: title",
+    {
+      view: "pill-badge",
+      when: "savings",
+      data: "{ text: '~' + savings.formatBytes(), postfix: savingsShare.percent(2), color: 'rgba(120, 177, 9, 0.35)' }",
+      tooltip: "text: 'Estimated savings: size and share of the bundle'",
+    },
+    {
+      view: "inline-list",
+      className: "in-packages",
+      when: "packageNames",
+      data: "packageNames",
+      item: {
+        view: "link",
+        className: "mo-chip mo-chip-pkg",
+        data: `{ href: $.pageLink("package", {}), text: $ }`,
+      },
+    },
+  ],
+  content: {
+    view: "block",
+    className: "in-finding-content",
+    content: [
+      { view: "markdown", data: "message" },
+      {
+        view: "block",
+        when: "packagesText",
+        className: "in-pre",
+        content: "text: packagesText",
+      },
+      {
+        view: "expand",
+        when: "affected",
+        className: "in-affected",
+        header: [
+          "text: 'Affected modules '",
+          "pill-badge: affected.size()",
+          "pill-badge: { text: affectedSize.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
+        ],
+        content: {
+          view: "list",
+          data: "affected",
+          limit: 20,
+          item: { view: "block", content: getTreeModule() },
+        },
+      },
+      {
+        view: "block",
+        when: "docsUrls",
+        className: "in-docs",
+        content: [
+          "text: 'Learn more: '",
+          {
+            view: "inline-list",
+            data: "docsUrls",
+            item: {
+              view: "link",
+              external: true,
+              data: "{ href: $, text: $ }",
+            },
+          },
+        ],
+      },
+    ],
+  },
+};
+
+// "Insights" tab: summary, heaviest packages/modules and recommendations
+function getInsightsTab(): SingleViewConfig {
+  return {
+    view: "block",
+    className: "tab-scroll insights",
+    data: "$.bundleInsights()",
+    content: [
+      { view: "bundle-insights" },
+      {
+        view: "h3",
+        className: "in-title",
+        content: [
+          "text: 'Recommendations '",
+          {
+            view: "pill-badge",
+            when: "hasRecommendations",
+            data: "findings.size()",
+          },
+        ],
+      },
+      {
+        view: "alert-warning",
+        when: "not hasRecommendations",
+        content:
+          "html: 'Recommendations are only available for production bundles. Generate the report from a bundle built with <code>--dev false</code> to see them.'",
+      },
+      {
+        view: "alert-success",
+        when: "hasRecommendations and not findings",
+        content: "text: '✅ No recommendations: the bundle looks good!'",
+      },
+      { view: "list", data: "findings", item: findingItem },
+    ],
+  };
+}
 
 const externalLinkHtml = `<svg class="my-icon my-icon-link" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"></path></svg>`;
 
@@ -476,6 +593,7 @@ function getCopyToClipboardButton({
 export {
   externalLinkHtml,
   getCopyToClipboardButton,
+  getInsightsTab,
   getModulesTree,
   getPackage,
   getPackageList,

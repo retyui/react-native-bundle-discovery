@@ -1,11 +1,11 @@
 import fs from "node:fs";
-import chalk from "chalk";
-import { getPackageGroups } from "./packages";
-import { readBuildReport } from "./readReport";
 import {
   type DeprecatedPackage,
   findDeprecatedPackages,
-} from "./recommendations/deprecated-packages";
+  getPackageGroups,
+} from "@react-native-bundle-discovery/shared";
+import chalk from "chalk";
+import { readBuildReport } from "./readReport";
 import type { ByteLimit, PreparedReport, SizeLimit } from "./types";
 import { formatBytes } from "./utils";
 

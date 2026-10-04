@@ -1,4 +1,6 @@
-import type { PreparedReport, Recommendation } from "../types";
+import { getPackageModules } from "../prepareReport";
+import { getModulesSavings } from "./savings";
+import type { PreparedReport, Recommendation } from "./types";
 
 export interface DeprecatedPackage {
   id: string;
@@ -57,6 +59,12 @@ Upgrade to a non-deprecated version or migrate to the recommended replacement.
       packages: deprecatedPackages.map(({ id }) => id),
       docsUrl:
         "https://docs.npmjs.com/deprecating-and-undeprecating-packages-or-package-versions",
+      // A replacement is still needed, so only the affected modules are reported
+      modules: getModulesSavings(
+        report.packages
+          .filter((pkg) => pkg?.metadata?.deprecated)
+          .flatMap((pkg) => getPackageModules(report, pkg)),
+      ).modules,
     };
   },
 };

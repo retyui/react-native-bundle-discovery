@@ -3,6 +3,7 @@ import {
   getCopyToClipboardButton,
   getPackage,
   getPackageList,
+  getTreeModule,
 } from "./_common";
 
 discovery.page.define("package", {
@@ -27,6 +28,7 @@ discovery.page.define("package", {
       currentPkgDeprecated: $pkg.pkgInstances.[metadata.deprecated],
       currentPkgOutdated: $pkg.pkgInstances.[metadata and not metadata.isLatest],
       currentPkgLatestVersion: $pkg.pkgInstances.metadata.latestVersion[0],
+      currentPkgImportChain: $.importChain($currentPkgName),
     }
   `,
   content: [
@@ -141,6 +143,41 @@ discovery.page.define("package", {
               data: `'<img class="bundlejs-badge-img" src="https://deno.bundlejs.com/?q=' + q + '&badge=detailed" />'`,
             },
           ],
+        },
+      ],
+    },
+
+    {
+      view: "block",
+      when: "$.currentPkgImportChain",
+      data: "$.currentPkgImportChain",
+      className: "why",
+      content: [
+        "h3: 'Why is this in my bundle?'",
+        {
+          view: "text",
+          className: "why-hint",
+          data: `fromEntry
+            ? 'The shortest import chain from the entry point:'
+            : 'Not imported from the entry point: the bundler runs it before the app code (e.g. polyfills). The shortest chain:'`,
+        },
+        {
+          view: "list",
+          data: "steps",
+          className: "why-chain",
+          item: {
+            view: "block",
+            className: "=isTarget ? 'why-step why-step-target' : 'why-step'",
+            content: [
+              ...getTreeModule(),
+              {
+                view: "pill-badge",
+                when: "entersPackage",
+                className: "why-enters",
+                data: "{ prefix: 'enters', text: entersPackage, color: 'rgba(0, 170, 255, 0.25)' }",
+              },
+            ],
+          },
         },
       ],
     },

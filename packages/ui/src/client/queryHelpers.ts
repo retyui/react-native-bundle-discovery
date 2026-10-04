@@ -1,3 +1,4 @@
+import type { RecommendationFinding } from "@react-native-bundle-discovery/shared";
 import type { PreparedModule, PreparedReport } from "./prepare";
 
 interface TreeNode {
@@ -7,6 +8,7 @@ interface TreeNode {
   fullPath?: string;
   type?: "file" | "folder";
   files?: number;
+  issues?: string[];
 }
 
 export interface TreemapNode {
@@ -16,8 +18,15 @@ export interface TreemapNode {
   files?: number;
   type?: "file" | "folder";
   size: string;
+  issues?: string[];
   children?: TreemapNode[];
 }
+
+export type Severity = "high" | "medium" | "low";
+
+// A finding is "high" when it saves at least 1% of the bundle
+const HIGH_SEVERITY_SHARE = 0.01;
+const TOP_LIST_SIZE = 8;
 
 interface TreemapItem {
   id: string;
@@ -34,6 +43,48 @@ interface NetworkGraphParams {
 
 type GraphModule = Pick<PreparedModule, "path" | "dependents">;
 type PluralForms = [singular: string, plural: string];
+
+const isNodeModule = (m: PreparedModule) => m.path.includes("node_modules/");
+const moduleSize = (m: PreparedModule) => m.output.sizeInBytes;
+
+function toListModule(m: PreparedModule) {
+  return {
+    ext: helpers.getFileExtension(m.path),
+    name: m.path,
+    size: helpers.formatBytes(moduleSize(m)),
+    sizeInBytes: moduleSize(m),
+    isEntry: !!m.isEntry,
+  };
+}
+
+// "react-native@0.80.0" -> "react-native", "@babel/runtime@7.0.0" -> "@babel/runtime"
+function stripVersion(id: string) {
+  const at = id.lastIndexOf("@");
+  return at > 0 ? id.slice(0, at) : id;
+}
+
+// Package names to link to: `packages` is a list of `name@version` or a
+// free-form text (duplicates: "lodash x2:\n - lodash@4.17.21 (...)")
+function getFindingPackageNames(packages: RecommendationFinding["packages"]) {
+  if (!packages) return [];
+  if (typeof packages === "string") {
+    return [packages.split(/ x\d+:/)[0].trim()].filter(Boolean);
+  }
+  return Array.from(new Set(packages.map(stripVersion)));
+}
+
+const modulesByAbsolutePath = new WeakMap<
+  PreparedReport,
+  Map<string, PreparedModule>
+>();
+function getModulesByAbsolutePath(report: PreparedReport) {
+  let map = modulesByAbsolutePath.get(report);
+  if (!map) {
+    map = new Map(report.modules.map((m) => [m.absolutePath, m]));
+    modulesByAbsolutePath.set(report, map);
+  }
+  return map;
+}
 
 const helpers = {
   prettifyMap: new Map<string, string>(),
@@ -329,18 +380,205 @@ Please do the following:
       duplicatesSize: module.duplicates.reduce((acc, m) => acc + size(m), 0),
     };
   },
+  // Everything the "Insights" tab needs, in one pass
+  bundleInsights(report: PreparedReport) {
+    const totalSize = report.modules.reduce((acc, m) => acc + moduleSize(m), 0);
+    const share = (bytes: number) => (totalSize ? bytes / totalSize : 0);
+    const modulesByPath = new Map(report.modules.map((m) => [m.path, m]));
+
+    // Packages: grouped by name, all copies together
+    const packages = new Map<string, { size: number; copies: Set<string> }>();
+    let nodeModulesSize = 0;
+    const ownModules: PreparedModule[] = [];
+    for (const m of report.modules) {
+      if (!isNodeModule(m)) {
+        ownModules.push(m);
+        continue;
+      }
+      nodeModulesSize += moduleSize(m);
+      const name = helpers.getModulesName(m.path);
+      const marker = `node_modules/${name}/`;
+      const pkg = packages.get(name) ?? { size: 0, copies: new Set() };
+      pkg.size += moduleSize(m);
+      pkg.copies.add(m.path.slice(0, m.path.lastIndexOf(marker)));
+      packages.set(name, pkg);
+    }
+    const sourceSize = totalSize - nodeModulesSize;
+    const largestPackage = Math.max(
+      0,
+      ...[...packages.values()].map((p) => p.size),
+    );
+    const largestOwnModule = Math.max(0, ...ownModules.map(moduleSize));
+
+    // Findings: the heaviest savings first, a module is counted only once
+    // in the total, even if several findings are about it
+    const countedModules = new Set<string>();
+    let potentialSavings = 0;
+    const findings = (report.recommendations ?? [])
+      .map((finding) => {
+        const savings = finding.sizeInBytes ?? 0;
+        const affected = (finding.modules ?? [])
+          .map((path) => modulesByPath.get(path))
+          .filter((m): m is PreparedModule => !!m)
+          .sort((a, b) => moduleSize(b) - moduleSize(a));
+        const severity: Severity =
+          savings && share(savings) >= HIGH_SEVERITY_SHARE
+            ? "high"
+            : savings
+              ? "medium"
+              : "low";
+        return {
+          ...finding,
+          severity,
+          savings,
+          savingsShare: share(savings),
+          packageNames: getFindingPackageNames(finding.packages),
+          // Duplicates list copies with versions & paths as text
+          packagesText:
+            typeof finding.packages === "string" ? finding.packages : null,
+          docsUrls: [finding.docsUrl ?? []].flat(),
+          affected: affected.map(toListModule),
+          affectedSize: affected.reduce((acc, m) => acc + moduleSize(m), 0),
+        };
+      })
+      .sort((a, b) => b.savings - a.savings);
+
+    for (const finding of findings) {
+      if (!finding.savings) continue;
+      const overlap = finding.affected
+        .filter((m) => countedModules.has(m.name))
+        .reduce((acc, m) => acc + m.sizeInBytes, 0);
+      potentialSavings += Math.max(finding.savings - overlap, 0);
+      for (const m of finding.affected) countedModules.add(m.name);
+    }
+
+    const duplicatePackages = [...packages.values()].filter(
+      (p) => p.copies.size > 1,
+    ).length;
+
+    return {
+      platform: report.transformOptions?.platform,
+      isDev: report.transformOptions?.dev !== false,
+      hasRecommendations: report.recommendations !== null,
+      totalSize,
+      modulesCount: report.modules.length,
+      sourceSize,
+      sourceShare: share(sourceSize),
+      ownModulesCount: ownModules.length,
+      nodeModulesSize,
+      nodeModulesShare: share(nodeModulesSize),
+      packagesCount: packages.size,
+      duplicatePackages,
+      duplicateModules: report.modules.filter((m) => m.duplicates.length)
+        .length,
+      potentialSavings,
+      potentialSavingsShare: share(potentialSavings),
+      findings,
+      findingsWithSavings: findings.filter((f) => f.savings).length,
+      topPackages: [...packages.entries()]
+        .sort((a, b) => b[1].size - a[1].size)
+        .slice(0, TOP_LIST_SIZE)
+        .map(([name, pkg]) => ({
+          name,
+          size: pkg.size,
+          share: share(pkg.size),
+          bar: largestPackage ? pkg.size / largestPackage : 0,
+          copies: pkg.copies.size,
+        })),
+      topPackagesShare: share(
+        [...packages.values()]
+          .map((p) => p.size)
+          .sort((a, b) => b - a)
+          .slice(0, 5)
+          .reduce((acc, size) => acc + size, 0),
+      ),
+      topOwnModules: [...ownModules]
+        .sort((a, b) => moduleSize(b) - moduleSize(a))
+        .slice(0, TOP_LIST_SIZE)
+        .map((m) => ({
+          name: m.path,
+          size: moduleSize(m),
+          share: share(moduleSize(m)),
+          bar: largestOwnModule ? moduleSize(m) / largestOwnModule : 0,
+        })),
+    };
+  },
+  // Shortest import chain from the entry point to the first module of the package:
+  // answers "Why is this package in my bundle?"
+  importChain(report: PreparedReport, pkgName: string) {
+    const isTarget = (m: PreparedModule) =>
+      isNodeModule(m) && helpers.getModulesName(m.path) === pkgName;
+    const byAbsolutePath = getModulesByAbsolutePath(report);
+
+    const search = (starts: PreparedModule[]) => {
+      const prev = new Map<PreparedModule, PreparedModule | null>();
+      const queue = [...starts];
+      for (const start of starts) prev.set(start, null);
+      while (queue.length) {
+        const current = queue.shift() as PreparedModule;
+        if (isTarget(current)) {
+          const chain: PreparedModule[] = [];
+          for (
+            let m: PreparedModule | null = current;
+            m;
+            m = prev.get(m) ?? null
+          ) {
+            chain.unshift(m);
+          }
+          return chain;
+        }
+        for (const dependency of current.dependencies) {
+          const next = byAbsolutePath.get(dependency.absolutePath);
+          if (next && !prev.has(next)) {
+            prev.set(next, current);
+            queue.push(next);
+          }
+        }
+      }
+      return null;
+    };
+
+    const entry = report.modules.filter((m) => m.isEntry);
+    let chain = search(entry);
+    let fromEntry = true;
+    if (!chain) {
+      // e.g. polyfills that the bundler runs before the entry point
+      chain = search(report.modules.filter((m) => m.dependents.length === 0));
+      fromEntry = false;
+    }
+    if (!chain) return null;
+
+    return {
+      fromEntry,
+      steps: chain.map((m, index) => {
+        const pkg = isNodeModule(m) ? helpers.getModulesName(m.path) : null;
+        const prevModule = chain[index - 1];
+        const prevPkg =
+          prevModule && isNodeModule(prevModule)
+            ? helpers.getModulesName(prevModule.path)
+            : null;
+        return {
+          ...toListModule(m),
+          pkg,
+          // The step where the chain enters another package
+          entersPackage: index > 0 && pkg !== prevPkg ? pkg : null,
+          isTarget: index === chain.length - 1,
+        };
+      }),
+    };
+  },
   isPackageImport(moduleName?: string | null) {
     return moduleName?.[0] !== ".";
   },
   transformFilesList(
-    files: { path: string; size: number }[],
+    files: { path: string; size: number; issues?: string[] }[],
     rootFolder: string,
     type: string,
   ) {
     const nodeModulesMap: TreeNode = { children: {}, size: 0 };
     const sourceCodeMap: TreeNode = { children: {}, size: 0 };
 
-    files.forEach(({ path, size }) => {
+    files.forEach(({ path, size, issues }) => {
       if (path === "__prelude__") {
         path = "node_modules/__prelude__";
       }
@@ -366,6 +604,7 @@ Please do the following:
           current[part].size = size;
           current[part].path = shortPath;
           current[part].fullPath = path;
+          current[part].issues = issues;
         }
 
         current = current[part].children;
@@ -479,6 +718,7 @@ function toTreemapNode(node: TreeNode, name: string): TreemapNode {
     files: node.files,
     type: node.type,
     size: helpers.formatBytes(node.size),
+    issues: node.issues,
   };
 
   if (keys.length === 0) {

@@ -1,5 +1,5 @@
-import type { Recommendation } from "../types";
-import { getReactNativeVersion, isVersionGte } from "../utils";
+import { getReactNativeVersion, isVersionGte } from "../versions";
+import type { Recommendation } from "./types";
 
 const BUNDLE_MODE_MODULES_PATH =
   "node_modules/react-native-worklets/.worklets/";

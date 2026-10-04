@@ -1,29 +1,12 @@
+import {
+  collectRecommendations,
+  type RecommendationFinding,
+} from "@react-native-bundle-discovery/shared";
 import chalk from "chalk";
 import { readBuildReport } from "./readReport";
-import recommendations from "./recommendations/index";
-import type { Finding, PreparedReport } from "./types";
+import { formatBytes } from "./utils";
 
-interface AnalyzeFinding extends Finding {
-  id: string;
-  title: string;
-}
-
-function collectRecommendations(report: PreparedReport): AnalyzeFinding[] {
-  return recommendations.flatMap((recommendation) => {
-    const finding = recommendation.check(report);
-    if (!finding) {
-      return [];
-    }
-
-    return (Array.isArray(finding) ? finding : [finding]).map((f) => {
-      return {
-        id: recommendation.id,
-        title: recommendation.title,
-        ...f,
-      };
-    });
-  });
-}
+type AnalyzeFinding = RecommendationFinding;
 
 function printDefaultFormat(filePath: string, findings: AnalyzeFinding[]) {
   const prettyPath = chalk.cyan(filePath);
@@ -50,6 +33,12 @@ function printDefaultFormat(filePath: string, findings: AnalyzeFinding[]) {
 
     if (finding.packages && finding.packages.length > 0) {
       console.log(`   ${chalk.magenta("Packages:")} ${finding.packages}`);
+    }
+
+    if (finding.sizeInBytes) {
+      console.log(
+        `   ${chalk.green("Savings:")} ~${formatBytes(finding.sizeInBytes)}`,
+      );
     }
 
     if (finding.docsUrl) {

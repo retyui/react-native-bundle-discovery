@@ -1,5 +1,8 @@
-import type { PreparedReport, Recommendation } from "../types";
-import { getReactNativeVersion, isVersionGte } from "../utils";
+import { getPackageModules } from "../prepareReport";
+import type { ReportModule } from "../types";
+import { getReactNativeVersion, isVersionGte } from "../versions";
+import { getModulesSavings } from "./savings";
+import type { PreparedReport, Recommendation } from "./types";
 
 const deadCode = "react-native/Libraries/Promise.js";
 
@@ -26,10 +29,11 @@ const promiseAnyAllSettledEntries = [
 function findMatchingPromisePolyfills(
   report: PreparedReport,
   entries: string[],
-): string[] {
+): { names: string[]; modules: ReportModule[] } {
   const packages = report.packages;
   const modules = report.modules;
   const matches = new Set<string>();
+  const matchedModules: ReportModule[] = [];
   const entriesCoreJs = entries.filter((entry) => entry.startsWith("core-js/"));
   const entriesNonCoreJs = entries.filter(
     (entry) => !entry.startsWith("core-js/"),
@@ -38,16 +42,18 @@ function findMatchingPromisePolyfills(
   packages.forEach((pkg) => {
     if (entriesNonCoreJs.includes(pkg?.name)) {
       matches.add(pkg.name);
+      matchedModules.push(...getPackageModules(report, pkg));
     }
   });
 
   modules.forEach((module) => {
     if (entriesCoreJs.some((entry) => module?.path?.includes(entry))) {
       matches.add(module.path);
+      matchedModules.push(module);
     }
   });
 
-  return Array.from(matches);
+  return { names: Array.from(matches), modules: matchedModules };
 }
 
 const recommendation: Recommendation = {
@@ -61,21 +67,24 @@ const recommendation: Recommendation = {
     const modules = report.modules;
     const reactNativeVersion = getReactNativeVersion(packages);
 
-    const hasDeadPromiseModule = modules.some((module) =>
+    const deadPromiseModules = modules.filter((module) =>
       module?.path?.includes(deadCode),
     );
+    const hasDeadPromiseModule = deadPromiseModules.length > 0;
 
     const removablePolyfills: string[] = [];
-    if (isVersionGte(reactNativeVersion, "0.86.0")) {
-      removablePolyfills.push(
-        ...findMatchingPromisePolyfills(report, promiseTryWithResolversEntries),
-      );
-    }
-
-    if (isVersionGte(reactNativeVersion, "0.75.0")) {
-      removablePolyfills.push(
-        ...findMatchingPromisePolyfills(report, promiseAnyAllSettledEntries),
-      );
+    const removableModules: ReportModule[] = [...deadPromiseModules];
+    const entriesToCheck = [
+      isVersionGte(reactNativeVersion, "0.86.0") &&
+        promiseTryWithResolversEntries,
+      isVersionGte(reactNativeVersion, "0.75.0") && promiseAnyAllSettledEntries,
+    ];
+    for (const entries of entriesToCheck) {
+      if (entries) {
+        const found = findMatchingPromisePolyfills(report, entries);
+        removablePolyfills.push(...found.names);
+        removableModules.push(...found.modules);
+      }
     }
 
     const uniquePolyfills = Array.from(new Set(removablePolyfills));
@@ -119,6 +128,7 @@ Consider removing: ${uniquePolyfills.join(", ")}.`,
         "https://github.com/react/react-native/issues/57702",
         "https://github.com/react/react-native/pull/57215",
       ],
+      ...getModulesSavings(removableModules),
     };
   },
 };

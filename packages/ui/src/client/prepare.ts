@@ -1,9 +1,11 @@
 import type {
-  BundleReport,
+  RecommendationFinding,
   ReportModule,
   ReportModuleDependency,
   ReportPackage,
+  ReportWithRecommendations,
 } from "@react-native-bundle-discovery/shared";
+import { DUPLICATE_ISSUE } from "./issues";
 
 // Fields added to the report by `prepare()` (data is mutated in place)
 export interface PreparedPackage extends ReportPackage {
@@ -20,13 +22,22 @@ export interface PreparedModule extends Omit<ReportModule, "dependencies"> {
   dependencies: PreparedDependency[];
   dependents: PreparedModule[];
   duplicates: PreparedModule[];
+  /** Titles of recommendations that remove this module (and "Duplicate module") */
+  issues?: string[];
   _tmp_ids?: string[];
 }
 
 export interface PreparedReport
-  extends Omit<BundleReport, "packages" | "modules"> {
+  extends Omit<ReportWithRecommendations, "packages" | "modules"> {
   packages: PreparedPackage[];
   modules: PreparedModule[];
+}
+
+function addIssue(module: PreparedModule, issue: string) {
+  module.issues ??= [];
+  if (!module.issues.includes(issue)) {
+    module.issues.push(issue);
+  }
 }
 
 function getDuplicateId(path: string) {
@@ -51,7 +62,7 @@ function getDuplicateId(path: string) {
   return ids;
 }
 
-function prepare(input: BundleReport): PreparedReport {
+function prepare(input: ReportWithRecommendations): PreparedReport {
   // `prepare` mutates the report in place, adding the `Prepared*` fields
   const data = input as unknown as PreparedReport;
   // data.modules = data.modules.slice(875, 880); TODO for debugging a formtree chart
@@ -59,6 +70,8 @@ function prepare(input: BundleReport): PreparedReport {
   const duplicatesMap = new Map<string, PreparedModule[]>();
   const allLodashModules = new Set<PreparedModule>();
 
+  // Missing for reports loaded without `withRecommendations()`
+  data.recommendations ??= null;
   data.packages.forEach((pkg) => {
     pkg.path = pkg.absolutePath.replace(`${data.rootFolder}/`, "");
   });
@@ -116,6 +129,9 @@ function prepare(input: BundleReport): PreparedReport {
       m.duplicates.push(...allLodashModules);
     }
     delete m._tmp_ids;
+    if (m.duplicates.length > 0) {
+      addIssue(m, DUPLICATE_ISSUE);
+    }
 
     // 2. Dependencies
     m.dependencies.forEach((dependency) => {
@@ -123,6 +139,19 @@ function prepare(input: BundleReport): PreparedReport {
       if (dependentModule) {
         dependentModule.dependents.push(m); //add to the dependent module directly
       }
+    });
+  });
+
+  // 3. Recommendations: relative module paths + `issues` on the modules
+  // (only for findings with savings, i.e. the modules can be removed)
+  const modulesByPath = new Map(data.modules.map((m) => [m.absolutePath, m]));
+  data.recommendations?.forEach((finding: RecommendationFinding) => {
+    finding.modules = finding.modules?.map((path) => {
+      const module = modulesByPath.get(path);
+      if (module && finding.sizeInBytes) {
+        addIssue(module, finding.title);
+      }
+      return module?.path ?? path;
     });
   });
 
