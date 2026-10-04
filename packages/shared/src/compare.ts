@@ -407,8 +407,36 @@ export function compareReports(
   };
 }
 
+/** Code of a "before" module, to diff it with the "after" one in the UI */
+export interface BeforeModuleCode {
+  source: string;
+  output: string;
+}
+
 export interface ReportWithComparison extends BundleReport {
-  comparison: Comparison & { beforeFile: string };
+  comparison: Comparison & {
+    beforeFile: string;
+    /** Code of the changed modules in the "before" report, by (normalized) path */
+    beforeModules: Record<string, BeforeModuleCode>;
+  };
+}
+
+function getBeforeModules(
+  before: PreparedReport,
+  changed: ModuleChange[],
+): Record<string, BeforeModuleCode> {
+  const paths = new Set(changed.map((module) => module.path));
+  const result: Record<string, BeforeModuleCode> = {};
+  before.modules.forEach((module) => {
+    const modulePath = normalizePath(module?.path, before.rootFolder);
+    if (paths.has(modulePath) && !result[modulePath]) {
+      result[modulePath] = {
+        source: module.source?.code ?? "",
+        output: module.output?.code ?? "",
+      };
+    }
+  });
+  return result;
 }
 
 /** Attaches the diff against a "before" report (raw JSON of any supported format) */
@@ -417,14 +445,17 @@ export function withComparison<T extends BundleReport>(
   before: unknown,
   beforePath: string,
 ): T & ReportWithComparison {
+  const beforeReport = prepareReport(before, beforePath, true);
+  const comparison = compareReports(
+    beforeReport,
+    // A shallow copy: `prepareReport()` replaces `packages` of the given object
+    prepareReport({ ...report }, "", true),
+  );
   return Object.assign(report, {
     comparison: {
-      ...compareReports(
-        prepareReport(before, beforePath, true),
-        // A shallow copy: `prepareReport()` replaces `packages` of the given object
-        prepareReport({ ...report }, "", true),
-      ),
+      ...comparison,
       beforeFile: beforePath.split("/").pop() ?? beforePath,
+      beforeModules: getBeforeModules(beforeReport, comparison.modules.changed),
     },
   });
 }

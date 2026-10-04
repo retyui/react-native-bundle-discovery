@@ -14,7 +14,7 @@ interface CompareViewData {
   modulePaths: string[];
 }
 
-const ROWS_LIMIT = 50;
+const ROWS_LIMIT = 10;
 
 function formatDelta(bytes: number) {
   if (bytes === 0) return "0 B";
@@ -26,11 +26,26 @@ function deltaHTML(bytes: number) {
   return `<span class="${cls}">${formatDelta(bytes)}</span>`;
 }
 
-function formatCountDelta(before: number, after: number) {
+// "▼ 548 · 9.4%" pill (red when grows, green when shrinks) + "from 5,846"
+function change(delta: number, amount: string, before: number, from: string) {
+  const percent = before
+    ? ` · ${((Math.abs(delta) / before) * 100).toFixed(2)}%`
+    : "";
+  const pill =
+    delta === 0
+      ? `<span class="cmp-pill">= no change</span>`
+      : `<span class="cmp-pill cmp-pill-${delta > 0 ? "up" : "down"}">${delta > 0 ? "▲" : "▼"} ${amount}${percent}</span>`;
+  return `<span class="cmp-change">${pill}<span class="cmp-from">from ${from}</span></span>`;
+}
+
+function countChange(before: number, after: number) {
   const delta = after - before;
-  return delta === 0
-    ? "no change"
-    : `${delta > 0 ? "+" : "−"}${Math.abs(delta)}`;
+  return change(
+    delta,
+    Math.abs(delta).toLocaleString(),
+    before,
+    before.toLocaleString(),
+  );
 }
 
 interface Row {
@@ -74,27 +89,28 @@ function sumDelta(items: { deltaInBytes: number }[]) {
 }
 
 function renderCards({ summary, packages }: Comparison) {
-  const { before, after, deltaInBytes, deltaPercent } = summary;
-  const percent =
-    deltaPercent === null
-      ? ""
-      : ` (${deltaPercent > 0 ? "+" : ""}${deltaPercent.toFixed(2)}%)`;
+  const { before, after, deltaInBytes } = summary;
   const cards = [
     card({
       label: "Bundle size",
       value: formatBytes(after.sizeInBytes),
-      sub: `${deltaHTML(deltaInBytes)}${percent} · was ${formatBytes(before.sizeInBytes)}`,
+      sub: change(
+        deltaInBytes,
+        formatBytes(Math.abs(deltaInBytes)),
+        before.sizeInBytes,
+        formatBytes(before.sizeInBytes),
+      ),
       kind: deltaInBytes > 0 ? "danger" : deltaInBytes < 0 ? "good" : "accent",
     }),
     card({
       label: "Modules",
       value: after.modules.toLocaleString(),
-      sub: `${formatCountDelta(before.modules, after.modules)} · was ${before.modules.toLocaleString()}`,
+      sub: countChange(before.modules, after.modules),
     }),
     card({
       label: "Packages",
       value: after.packages.toLocaleString(),
-      sub: `${formatCountDelta(before.packages, after.packages)} · was ${before.packages.toLocaleString()}`,
+      sub: countChange(before.packages, after.packages),
     }),
     card({
       label: "New duplicates",
@@ -105,7 +121,10 @@ function renderCards({ summary, packages }: Comparison) {
     card({
       label: "New deprecated",
       value: plural(packages.deprecated.added.length, "package"),
-      sub: `${packages.deprecated.beforeCount} → ${packages.deprecated.afterCount} deprecated in total`,
+      sub: countChange(
+        packages.deprecated.beforeCount,
+        packages.deprecated.afterCount,
+      ),
       kind: packages.deprecated.added.length ? "danger" : "",
     }),
   ];
@@ -199,7 +218,9 @@ function render({ comparison: c, modulePaths }: CompareViewData) {
   const changedModules = c.modules.changed.map((m: ModuleChange) =>
     row({
       name: m.path,
-      href: moduleHref(m.path),
+      href: paths.has(m.path)
+        ? discovery.encodePageHash("module-diff", m.path)
+        : null,
       detail: `${formatBytes(m.beforeSizeInBytes)} → ${formatBytes(m.afterSizeInBytes)}`,
       delta: m.deltaInBytes,
     }),

@@ -61,12 +61,12 @@ function renderSize(s: Summary) {
     <div class="rb-size" title="${escapeHTML(title)}">
       <b class="rb-total">${formatBytes(s.totalSize)}</b>
       <span class="rb-split">
-        <span class="rb-split-own" style="width:${(sourceShare * 100).toFixed(2)}%"></span>
-        <span class="rb-split-nm" style="width:${(nodeModulesShare * 100).toFixed(2)}%"></span>
+        <span class="rb-split-own" style="width:${(sourceShare * 100).toFixed(2)}%" title="${escapeHTML(`Your code: ${formatBytes(s.sourceSize)} (${formatPercent(sourceShare)})`)}"></span>
+        <span class="rb-split-nm" style="width:${(nodeModulesShare * 100).toFixed(2)}%" title="${escapeHTML(`node_modules: ${formatBytes(s.nodeModulesSize)} (${formatPercent(nodeModulesShare)})`)}"></span>
       </span>
       <span class="rb-legend">
-        <span><i class="rb-dot rb-dot-own"></i>Your code ${formatPercent(sourceShare)}</span>
-        <span><i class="rb-dot rb-dot-nm"></i>node_modules ${formatPercent(nodeModulesShare)}</span>
+        <span><i class="rb-dot rb-dot-own"></i>Your code ${chip(formatPercent(sourceShare), "own")}</span>
+        <span><i class="rb-dot rb-dot-nm"></i>node_modules ${chip(formatPercent(nodeModulesShare), "nm")}</span>
       </span>
     </div>`;
 }

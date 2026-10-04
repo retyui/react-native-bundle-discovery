@@ -23,6 +23,7 @@ const config = {
       // Pages
       path.resolve(__dirname, "client/pages/default.js"),
       path.resolve(__dirname, "client/pages/module.js"),
+      path.resolve(__dirname, "client/pages/moduleDiff.js"),
       path.resolve(__dirname, "client/pages/package.js"),
       // Custom views
       path.resolve(__dirname, "client/views/prettify.js"),
@@ -31,6 +32,7 @@ const config = {
       path.resolve(__dirname, "client/views/packageOverview.js"),
       path.resolve(__dirname, "client/views/insights.js"),
       path.resolve(__dirname, "client/views/compare.js"),
+      path.resolve(__dirname, "client/views/codeDiff.js"),
       path.resolve(__dirname, "client/views/reportBar.js"),
       path.resolve(__dirname, "client/views/treemap.js"),
       path.resolve(__dirname, "client/views/persistedFilterInput.js"),

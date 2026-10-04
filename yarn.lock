@@ -1524,7 +1524,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"diff@npm:^8.0.2":
+"diff@npm:^8.0.2, diff@npm:^8.0.4":
   version: 8.0.4
   resolution: "diff@npm:8.0.4"
   checksum: 10c0/7ee5d03926db4039be7252ac3b0abaae1bd122a2ca971e5ca7270e444e36ff83dd906fad1a719740ca347e97ed5dc8f458a76a8391dbcd7aff363bdafb348a00
@@ -2461,6 +2461,7 @@ __metadata:
     "@types/minimist": "npm:^1.2.5"
     chalk: "npm:^4.1.2"
     d3-hierarchy: "npm:^3.1.2"
+    diff: "npm:^8.0.4"
     minimist: "npm:^1.2.8"
     prettier: "npm:^3.9.6"
   peerDependencies:

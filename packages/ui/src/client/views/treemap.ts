@@ -14,28 +14,26 @@ type Rect = HierarchyRectangularNode<Root>;
 // HSL color, lightness is for the light theme (the dark theme darkens it)
 type Tone = { h: number; s: number; l: number };
 
-// "Titanium & dusk": muted twilight tones mixed with vivid accents,
-// ordered so neighbouring packages contrast
+// d3's default categorical palette (d3.schemeCategory10) as HSL
 const PALETTE: Tone[] = [
-  { h: 214, s: 32, l: 42 }, // titanium navy
-  { h: 333, s: 62, l: 54 }, // magenta
-  { h: 43, s: 80, l: 55 }, // gold
-  { h: 276, s: 42, l: 50 }, // violet
-  { h: 222, s: 24, l: 60 }, // slate blue
-  { h: 357, s: 72, l: 52 }, // red
-  { h: 288, s: 16, l: 60 }, // dusk mauve
-  { h: 22, s: 64, l: 54 }, // amber
-  { h: 345, s: 14, l: 55 }, // desert rose
-  { h: 300, s: 28, l: 40 }, // plum
+  { h: 205, s: 71, l: 41 }, // #1f77b4 blue
+  { h: 28, s: 100, l: 53 }, // #ff7f0e orange
+  { h: 120, s: 57, l: 40 }, // #2ca02c green
+  { h: 360, s: 69, l: 50 }, // #d62728 red
+  { h: 271, s: 39, l: 57 }, // #9467bd purple
+  { h: 10, s: 30, l: 42 }, // #8c564b brown
+  { h: 318, s: 66, l: 68 }, // #e377c2 pink
+  { h: 0, s: 0, l: 50 }, // #7f7f7f gray
+  { h: 60, s: 70, l: 44 }, // #bcbd22 olive
+  { h: 186, s: 80, l: 45 }, // #17becf cyan
 ];
 const TONE = {
-  navy: PALETTE[0],
-  magenta: PALETTE[1],
-  gold: PALETTE[2],
-  violet: PALETTE[3],
-  slate: PALETTE[4],
-  red: PALETTE[5],
-  amber: PALETTE[7],
+  blue: PALETTE[0],
+  orange: PALETTE[1],
+  green: PALETTE[2],
+  red: PALETTE[3],
+  purple: PALETTE[4],
+  olive: PALETTE[8],
 };
 // Labels switch to white on fills darker than this
 const LIGHT_LABEL_BELOW = 52;
@@ -56,19 +54,19 @@ const COLOR_BY_OPTIONS: { value: ColorBy; text: string }[] = [
 ];
 // File extension -> tone, `null` tone is gray
 const TYPE_TONES: { text: string; exts: string[]; tone: Tone | null }[] = [
-  { text: "js", exts: ["js", "jsx", "mjs", "cjs"], tone: TONE.gold },
-  { text: "ts", exts: ["ts", "tsx"], tone: TONE.navy },
-  { text: "json", exts: ["json"], tone: TONE.amber },
+  { text: "js", exts: ["js", "jsx", "mjs", "cjs"], tone: TONE.olive },
+  { text: "ts", exts: ["ts", "tsx"], tone: TONE.blue },
+  { text: "json", exts: ["json"], tone: TONE.orange },
   {
     text: "images",
     exts: ["png", "jpg", "jpeg", "gif", "webp", "svg"],
-    tone: TONE.violet,
+    tone: TONE.purple,
   },
   { text: "other", exts: [], tone: null },
 ];
 const ISSUE_TONES: { text: string; tone: Tone | null }[] = [
   { text: "Duplicate", tone: TONE.red },
-  { text: "Can be removed", tone: TONE.amber },
+  { text: "Can be removed", tone: TONE.orange },
   { text: "No issues", tone: null },
 ];
 // Kept between re-renders (e.g. when the filter changes)
@@ -195,25 +193,25 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
   for (const canvas of [base, overlay]) {
     canvas.style.position = "absolute";
     canvas.style.left = "0";
-    canvas.style.top = "0";
+    canvas.style.top = `${BREADCRUMB_HEIGHT}px`;
   }
   overlay.style.cursor = "pointer";
   overlay.style.touchAction = "none";
 
-  const footer = document.createElement("div");
-  footer.className = "treemap-footer";
+  const header = document.createElement("div");
+  header.className = "treemap-header";
 
   const breadcrumb = document.createElement("div");
   breadcrumb.className = "treemap-breadcrumb";
 
   const controls = document.createElement("div");
   controls.className = "treemap-controls";
-  footer.append(breadcrumb, controls);
+  header.append(breadcrumb, controls);
 
   const tooltip = document.createElement("div");
   tooltip.className = "treemap-tooltip";
 
-  host.append(base, overlay, footer, tooltip);
+  host.append(header, base, overlay, tooltip);
 
   // Path from the full root to the zoomed-in node
   let focusPath: Root[] = [fullRoot];
@@ -516,7 +514,7 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
         ? event.offsetY - tooltip.offsetHeight - 8
         : event.offsetY + 12;
     tooltip.style.left = `${Math.max(left, 0)}px`;
-    tooltip.style.top = `${Math.max(top, 0)}px`;
+    tooltip.style.top = `${Math.max(top, 0) + BREADCRUMB_HEIGHT}px`;
   });
 
   overlay.addEventListener("mouseleave", () => {

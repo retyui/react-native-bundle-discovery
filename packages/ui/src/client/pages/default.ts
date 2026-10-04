@@ -60,6 +60,7 @@ discovery.page.define("default", [
       },
       {
         value: TABS.DUPLICATES,
+        when: "modules.filter(=> duplicates)",
         className: `main-tabs-${TABS.DUPLICATES}`,
         content: [
           "text:'Duplicates '",
@@ -72,7 +73,13 @@ discovery.page.define("default", [
         className: `main-tabs-${TABS.COMPARE}`,
         content: [
           "text:'Compare '",
-          `pill-badge: $d: comparison.summary.deltaInBytes; ($d > 0 ? '+' : $d < 0 ? '−' : '') + ($d < 0 ? -$d : $d).formatBytes()`,
+          {
+            view: "pill-badge",
+            data: "comparison.summary.deltaInBytes",
+            className: (delta: number) =>
+              `cmp-tab-delta-${delta > 0 ? "bad" : delta < 0 ? "good" : "ok"}`,
+            text: `=($ > 0 ? '+' : $ < 0 ? '−' : '') + ($ < 0 ? -$ : $).formatBytes()`,
+          },
         ],
       },
     ],
