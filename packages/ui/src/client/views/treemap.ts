@@ -11,8 +11,34 @@ import { isDark } from "./_colorScheme";
 type Root = Pick<TreemapNode, "name" | "children"> & Partial<TreemapNode>;
 type Rect = HierarchyRectangularNode<Root>;
 
-// Vivid, well separated hues: blue, green, amber, pink-red, cyan, violet, orange, magenta, lime
-const HUES = [217, 152, 40, 352, 190, 268, 20, 322, 95];
+// HSL color, lightness is for the light theme (the dark theme darkens it)
+type Tone = { h: number; s: number; l: number };
+
+// "Titanium & dusk": muted twilight tones mixed with vivid accents,
+// ordered so neighbouring packages contrast
+const PALETTE: Tone[] = [
+  { h: 214, s: 32, l: 42 }, // titanium navy
+  { h: 333, s: 62, l: 54 }, // magenta
+  { h: 43, s: 80, l: 55 }, // gold
+  { h: 276, s: 42, l: 50 }, // violet
+  { h: 222, s: 24, l: 60 }, // slate blue
+  { h: 357, s: 72, l: 52 }, // red
+  { h: 288, s: 16, l: 60 }, // dusk mauve
+  { h: 22, s: 64, l: 54 }, // amber
+  { h: 345, s: 14, l: 55 }, // desert rose
+  { h: 300, s: 28, l: 40 }, // plum
+];
+const TONE = {
+  navy: PALETTE[0],
+  magenta: PALETTE[1],
+  gold: PALETTE[2],
+  violet: PALETTE[3],
+  slate: PALETTE[4],
+  red: PALETTE[5],
+  amber: PALETTE[7],
+};
+// Labels switch to white on fills darker than this
+const LIGHT_LABEL_BELOW = 52;
 // Hue shift between sibling sub-folders of a package, per nesting level
 const HUE_SHIFT_STEPS = [8, 4];
 // Rectangles smaller than this are filled flat (no cushion gradient)
@@ -28,40 +54,49 @@ const COLOR_BY_OPTIONS: { value: ColorBy; text: string }[] = [
   { value: "type", text: "File type" },
   { value: "issues", text: "Issues" },
 ];
-// File extension -> hue, `null` hue is gray
-const TYPE_HUES: { text: string; exts: string[]; hue: number | null }[] = [
-  { text: "js", exts: ["js", "jsx", "mjs", "cjs"], hue: 50 },
-  { text: "ts", exts: ["ts", "tsx"], hue: 210 },
-  { text: "json", exts: ["json"], hue: 20 },
+// File extension -> tone, `null` tone is gray
+const TYPE_TONES: { text: string; exts: string[]; tone: Tone | null }[] = [
+  { text: "js", exts: ["js", "jsx", "mjs", "cjs"], tone: TONE.gold },
+  { text: "ts", exts: ["ts", "tsx"], tone: TONE.navy },
+  { text: "json", exts: ["json"], tone: TONE.amber },
   {
     text: "images",
     exts: ["png", "jpg", "jpeg", "gif", "webp", "svg"],
-    hue: 290,
+    tone: TONE.violet,
   },
-  { text: "other", exts: [], hue: null },
+  { text: "other", exts: [], tone: null },
 ];
-const ISSUE_HUES: { text: string; hue: number | null }[] = [
-  { text: "Duplicate", hue: 0 },
-  { text: "Can be removed", hue: 32 },
-  { text: "No issues", hue: null },
+const ISSUE_TONES: { text: string; tone: Tone | null }[] = [
+  { text: "Duplicate", tone: TONE.red },
+  { text: "Can be removed", tone: TONE.amber },
+  { text: "No issues", tone: null },
 ];
 // Kept between re-renders (e.g. when the filter changes)
 let colorBy: ColorBy = "package";
 
-function getTypeHue(name: string) {
+function getTypeTone(name: string) {
   const dot = name.lastIndexOf(".");
   const ext = dot === -1 ? "js" : name.slice(dot + 1).toLowerCase();
   return (
-    TYPE_HUES.find((t) => t.exts.includes(ext)) ??
-    TYPE_HUES[TYPE_HUES.length - 1]
-  ).hue;
+    TYPE_TONES.find((t) => t.exts.includes(ext)) ??
+    TYPE_TONES[TYPE_TONES.length - 1]
+  ).tone;
 }
 
-function getIssueHue(issues: string[] | undefined) {
+function getIssueTone(issues: string[] | undefined) {
   if (!issues?.length) return null;
   return issues.includes(DUPLICATE_ISSUE)
-    ? ISSUE_HUES[0].hue
-    : ISSUE_HUES[1].hue;
+    ? ISSUE_TONES[0].tone
+    : ISSUE_TONES[1].tone;
+}
+
+// Saturation and lightness for the current theme and nesting depth
+function shade(tone: Tone, depth: number, dark: boolean) {
+  // Nested folders get only slightly lighter, so tones stay rich
+  const lift = Math.min(depth * 1.5, 6);
+  return dark
+    ? { h: tone.h, s: Math.max(tone.s - 6, 0), l: tone.l - 10 + lift / 2 }
+    : { h: tone.h, s: tone.s, l: tone.l + lift };
 }
 
 function escapeHTML(str: string) {
@@ -100,27 +135,34 @@ function tooltipHTML(node: Root) {
 
 // Each package/folder at the first branching level gets its own hue,
 // descendants inherit it
-function assignHues(roots: Root[]) {
-  const hues = new Map<Root, number>();
+function assignTones(roots: Root[]) {
+  const tones = new Map<Root, Tone>();
   // Sub-folders of a package shift the hue a bit, so big packages
   // show their structure while keeping the package's color family
-  const inherit = (node: Root, hue: number, level = 0) => {
-    hues.set(node, hue);
+  const inherit = (node: Root, tone: Tone, level = 0) => {
+    tones.set(node, tone);
     const step = HUE_SHIFT_STEPS[level] ?? 0;
     (node.children ?? []).forEach((child, index) => {
-      inherit(child, hue + ((index % 5) - 2) * step, level + 1);
+      inherit(
+        child,
+        { ...tone, h: tone.h + ((index % 5) - 2) * step },
+        level + 1,
+      );
     });
   };
 
-  let i = 0;
-  for (const root of roots) {
+  // The heaviest package gets the first (hero) color, then the accents
+  const packages = roots.flatMap((root) => {
     let node = root;
     while (node.children?.length === 1) node = node.children[0];
-    for (const child of node.children ?? []) {
-      inherit(child, HUES[i++ % HUES.length]);
-    }
-  }
-  return hues;
+    return node.children ?? [];
+  });
+  packages
+    .sort((a, b) => (b.value ?? 0) - (a.value ?? 0))
+    .forEach((node, i) => {
+      inherit(node, PALETTE[i % PALETTE.length]);
+    });
+  return tones;
 }
 
 function truncate(
@@ -142,7 +184,7 @@ function truncate(
 
 function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
   const dark = isDark();
-  let hues = new Map<Root, number>();
+  let tones = new Map<Root, Tone>();
   const fullRoot: Root = { name: "Bundle", children: roots };
 
   host.style.position = "relative";
@@ -186,28 +228,29 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
   let offsetX = 0;
   let offsetY = 0;
 
-  function getHue(node: Rect) {
-    if (colorBy === "package") return hues.get(node.data);
+  function getTone(node: Rect) {
+    if (colorBy === "package") return tones.get(node.data);
     if (node.children) return undefined;
-    const hue =
+    const tone =
       colorBy === "type"
-        ? getTypeHue(node.data.name)
-        : getIssueHue(node.data.issues);
-    return hue ?? undefined;
+        ? getTypeTone(node.data.name)
+        : getIssueTone(node.data.issues);
+    return tone ?? undefined;
+  }
+
+  // Lightness of the fill (before the cushion gradient)
+  function fillLightness(node: Rect) {
+    const tone = getTone(node);
+    if (!tone) return dark ? 18 + node.depth * 4 : 88 - node.depth * 4;
+    return shade(tone, node.depth, dark).l;
   }
 
   // `delta` shifts the lightness, used for the cushion gradient
   function fill(node: Rect, delta = 0) {
-    const hue = getHue(node);
-    const depth = node.depth;
-    if (hue === undefined) {
-      const lightness = dark ? 18 + depth * 4 : 88 - depth * 4;
-      return `hsl(0 0% ${lightness + delta}%)`;
-    }
-    const lightness = dark
-      ? Math.min(38 + depth * 3, 52)
-      : Math.min(54 + depth * 3, 68);
-    return `hsl(${hue} ${dark ? 65 : 80}% ${lightness + delta}%)`;
+    const tone = getTone(node);
+    if (!tone) return `hsl(0 0% ${fillLightness(node) + delta}%)`;
+    const { h, s, l } = shade(tone, node.depth, dark);
+    return `hsl(${h} ${s}% ${l + delta}%)`;
   }
 
   // Lighter top-left, darker bottom-right corner
@@ -230,7 +273,7 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
     const focus = focusPath[focusPath.length - 1];
     // At the top, color packages inside "Source Code"/"node_modules";
     // when zoomed in, color the children of the zoomed folder
-    hues = assignHues(focusPath.length === 1 ? roots : [focus]);
+    tones = assignTones(focusPath.length === 1 ? roots : [focus]);
     root = hierarchy(focus)
       .sum((d) => (d.children?.length ? 0 : (d.value ?? 0)))
       .sort((a, b) => (b.value ?? 0) - (a.value ?? 0)) as Rect;
@@ -288,7 +331,8 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
       if (isFolder && h <= HEADER_HEIGHT * 2) continue;
       const label = truncate(ctx, node.data.name, w - 8);
       if (!label) continue;
-      ctx.fillStyle = dark ? "#eee" : "#111";
+      ctx.fillStyle =
+        dark || fillLightness(node) < LIGHT_LABEL_BELOW ? "#f4f4f6" : "#16161a";
       ctx.font = isFolder ? `bold ${FONT}` : FONT;
       ctx.fillText(label, node.x0 + 4, node.y0 + HEADER_HEIGHT / 2 + 1);
       ctx.font = FONT;
@@ -315,22 +359,22 @@ function createTreemap(host: HTMLElement, roots: TreemapNode[]) {
     );
   }
 
-  function swatch(hue: number | null) {
+  function swatch(tone: Tone | null) {
     const color =
-      hue === null
+      tone === null
         ? dark
           ? "hsl(0 0% 30%)"
           : "hsl(0 0% 78%)"
-        : `hsl(${hue} ${dark ? 65 : 80}% ${dark ? 45 : 58}%)`;
+        : (({ h, s, l }) => `hsl(${h} ${s}% ${l}%)`)(shade(tone, 2, dark));
     return `<span class="treemap-swatch" style="background:${color}"></span>`;
   }
 
   function renderControls() {
     const legend =
-      colorBy === "type" ? TYPE_HUES : colorBy === "issues" ? ISSUE_HUES : [];
+      colorBy === "type" ? TYPE_TONES : colorBy === "issues" ? ISSUE_TONES : [];
     controls.innerHTML = `
       <span class="treemap-legend">${legend
-        .map((item) => `<span>${swatch(item.hue)}${item.text}</span>`)
+        .map((item) => `<span>${swatch(item.tone)}${item.text}</span>`)
         .join("")}</span>
       <span class="treemap-color-by-label">Color by:</span>`;
     const group = document.createElement("span");
