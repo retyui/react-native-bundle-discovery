@@ -60,16 +60,14 @@ const recommendation: Recommendation = {
   id: "rn-issue-promise-polyfill",
   title: "Remove Promise polyfills",
   check: (report) => {
-    if (report.kind === "webpack") {
-      return null;
-    }
     const packages = report.packages;
     const modules = report.modules;
     const reactNativeVersion = getReactNativeVersion(packages);
 
-    const deadPromiseModules = modules.filter((module) =>
-      module?.path?.includes(deadCode),
-    );
+    // The `Promise.js` fix is Metro-only (`resolveRequest`); Metro reports have no `kind`
+    const deadPromiseModules = report.kind
+      ? []
+      : modules.filter((module) => module?.path?.includes(deadCode));
     const hasDeadPromiseModule = deadPromiseModules.length > 0;
 
     const removablePolyfills: string[] = [];

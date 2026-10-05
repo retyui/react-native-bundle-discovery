@@ -51,6 +51,7 @@ export interface TransformOptions {
 }
 
 export interface BundleReport {
+  kind?: string;
   date: number;
   entryPoint: string;
   rootFolder: string;

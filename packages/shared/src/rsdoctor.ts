@@ -134,6 +134,7 @@ export const transformRSDoctorData = (
   const tmpDependenciesMap = getDependenciesMap(rsdoctorData);
   const firstConfig = rsdoctorData.data.configs[0];
   return {
+    kind: "rsdoctor",
     date: Date.now(), // no info in rspack report
     entryPoint: getEntryFile(rsdoctorData),
     rootFolder: firstConfig.root,

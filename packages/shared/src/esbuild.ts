@@ -195,6 +195,7 @@ export const transformEsbuildMetafile = (
   });
 
   return {
+    kind: "esbuild",
     date: Date.now(), // no info in esbuild metafile
     entryPoint: entryPoint ? toAbsolute(entryPoint) : "",
     rootFolder,
