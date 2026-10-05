@@ -11,10 +11,15 @@ Creates a Metro `resolveRequest` that removes unnecessary React Native modules f
 
 ## Options
 
-| Option              | Type      | Default | Description                                                                      |
-| ------------------- | --------- | ------- | -------------------------------------------------------------------------------- |
-| `removeUTFSequence` | `boolean` | `false` | Remove the unused `react-native/Libraries/UTFSequence.js` module.                |
-| `removeNewRenderer` | `boolean` | `false` | Remove the Fabric renderer. Enable only if the New Architecture is **disabled**. |
+| Option                  | Type      | Default | Description                                                                                          |
+| ----------------------- | --------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| `removeUTFSequence`     | `boolean` | `false` | Remove the unused `react-native/Libraries/UTFSequence.js` module.                                    |
+| `removePromisePolyfill` | `boolean` | `false` | Remove the `react-native/Libraries/Promise.js` polyfill. Enable only if you use **Hermes**.           |
+| `removeNewRenderer`     | `boolean` | `false` | Remove the Fabric renderer. Enable only if the New Architecture is **disabled**.                     |
+
+<Callout type="warn">
+`removePromisePolyfill` relies on Hermes' built-in `Promise`: React Native loads `Promise.js` only when Hermes' `Promise` isn't available. With JSC, `global.Promise` would be replaced with an empty module.
+</Callout>
 
 ## Example
 
@@ -25,6 +30,7 @@ const config = {
   resolver: {
     resolveRequest: createResolveRequest({
       removeUTFSequence: true,
+      removePromisePolyfill: true, // Hermes only
     }),
   },
 };

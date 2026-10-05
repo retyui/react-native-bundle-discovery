@@ -349,9 +349,11 @@ const empty = { type: "empty" } as const;
  */
 const createResolveRequest = ({
   removeNewRenderer = false, // Should be true when new ARCH is disabled
+  removePromisePolyfill = false, // Remove useless polyfill (Hermes already has Promise)
   removeUTFSequence = false, // Remove useless code
 }: {
   removeNewRenderer?: boolean;
+  removePromisePolyfill?: boolean;
   removeUTFSequence?: boolean;
 } = {}) => {
   const resolveRequest = (
@@ -365,6 +367,12 @@ const createResolveRequest = ({
     if (
       removeUTFSequence &&
       result?.filePath?.endsWith("/react-native/Libraries/UTFSequence.js")
+    ) {
+      return empty;
+    }
+    if (
+      removePromisePolyfill &&
+      result?.filePath?.endsWith("/react-native/Libraries/Promise.js")
     ) {
       return empty;
     }
