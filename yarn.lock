@@ -6622,8 +6622,11 @@ __metadata:
     chalk: "npm:^4.1.2"
   peerDependencies:
     metro: "*"
+    rollipop: "*"
   peerDependenciesMeta:
     metro:
+      optional: true
+    rollipop:
       optional: true
   languageName: unknown
   linkType: soft

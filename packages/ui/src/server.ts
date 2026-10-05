@@ -59,7 +59,9 @@ export function serve(
     }
   }
 
-  const configFile = path.resolve(__dirname, "./.tmp.js");
+  // One config per port: discovery.js reads it lazily, so a shared file would
+  // make every running server serve the report of the last one started
+  const configFile = path.resolve(__dirname, `./.tmp-${PORT}.js`);
 
   if (verbose) {
     console.info(

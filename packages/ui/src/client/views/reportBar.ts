@@ -26,6 +26,10 @@ function chip(text: string, kind: string, title?: string) {
 // Only a wrong build setup is loud: it makes every size in the report misleading
 function renderBuild(s: Summary) {
   const chips = [
+    // Metro is the default, so only other bundlers are shown
+    s.kind && s.kind !== "metro"
+      ? chip(escapeHTML(s.kind), "platform", "Report kind")
+      : "",
     s.platform ? chip(escapeHTML(platformName(s.platform)), "platform") : "",
   ];
   if (s.dev === true) {

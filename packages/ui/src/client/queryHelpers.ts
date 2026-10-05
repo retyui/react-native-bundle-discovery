@@ -438,6 +438,7 @@ const helpers = {
     }
     const options = report.transformOptions;
     return {
+      kind: report.kind ?? null,
       platform: options?.platform ?? null,
       // `null` when the report has no such info (e.g. non-Metro reports)
       dev: typeof options?.dev === "boolean" ? options.dev : null,

@@ -13,7 +13,7 @@
   "bin": "./dist/bin.js",
   "files": [
     "dist",
-    "!dist/.tmp.js",
+    "!dist/.tmp*.js",
     "assets"
   ],
   "scripts": {
