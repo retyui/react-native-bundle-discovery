@@ -1,5 +1,13 @@
 # react-native-bundle-discovery-rozenite-plugin
 
+## 2.9.1
+
+### Patch Changes
+
+- Updated dependencies [[`bcd0922`](https://github.com/retyui/react-native-bundle-discovery/commit/bcd09227bd83179005e484146c527cb01ad0d589), [`e3ff2b1`](https://github.com/retyui/react-native-bundle-discovery/commit/e3ff2b1546289f054a8103958698ca8b47016763)]:
+  - react-native-bundle-discovery-ui@2.9.1
+  - react-native-bundle-discovery@2.9.1
+
 ## 2.9.0
 
 ### Patch Changes
