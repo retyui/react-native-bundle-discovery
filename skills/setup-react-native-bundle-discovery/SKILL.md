@@ -3,8 +3,8 @@ name: setup-react-native-bundle-discovery
 description: >
   Install ONLY the `react-native-bundle-discovery` package and wire it into a React Native
   project so a bundle report is generated when the `BUNDLE_ANALYZER` env var
-  is set. Works for both plain Metro projects (via `createSerializer` in
-  `metro.config.js`) and Re.Pack projects (via `BundleDiscoveryPlugin` in
+  is set. Works for plain Metro projects and Expo projects (via
+  `createSerializer` in `metro.config.js`) and Re.Pack projects (via `BundleDiscoveryPlugin` in
   `rspack.config.mjs` / `webpack.config.js`). Use this skill whenever the user
   asks to "add bundle analysis", "install react-native-bundle-discovery",
   "set up BUNDLE_ANALYZER", or similar.
@@ -25,6 +25,9 @@ Inspect the repo root (and any workspace packages) for:
 - **Re.Pack project**: a `rspack.config.mjs`, `rspack.config.js`, or
   `webpack.config.js` that imports `@callstack/repack` and calls
   `Repack.defineRspackConfig(...)` / `Repack.defineWebpackConfig(...)`.
+- **Expo project**: `expo` is in `package.json` dependencies, and
+  `metro.config.js` (if present) uses `getDefaultConfig` from
+  `expo/metro-config`.
 - **Plain Metro project**: a `metro.config.js` and no Re.Pack bundler config.
 
 **Conflict rule:** if the project contains both a `metro.config.js` and a
@@ -173,6 +176,42 @@ export default Repack.defineRspackConfig({
 });
 ```
 
+## Step 3c — Expo project: edit `metro.config.js`
+
+If the project has no `metro.config.js`, create it with
+`npx expo customize metro.config.js` (or write the file below by hand).
+
+Expo ships its own serializer, so **always** pass the existing
+`config.serializer.customSerializer` through the `serializer` option — never
+replace it:
+
+```js
+// metro.config.js
+const { getDefaultConfig } = require('expo/metro-config');
+const { createSerializer } = require('react-native-bundle-discovery');
+
+const config = getDefaultConfig(__dirname);
+
+// ...keep existing config changes here...
+
+if (process.env.BUNDLE_ANALYZER) {
+  config.serializer.customSerializer = createSerializer({
+    projectRoot: __dirname, // ⚠️ In a monorepo, use the monorepo root instead
+    serializer: config.serializer.customSerializer,
+    // `expo export:embed` force-exits before the background npm metadata fetch
+    // finishes, so the report would never be written
+    fetchPackagesMetadata: false,
+  });
+}
+
+module.exports = config;
+```
+
+If the config is wrapped (e.g. `withSentryConfig(...)`, `withNativeWind(...)`,
+or created by `getSentryExpoConfig(...)`), keep the wrapper as it is and
+insert the `if (process.env.BUNDLE_ANALYZER)` block on the final `config`
+object right before `module.exports`.
+
 ## Step 4 — Explain how to build with the flag enabled
 
 ```bash
@@ -182,6 +221,19 @@ BUNDLE_ANALYZER=1 npx react-native bundle \
   --dev false \
   --bundle-output ios/main.jsbundle \
   --assets-dest ios/assets --reset-cache
+```
+
+For **Expo** projects use `expo export:embed` instead (if the project does
+not use Expo Router, set `--entry-file` to the `main` entry from
+`package.json`):
+
+```bash
+BUNDLE_ANALYZER=1 npx expo export:embed \
+  --platform ios \
+  --dev false \
+  --entry-file node_modules/expo-router/entry.js \
+  --bundle-output build/ios/main.jsbundle \
+  --assets-dest build/ios
 ```
 
 After the build, a `metro-stats.json` file will be generated in the project
@@ -202,6 +254,12 @@ those extra packages if the user asks for them.
   `webpack.config.js` — merge in the minimal diff.
 - If the project is a monorepo, set `projectRoot` (Metro) to the monorepo
   root, not the individual package directory.
+- In Expo projects, always pass Expo's `config.serializer.customSerializer`
+  to `createSerializer` as the `serializer` option.
+- In Expo projects, always set `fetchPackagesMetadata: false` —
+  `expo export:embed` force-exits the process
+  (https://github.com/expo/expo/blob/b26add4d7d270e3bf3e7b9d4d048c50d60f544de/packages/%40expo/cli/src/utils/exit.ts#L125)
+  before the metadata fetch finishes, so the report would never be written.
 - If the project already has its own `config.serializer.customSerializer` in
   `metro.config.js`, do not discard it — pass it to `createSerializer` as the
   `serializer` option so it keeps running.
@@ -213,6 +271,7 @@ those extra packages if the user asks for them.
 ## References in this repo
 
 - https://retyui.github.io/bundle-discovery/ — full setup docs.
+- https://retyui.github.io/bundle-discovery/docs/guides/expo — Expo-specific docs.
 - https://retyui.github.io/bundle-discovery/docs/guides/repack — Re.Pack-specific `BundleDiscoveryPlugin` docs.
 - `packages/serializer/src/index.ts` — `createSerializer` implementation.
 - `packages/serializer/src/webpack.ts` — `BundleDiscoveryPlugin` implementation.

@@ -3,7 +3,7 @@ title: "Quick start"
 ---
 
 This setup is for a standard **Metro** project.
-Using Re.Pack or Rozenite? See [Other setups](/docs/getting-started/other-setups).
+Using Expo, Re.Pack or Rozenite? See [Other setups](/docs/getting-started/other-setups).
 
 <Callout type="info" title="Using an AI coding agent?">
 Skip the manual steps below and point your agent at the
@@ -24,24 +24,26 @@ yarn add -D react-native-bundle-discovery-cli  # optional: CLI
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 +const { createSerializer } = require('react-native-bundle-discovery');
 
--const config = {};
-+const config = {
-+  serializer: {
+const config = {};
+
++if (process.env.BUNDLE_ANALYZER) {
++  config.serializer = {
 +    customSerializer: createSerializer({
 +      projectRoot: __dirname, // ⚠️ In a monorepo, use the monorepo root instead
 +    }),
-+  },
-+};
++  };
++}
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);
 ```
 
+The report is generated only when the `BUNDLE_ANALYZER` environment variable is set, so regular builds are unaffected.
 See all options in [`createSerializer`](/docs/api/create-serializer).
 
 ## 3. Build a release bundle
 
 ```bash
-npx react-native bundle \
+BUNDLE_ANALYZER=1 npx react-native bundle \
   --entry-file index.js \
   --platform ios \
   --dev false \

@@ -1,5 +1,14 @@
 {
   "title": "Guides",
   "defaultOpen": true,
-  "pages": ["ui", "cli", "ci", "repack", "rnx-kit", "rozenite", "ai-agent"]
+  "pages": [
+    "ui",
+    "cli",
+    "ci",
+    "expo",
+    "repack",
+    "rnx-kit",
+    "rozenite",
+    "ai-agent"
+  ]
 }

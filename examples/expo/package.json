@@ -1,0 +1,49 @@
+{
+  "name": "expo-example",
+  "main": "expo-router/entry",
+  "version": "1.0.0",
+  "dependencies": {
+    "@expo/ui": "~57.0.21",
+    "expo": "~57.0.26",
+    "expo-constants": "~57.0.20",
+    "expo-device": "~57.0.2",
+    "expo-font": "~57.0.4",
+    "expo-glass-effect": "~57.0.4",
+    "expo-image": "~57.0.5",
+    "expo-linking": "~57.0.11",
+    "expo-router": "~57.0.24",
+    "expo-splash-screen": "~57.0.9",
+    "expo-status-bar": "~57.0.1",
+    "expo-symbols": "~57.0.3",
+    "expo-system-ui": "~57.0.4",
+    "expo-web-browser": "~57.0.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-gesture-handler": "~2.32.0",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-web": "~0.21.0",
+    "react-native-worklets": "0.10.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "react-native-bundle-discovery": "^2.9.0",
+    "react-native-bundle-discovery-cli": "^2.9.0",
+    "react-native-bundle-discovery-ui": "^2.9.0",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "reset-project": "node ./scripts/reset-project.js",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "lint": "expo lint",
+    "build-ios": "npx expo export:embed --platform ios --dev false --entry-file node_modules/expo-router/entry.js --bundle-output build/ios/main.jsbundle --assets-dest build/ios",
+    "build-android": "npx expo export:embed --platform android --dev false --entry-file node_modules/expo-router/entry.js --bundle-output build/android/index.android.bundle --assets-dest build/android",
+    "discovery": "npx react-native-bundle-discovery-ui metro-stats.json --port 8094"
+  },
+  "private": true
+}

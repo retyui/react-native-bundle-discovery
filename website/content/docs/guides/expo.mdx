@@ -1,0 +1,64 @@
+---
+title: "Expo"
+---
+
+For [Expo](https://expo.dev/) projects, wrap Expo's own Metro serializer with `createSerializer`.
+
+<Callout type="info">
+Using an AI coding agent? Point it at the [`setup-react-native-bundle-discovery`](/docs/guides/ai-agent) skill to install `react-native-bundle-discovery` automatically.
+</Callout>
+
+1. Install the package:
+
+```bash
+yarn add -D react-native-bundle-discovery
+```
+
+2. Wrap the serializer in `metro.config.js` (run `npx expo customize metro.config.js` if you don't have one yet):
+
+```diff title="metro.config.js"
+const { getDefaultConfig } = require('expo/metro-config');
++const { createSerializer } = require('react-native-bundle-discovery');
+
+const config = getDefaultConfig(__dirname);
+
++if (process.env.BUNDLE_ANALYZER) {
++  config.serializer.customSerializer = createSerializer({
++    projectRoot: __dirname, // ⚠️ In a monorepo, use the monorepo root instead
++    serializer: config.serializer.customSerializer, // keep Expo's serializer
++    // `expo export:embed` force-exits before the background npm metadata fetch
++    // finishes, so the report would never be written
++    fetchPackagesMetadata: false,
++  });
++}
+
+module.exports = config;
+```
+
+<Callout type="warn" title="Why `fetchPackagesMetadata: false`?">
+`expo export:embed` [force-exits the process](https://github.com/expo/expo/blob/b26add4d7d270e3bf3e7b9d4d048c50d60f544de/packages/%40expo/cli/src/utils/exit.ts#L125) right after the bundle is written.
+The npm registry metadata (publish date, deprecation, latest version) is fetched in the background, so the report would never be saved.
+Without it, the deprecated and outdated package recommendations are not available.
+</Callout>
+
+See all options in [`createSerializer`](/docs/api/create-serializer).
+
+3. Build a release bundle with the `BUNDLE_ANALYZER` environment variable:
+
+```bash
+BUNDLE_ANALYZER=1 npx expo export:embed \
+  --platform ios \
+  --dev false \
+  --entry-file node_modules/expo-router/entry.js \
+  --bundle-output build/ios/main.jsbundle \
+  --assets-dest build/ios
+```
+
+Not using Expo Router? Point `--entry-file` at your app entry (the `main` field of `package.json`, e.g. `index.js`).
+
+4. After the build, `metro-stats.json` is in the root of your project. Analyze it:
+
+```bash
+npx react-native-bundle-discovery-ui metro-stats.json   # UI
+npx react-native-bundle-discovery-cli metro-stats.json  # CLI
+```
