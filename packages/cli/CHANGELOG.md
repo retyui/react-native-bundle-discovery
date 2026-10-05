@@ -1,5 +1,11 @@
 # react-native-bundle-discovery-cli
 
+## 2.9.0
+
+### Minor Changes
+
+- [#23](https://github.com/retyui/react-native-bundle-discovery/pull/23) [`6271156`](https://github.com/retyui/react-native-bundle-discovery/commit/627115602e54b474670fcaf42b1599570fc76940) Thanks [@retyui](https://github.com/retyui)! - `analyze`: recommendations now include an estimated `sizeInBytes` saving and the affected `modules` (JSON output), and print a "Savings" line. Duplicate package entries with the same path are no longer counted as savings.
+
 ## 2.8.0
 
 ### Minor Changes

@@ -1,5 +1,14 @@
 # react-native-bundle-discovery-rozenite-plugin
 
+## 2.9.0
+
+### Patch Changes
+
+- [#23](https://github.com/retyui/react-native-bundle-discovery/pull/23) [`6271156`](https://github.com/retyui/react-native-bundle-discovery/commit/627115602e54b474670fcaf42b1599570fc76940) Thanks [@retyui](https://github.com/retyui)! - New default "Insights" tab: bundle summary cards, heaviest packages and own modules, and the optimization recommendations of the `analyze` CLI command ranked by estimated savings (production reports only). Header badges show the share of the bundle, the treemap can be colored by package, file type or issues (duplicates / removable code), the "Duplicates" tab lists duplicate packages with possible savings, and the package page shows the shortest import chain ("Why is this in my bundle?").
+- Updated dependencies [[`9a7d932`](https://github.com/retyui/react-native-bundle-discovery/commit/9a7d9325d6039354ba661d68b47eef85dc8334ff), [`1819d53`](https://github.com/retyui/react-native-bundle-discovery/commit/1819d53c4c0b560f186c90d8cf9cfabf52d2be5e), [`6271156`](https://github.com/retyui/react-native-bundle-discovery/commit/627115602e54b474670fcaf42b1599570fc76940), [`d40a350`](https://github.com/retyui/react-native-bundle-discovery/commit/d40a350eb97f2077a84c28421d2d063288167577), [`237407e`](https://github.com/retyui/react-native-bundle-discovery/commit/237407e43ffaf3a298f86fce71ff0e3850e5015f), [`2cfe22d`](https://github.com/retyui/react-native-bundle-discovery/commit/2cfe22dda8ded6fd37076aadde194a4142c46c7a), [`2cfe22d`](https://github.com/retyui/react-native-bundle-discovery/commit/2cfe22dda8ded6fd37076aadde194a4142c46c7a), [`9331e2f`](https://github.com/retyui/react-native-bundle-discovery/commit/9331e2f875f4b6cdeeda4ccda2ac5bb2c03700cd), [`a910869`](https://github.com/retyui/react-native-bundle-discovery/commit/a910869464542f8bdfe62776ca8f608610a3a735), [`86b7729`](https://github.com/retyui/react-native-bundle-discovery/commit/86b77297be8530b55c490f4f7130c7f0fc3fce9d), [`5817574`](https://github.com/retyui/react-native-bundle-discovery/commit/58175749496a860dbfa87da7fbdd7a9e8dd67844)]:
+  - react-native-bundle-discovery-ui@2.9.0
+  - react-native-bundle-discovery@2.9.0
+
 ## 2.8.0
 
 ### Patch Changes

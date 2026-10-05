@@ -1,6 +1,6 @@
 {
   "name": "react-native-bundle-discovery-cli",
-  "version": "2.8.0",
+  "version": "2.9.0",
   "description": "Analyze and compare React Native bundle reports in the terminal / CI",
   "repository": {
     "type": "git",
