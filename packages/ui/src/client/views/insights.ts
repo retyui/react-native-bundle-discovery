@@ -1,4 +1,5 @@
 import type helpers from "../queryHelpers";
+import { SIZE_HEAT_MIN, SIZE_HEAT_TOP } from "../sizeHeat";
 import { card, escapeHTML, formatBytes, formatPercent, plural } from "./_html";
 
 type Insights = ReturnType<typeof helpers.bundleInsights>;
@@ -12,12 +13,16 @@ function topList(
   if (items.length === 0) return "";
   const rows = items
     .map(
-      (item) => `
+      (item, index) => `
       <a class="in-row" href="${escapeHTML(discovery.encodePageHash(page, item.name))}">
         <span class="in-row-name" title="${escapeHTML(item.name)}">${escapeHTML(item.name)}${
           badge ? badge(item as Insights["topPackages"][number]) : ""
         }</span>
-        <span class="in-row-size">${formatBytes(item.size)}</span>
+        <span class="in-row-size${
+          index < SIZE_HEAT_TOP && item.size > SIZE_HEAT_MIN
+            ? ` size-heat size-heat-${SIZE_HEAT_TOP - index}`
+            : ""
+        }">${formatBytes(item.size)}</span>
         <span class="in-row-share">${formatPercent(item.share)}</span>
         <span class="in-row-bar"><span style="width:${Math.max(item.bar * 100, 1).toFixed(2)}%"></span></span>
       </a>`,

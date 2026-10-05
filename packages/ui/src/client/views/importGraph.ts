@@ -136,7 +136,7 @@ function createGraph(host: HTMLElement, data: GraphData) {
       svg("circle", {
         r: radius(point),
         fill: nodeColor(point.data),
-        stroke: dark ? "#111" : "#fff",
+        stroke: dark ? "#161618" : "#f1f1ef",
         "stroke-width": 1.5,
       }),
     );

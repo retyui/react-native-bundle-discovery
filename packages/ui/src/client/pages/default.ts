@@ -160,7 +160,7 @@ discovery.page.define("default", [
                 isEntry: $.isEntry,
                 reasons: $.dependents.map(=> $.$toModule()),
                 duplicates: $.duplicates.map(=> $.$toModule()),
-              })
+              }).withSizeHeat("sizeInBytes")
             `,
           }),
         },
@@ -168,7 +168,7 @@ discovery.page.define("default", [
           when: `#.id="${TABS.PACKAGES}"`,
           content: [
             getSortableContentFilter({
-              data: getPackage(`modules.filter(=> path has "node_modules")`),
+              data: `(${getPackage(`modules.filter(=> path has "node_modules")`)}).withSizeHeat("size")`,
               className: "packages-content",
               nameField: "pkgName",
               sizeField: "size",
@@ -241,7 +241,7 @@ discovery.page.define("default", [
                 view: "text",
                 when: "not duplicatePackages",
                 className: "dup-empty",
-                data: "'✅ Every package is bundled only once'",
+                data: "'Every package is bundled only once.'",
               },
               {
                 view: "h3",

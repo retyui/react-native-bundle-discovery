@@ -144,7 +144,6 @@ const metadataTooltip = {
   when: "metadata.createdAt",
   data: "'Published ' + metadata.createdAt.formatDate() + ' (' + metadata.createdAt.timeAgo() + ')'",
 };
-const outdatedColor = "rgba(255, 165, 0, 0.35)";
 
 // Compact npm metadata badges (`metadata` from the report)
 function getMetadataBadges({
@@ -162,24 +161,25 @@ function getMetadataBadges({
     {
       view: "pill-badge",
       when: deprecated,
-      data: `{ text: '⚠️ deprecated', message: ${deprecated} }`,
-      color: "#cf222e",
-      textColor: "white",
-      darkColor: "#f85149",
-      darkTextColor: "white",
+      className: "badge-deprecated",
+      data: `{ text: 'deprecated', message: ${deprecated} }`,
       tooltip: "text: message",
     },
     renderLatestVersion
       ? {
           view: "pill-badge",
           when: outdated,
+          className: "badge-warn",
           data: `{ text: '↑ v' + ${latestVersion} }`,
-          color: outdatedColor,
           tooltip: "text: 'Latest version on npm'",
         }
       : null,
   ].filter(Boolean) as SingleViewConfig[];
 }
+
+// Set on the size badge of the biggest items, see `withSizeHeat()` query helper
+// (evaluated against the badge's data, so the data has to carry `sizeHeat`)
+const SIZE_HEAT_CLASS = "=sizeHeat ? 'size-heat size-heat-' + sizeHeat : ''";
 
 function getPackageList({
   data,
@@ -199,7 +199,7 @@ function getPackageList({
   return {
     view: "list",
     data,
-    emptyText: "⚠️ No packages found",
+    emptyText: "No packages found.",
     limit,
     item: {
       view: "tree",
@@ -208,7 +208,11 @@ function getPackageList({
         content: [
           itemPkgName,
           "text: ' '",
-          "pill-badge:{ text: size.formatBytes(), color: 'rgba(120, 177, 9, 0.35)' }",
+          {
+            view: "pill-badge",
+            className: SIZE_HEAT_CLASS,
+            data: "{ text: size.formatBytes(), sizeHeat }",
+          },
           // Summary of all instances (visible when the tree is collapsed)
           ...getMetadataBadges({
             deprecated: "pkgInstances.metadata.deprecated[0]",
@@ -220,8 +224,8 @@ function getPackageList({
             ? {
                 view: "pill-badge",
                 when: "pkgInstances.size() > 1",
+                className: "badge-danger",
                 data: "(pkgInstances.size() - 1).pluralBadge(['copy','copies'], '+')",
-                color: "rgba(255, 0, 0, 0.35)",
               }
             : null,
           {
@@ -274,7 +278,11 @@ function getTreeModule({
   hasPercent?: boolean;
 } = {}): ViewConfig[] {
   return [
-    "pill-badge:{ text: ext, color: ext.getExtColor() }",
+    {
+      view: "pill-badge",
+      className: "ext-badge",
+      data: "{ text: ext, color: ext.getExtColor() }",
+    },
     hasTextMatch
       ? {
           view: "link",
@@ -297,7 +305,11 @@ function getTreeModule({
       color: "gold",
       textColor: "black",
     },
-    "pill-badge:{ text: size, color: 'rgba(120, 177, 9, 0.35)' }",
+    {
+      view: "pill-badge",
+      className: SIZE_HEAT_CLASS,
+      data: "{ text: size, sizeHeat }",
+    },
     hasPercent
       ? "pill-badge:{ text: percent, color: 'rgba(120, 177, 9, 0.35)' }"
       : null,
@@ -319,7 +331,7 @@ function getModulesTree({
     view: "list",
     limit,
     data: listData,
-    emptyText: "⚠️ No modules found",
+    emptyText: "No modules found.",
     item: {
       view: "tree",
       expanded: false,
@@ -505,7 +517,7 @@ function getInsightsTab(): SingleViewConfig {
       {
         view: "alert-success",
         when: "hasRecommendations and not findings",
-        content: "text: '✅ No recommendations: the bundle looks good!'",
+        content: "text: 'No recommendations.'",
       },
       { view: "list", data: "findings", item: findingItem },
     ],

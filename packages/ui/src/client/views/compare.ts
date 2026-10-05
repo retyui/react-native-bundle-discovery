@@ -144,7 +144,7 @@ function renderWarnings({ transformOptionsDiff, summary }: Comparison) {
   if (items.length === 0) return "";
   return `
     <div class="cmp-warning">
-      ⚠️ The reports were built with different options, so sizes are not directly comparable: ${items.join(", ")}
+      The reports were built with different options, so sizes are not directly comparable: ${items.join(", ")}
     </div>`;
 }
 
@@ -203,7 +203,7 @@ function render({ comparison: c, modulePaths }: CompareViewData) {
     return row({
       name: pkg.id,
       href: packageHref(name),
-      badge: ` ${chip("deprecated", "warn")}`,
+      badge: ` ${chip("deprecated", "deprecated")}`,
       detail: escapeHTML(pkg.reason ?? ""),
       delta: 0,
     });
@@ -246,7 +246,7 @@ function render({ comparison: c, modulePaths }: CompareViewData) {
     ${
       hasChanges
         ? ""
-        : `<div class="dup-empty cmp-empty">✅ No differences between the reports</div>`
+        : `<div class="dup-empty cmp-empty">No differences between the reports.</div>`
     }
     <div class="cmp-sections">
       ${section("Biggest growth", "by package / folder", contributors)}

@@ -22,7 +22,7 @@ function renderHeader(o: Overview) {
         ? ""
         : chip("Source code", "src"),
     o.injectedBy ? chip(`Injected by ${o.injectedBy}`, "warn") : "",
-    o.pkg?.metadata?.deprecated ? chip("Deprecated", "danger") : "",
+    o.pkg?.metadata?.deprecated ? chip("Deprecated", "deprecated") : "",
     o.pkg?.metadata && !o.pkg.metadata.isLatest && o.pkg.metadata.latestVersion
       ? chip(`Latest v${escapeHTML(o.pkg.metadata.latestVersion)}`, "warn")
       : "",
@@ -32,27 +32,13 @@ function renderHeader(o: Overview) {
 
   return `
     <div class="mo-header">
-      <span class="mo-ext" style="background:${extColor(o.ext)}">${escapeHTML(o.ext)}</span>
+      <span class="mo-ext">${escapeHTML(o.ext)}</span>
       <div class="mo-title">
         <div class="mo-dir">${escapeHTML(o.dir)}</div>
         <div class="mo-file">${escapeHTML(o.file)}</div>
         <div class="mo-chips">${chips}</div>
       </div>
     </div>`;
-}
-
-// Same palette as `getExtColor` query helper, but opaque enough for a badge
-function extColor(ext: string) {
-  const colors: Record<string, string> = {
-    js: "#f1e05a",
-    ts: "#3178c6",
-    tsx: "#3178c6",
-    json: "#e34c26",
-    svg: "#e69f0d",
-    css: "#563d7c",
-    png: "#e44b23",
-  };
-  return `${colors[ext] ?? colors.js}55`;
 }
 
 function renderCards(o: Overview) {

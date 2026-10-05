@@ -31,7 +31,7 @@ function renderBuild(s: Summary) {
   if (s.dev === true) {
     chips.push(
       chip(
-        "⚠ Dev bundle",
+        "Dev bundle",
         "warn",
         "__DEV__ is true: the bundle has dev-only code, so sizes are bigger than in production. Build with --dev false.",
       ),
@@ -42,7 +42,7 @@ function renderBuild(s: Summary) {
   if (s.minify === false) {
     chips.push(
       chip(
-        "⚠ Not minified",
+        "Not minified",
         "warn",
         "Minify is off: sizes are bigger than in a release build. Build with --minify true.",
       ),

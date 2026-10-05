@@ -43,7 +43,7 @@ const HUE_SHIFT_STEPS = [8, 4];
 const MIN_SHADED_SIZE = 6;
 const HEADER_HEIGHT = 16;
 const BREADCRUMB_HEIGHT = 26;
-const FONT = "11px system-ui, -apple-system, sans-serif";
+const FONT = '11px "Geist Mono", ui-monospace, monospace';
 const MAX_SCALE = 64;
 
 type ColorBy = "package" | "type" | "issues";

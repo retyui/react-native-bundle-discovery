@@ -17,9 +17,9 @@
     "assets"
   ],
   "scripts": {
-    "build": "run -T tsdown && run -T prettier --write --log-level warn --ignore-path= \"dist/**/*.js\"",
+    "build": "run -T tsdown && node scripts/fonts.mjs && run -T prettier --write --log-level warn --ignore-path= \"dist/**/*.js\"",
     "typecheck": "run -T tsc -p tsconfig.json && run -T tsc -p src/client/tsconfig.json",
-    "dev": "run -T tsdown && NODE_ENV=development discovery --config dist/discoveryrc.js",
+    "dev": "run -T tsdown && node scripts/fonts.mjs && NODE_ENV=development discovery --config dist/discoveryrc.js",
     "prepack": "cp ../../README.md README.md"
   },
   "dependencies": {
@@ -32,6 +32,8 @@
     "prettier": "^3.9.6"
   },
   "devDependencies": {
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
     "@react-native-bundle-discovery/shared": "workspace:*",
     "@types/d3-hierarchy": "^3.1.7",
     "@types/minimist": "^1.2.5"

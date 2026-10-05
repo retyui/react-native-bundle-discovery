@@ -26,7 +26,7 @@ function renderHeader(o: Overview) {
 
   const chips = [
     ...o.versions.map((version) => chip(`v${escapeHTML(version)}`, "pkg")),
-    o.deprecated.length ? chip("Deprecated", "danger") : "",
+    o.deprecated.length ? chip("Deprecated", "deprecated") : "",
     o.isOutdated && o.latestVersion
       ? chip(`Latest v${escapeHTML(o.latestVersion)}`, "warn")
       : "",

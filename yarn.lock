@@ -809,6 +809,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource-variable/geist-mono@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/geist-mono@npm:5.3.0"
+  checksum: 10c0/21a4097b3ccce08cbc181199f68a9193adc17d997ef8d883eab7565c6d79a82b2f8d7656f32f97b66f1f0b4ebba78a1a822c6318d55e0c5f572d74683ab036ee
+  languageName: node
+  linkType: hard
+
+"@fontsource-variable/geist@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/geist@npm:5.3.0"
+  checksum: 10c0/6b1d1d249643377c885d040769bf0964f242e8d03c4470535329ad4eed3d30a8134fea0d45c0b99b8069924a1f506a3bcb5b8d9cea77b7b5234dc7dd57371842
+  languageName: node
+  linkType: hard
+
 "@fuma-translate/react@npm:^1.0.2":
   version: 1.0.2
   resolution: "@fuma-translate/react@npm:1.0.2"
@@ -6557,6 +6571,8 @@ __metadata:
   dependencies:
     "@discoveryjs/cli": "npm:2.14.7"
     "@discoveryjs/discovery": "npm:1.0.0-beta.99"
+    "@fontsource-variable/geist": "npm:^5.3.0"
+    "@fontsource-variable/geist-mono": "npm:^5.3.0"
     "@react-native-bundle-discovery/shared": "workspace:*"
     "@types/d3-hierarchy": "npm:^3.1.7"
     "@types/minimist": "npm:^1.2.5"

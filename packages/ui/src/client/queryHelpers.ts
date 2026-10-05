@@ -1,5 +1,6 @@
 import type { RecommendationFinding } from "@react-native-bundle-discovery/shared";
 import type { PreparedModule, PreparedReport } from "./prepare";
+import { SIZE_HEAT_MIN, SIZE_HEAT_TOP } from "./sizeHeat";
 
 interface TreeNode {
   size: number;
@@ -27,6 +28,26 @@ export type Severity = "high" | "medium" | "low";
 // A finding is "high" when it saves at least 1% of the bundle
 const HIGH_SEVERITY_SHARE = 0.01;
 const TOP_LIST_SIZE = 8;
+// A color per file extension, unknown ones get a color from their name
+const EXT_COLORS: Record<string, string> = {
+  js: "#d4a72c",
+  jsx: "#0ea5c6",
+  mjs: "#84a62b",
+  cjs: "#a3872b",
+  ts: "#3178c6",
+  tsx: "#2b8a89",
+  json: "#e0503a",
+  svg: "#c27a0e",
+  css: "#7a4fc0",
+  png: "#c2347a",
+  jpg: "#a33aa8",
+  jpeg: "#a33aa8",
+  gif: "#5a63d6",
+  webp: "#16936b",
+  ttf: "#8a6a4f",
+  otf: "#8a6a4f",
+  wasm: "#654ff0",
+};
 
 interface NetworkGraphParams {
   maxParentDepth?: number | string;
@@ -243,16 +264,25 @@ const helpers = {
   },
 
   getExtColor(extName: string) {
-    const colors: Record<string, string> = {
-      js: "#f1e05a50",
-      ts: "#2b748950",
-      tsx: "#2b748950",
-      json: "#e34c2650",
-      svg: "#e69f0d50",
-      css: "#563d7c50",
-      png: "#e44b2350",
-    };
-    return colors[extName] ?? colors.js;
+    const known = EXT_COLORS[extName];
+    if (known) return known;
+    let hash = 0;
+    for (const char of String(extName)) {
+      hash = (hash * 31 + char.charCodeAt(0)) % 360;
+    }
+    return `hsl(${hash} 55% 45%)`;
+  },
+  // Marks the biggest items (over `SIZE_HEAT_MIN`) with `sizeHeat`: 3 for the biggest
+  withSizeHeat<T extends Record<string, unknown>>(items: T[], field: string) {
+    const top = items
+      .map((item) => item[field] as number)
+      .filter((size) => size > SIZE_HEAT_MIN)
+      .sort((a, b) => b - a)
+      .slice(0, SIZE_HEAT_TOP);
+    return items.map((item) => {
+      const rank = top.indexOf(item[field] as number);
+      return rank === -1 ? item : { ...item, sizeHeat: SIZE_HEAT_TOP - rank };
+    });
   },
   getFileExtension(filename: string) {
     const idx = filename.lastIndexOf(".");
