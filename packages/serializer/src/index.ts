@@ -195,10 +195,7 @@ async function createJsonReport({
     processModuleFilter,
   );
 
-  let packages: ReportPackage[] = toPackages([
-    ...preModules,
-    ...dependencies,
-  ]);
+  let packages: ReportPackage[] = toPackages([...preModules, ...dependencies]);
   const modules = preModules
     .map((m) => toModuleStruct(m, includeCode))
     .concat(dependencies.map((m) => toModuleStruct(m, includeCode)));

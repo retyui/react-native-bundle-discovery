@@ -39,3 +39,5 @@ packages/*/README.md
 # Generated at runtime by the Rozenite plugin
 packages/rozenite-plugin/.stats/*
 !packages/rozenite-plugin/.stats/.dir
+
+.claude/

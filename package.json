@@ -21,7 +21,9 @@
     "version-packages": "changeset version && yarn install --mode=update-lockfile",
     "release": "yarn build && changeset publish",
     "website:dev": "yarn workspace react-native-bundle-discovery-website run dev",
-    "website:build": "yarn workspace react-native-bundle-discovery-website run build:website"
+    "website:build": "yarn workspace react-native-bundle-discovery-website run build:website",
+    "examples:build-ios": "bash -c 'for d in examples/*/; do echo \"▶ $d\" && (cd \"$d\" && yarn build-ios) || exit 1; done'",
+    "examples:discovery": "bash -c 'trap \"kill 0\" EXIT; for d in examples/*/; do (cd \"$d\" && yarn discovery) & done; wait'"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",

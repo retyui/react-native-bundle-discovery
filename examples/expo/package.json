@@ -29,9 +29,9 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
-    "react-native-bundle-discovery": "^2.9.0",
-    "react-native-bundle-discovery-cli": "^2.9.0",
-    "react-native-bundle-discovery-ui": "^2.9.0",
+    "react-native-bundle-discovery": "^2.9.1",
+    "react-native-bundle-discovery-cli": "^2.9.1",
+    "react-native-bundle-discovery-ui": "^2.9.1",
     "typescript": "~6.0.3"
   },
   "scripts": {

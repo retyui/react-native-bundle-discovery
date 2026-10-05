@@ -3172,10 +3172,10 @@ __metadata:
     prettier: "npm:2.8.8"
     react: "npm:19.2.3"
     react-native: "npm:0.87.1"
-    react-native-bundle-discovery: "npm:^2.9.0"
-    react-native-bundle-discovery-cli: "npm:^2.9.0"
-    react-native-bundle-discovery-rozenite-plugin: "npm:^2.9.0"
-    react-native-bundle-discovery-ui: "npm:^2.9.0"
+    react-native-bundle-discovery: "npm:^2.9.1"
+    react-native-bundle-discovery-cli: "npm:^2.9.1"
+    react-native-bundle-discovery-rozenite-plugin: "npm:^2.9.1"
+    react-native-bundle-discovery-ui: "npm:^2.9.1"
     react-native-safe-area-context: "npm:^5.5.2"
     react-test-renderer: "npm:19.2.3"
     typescript: "npm:^6.0.3"
@@ -8481,32 +8481,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-bundle-discovery-cli@npm:^2.9.0":
-  version: 2.9.0
-  resolution: "react-native-bundle-discovery-cli@npm:2.9.0"
+"react-native-bundle-discovery-cli@npm:^2.9.1":
+  version: 2.9.1
+  resolution: "react-native-bundle-discovery-cli@npm:2.9.1"
   dependencies:
     chalk: "npm:^4.1.2"
     minimist: "npm:^1.2.8"
   bin:
     react-native-bundle-discovery-cli: ./dist/bin.js
-  checksum: 10c0/2bd59b50f17c08fd8c97236f7bdf04223b8882f4188d972d90fb7c39650bb4029e03a97029cb0f96f620870d0e34ced1648b275021238f6a7ca7de46dc1efe16
+  checksum: 10c0/ede24334f4dfca5f5d7e26cf9591a6f425bddde4ab3ea8e6d6e1a1ab0fcefb2edcfec9e1b6ae4e5307fc24a699c2fe18f73e81ff780227054e7b4f787aae859c
   languageName: node
   linkType: hard
 
-"react-native-bundle-discovery-rozenite-plugin@npm:^2.9.0":
-  version: 2.9.0
-  resolution: "react-native-bundle-discovery-rozenite-plugin@npm:2.9.0"
+"react-native-bundle-discovery-rozenite-plugin@npm:^2.9.1":
+  version: 2.9.1
+  resolution: "react-native-bundle-discovery-rozenite-plugin@npm:2.9.1"
   dependencies:
     "@discoveryjs/cli": "npm:2.14.7"
     react-native-bundle-discovery: "npm:*"
     react-native-bundle-discovery-ui: "npm:*"
-  checksum: 10c0/7ec9b8f91ae14f95f692690beb0498a6b2c5946a6d43cbba5e2fc9a67e63fe8413cd6c11488e05595d4b9a507666483505c5206f2b5322f8543eda63c1fabf19
+  checksum: 10c0/173f2931ceec2ac15c1b91d54237dfca594c3148e4bde1cb9e5dfbe4045f093f77a58dd16f5ff874e71cf9d2aff200ef974efb718b3574c48c62e5e7ed8a835b
   languageName: node
   linkType: hard
 
-"react-native-bundle-discovery-ui@npm:*, react-native-bundle-discovery-ui@npm:^2.9.0":
-  version: 2.9.0
-  resolution: "react-native-bundle-discovery-ui@npm:2.9.0"
+"react-native-bundle-discovery-ui@npm:*, react-native-bundle-discovery-ui@npm:^2.9.1":
+  version: 2.9.1
+  resolution: "react-native-bundle-discovery-ui@npm:2.9.1"
   dependencies:
     "@discoveryjs/cli": "npm:2.14.7"
     "@discoveryjs/discovery": "npm:1.0.0-beta.99"
@@ -8522,13 +8522,13 @@ __metadata:
       optional: true
   bin:
     react-native-bundle-discovery-ui: ./dist/bin.js
-  checksum: 10c0/035a88a15a02876c0af0ce90a7e11ec703f04da1133bc9a625d66cfb3b0900ee144298658e2f3abbde67287bc8611879df63f72959f45f8b5469bcb242bb660a
+  checksum: 10c0/a518ae720f81f67eb71ca1962eb7ba430ceb12d6aff57f0897cdca6a101a03e94b7058b0fae9794232ce1f929c0ed99cbc8a65fe6fd74ca770e9e4414a114741
   languageName: node
   linkType: hard
 
-"react-native-bundle-discovery@npm:*, react-native-bundle-discovery@npm:^2.9.0":
-  version: 2.9.0
-  resolution: "react-native-bundle-discovery@npm:2.9.0"
+"react-native-bundle-discovery@npm:*, react-native-bundle-discovery@npm:^2.9.1":
+  version: 2.9.1
+  resolution: "react-native-bundle-discovery@npm:2.9.1"
   dependencies:
     acorn: "npm:^8.18.0"
     acorn-walk: "npm:^8.3.5"
@@ -8538,7 +8538,7 @@ __metadata:
   peerDependenciesMeta:
     metro:
       optional: true
-  checksum: 10c0/c1f939483394b5c4436e9720906d35b6dc0e58e0e8b0565b243acfd62bfe6a51ba4b100fb6cb87cd7eeda2a57844aad33f05fcd50ffbc2ca16668a3cf7e08852
+  checksum: 10c0/7ea3989da631fe2f59250f6453e0377c8874bf0be38cc6e118c8b371c5377e5c4b76ab69108955616141da515d2e2b17442b813c24ae6ba9ae61611814907624
   languageName: node
   linkType: hard
 

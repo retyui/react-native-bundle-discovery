@@ -12,7 +12,8 @@
       "!**/node_modules",
       "!examples",
       "!packages/rozenite-plugin/public",
-      "!.changeset/*.md"
+      "!.changeset/*.md",
+      "!assets/*.json"
     ]
   },
   "formatter": {
@@ -39,7 +40,13 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended"
+      "preset": "recommended",
+      "complexity": {
+        "noImportantStyles": "off"
+      },
+      "style": {
+        "noDescendingSpecificity": "off"
+      }
     }
   }
 }
