@@ -1,0 +1,26 @@
+---
+title: "createSerializer"
+---
+
+```ts
+import { createSerializer } from "react-native-bundle-discovery";
+```
+
+Creates a Metro serializer that writes the JSON report. Use it as `serializer.customSerializer` (see [Quick start](/docs/getting-started/quick-start#2-configure-metro)).
+
+## Options
+
+| Option                  | Type       | Default                          | Description                                                                               |
+| ----------------------- | ---------- | -------------------------------- | ----------------------------------------------------------------------------------------- |
+| `projectRoot`           | `string`   | **Required**                     | Project root. ⚠️ In a monorepo, use the monorepo root, not the app package directory.     |
+| `outputJsonPath`        | `string`   | `<projectRoot>/metro-stats.json` | Where to save the report.                                                                 |
+| `includeCode`           | `boolean`  | `true`                           | Include source and bundled code of each module in the report (larger file).               |
+| `includeEnvs`           | `string[]` | `[]`                             | Names of environment variables to include in the report.                                  |
+| `fetchPackagesMetadata` | `boolean`  | `true`                           | Fetch package metadata (publish date, deprecation, latest version) from the npm registry. |
+| `silent`                | `boolean`  | `false`                          | Disable log output.                                                                       |
+| `serializer`            | `Function` | Metro default serializer         | Custom serializer to wrap.                                                                |
+
+<Callout type="warn">
+With `includeCode: true` (the default) the report **contains your source code**.
+If your code is proprietary, be careful who you share the report with.
+</Callout>

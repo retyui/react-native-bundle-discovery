@@ -1,6 +1,0 @@
-[
-  { "type": "dir", "name": "getting-started", "label": "Getting Started" },
-  { "type": "dir", "name": "guides", "label": "Guides" },
-  { "type": "dir", "name": "api", "label": "API" },
-  { "type": "file", "name": "similar-projects", "label": "Similar projects" }
-]

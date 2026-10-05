@@ -4,15 +4,27 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "rspress dev",
-    "build:website": "rspress build",
-    "preview": "rspress preview"
+    "dev": "next dev",
+    "build:website": "next build",
+    "preview": "serve out"
   },
   "dependencies": {
-    "@callstack/rspress-preset": "0.6.6",
-    "@rspress/core": "^2.0.23"
+    "fumadocs-core": "16.16.1",
+    "fumadocs-mdx": "15.4.6",
+    "fumadocs-ui": "16.16.1",
+    "lucide-react": "^1.50.0",
+    "next": "16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0"
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.28",
+    "serve": "^14.2.6",
+    "tailwindcss": "^4.3.3"
   }
 }

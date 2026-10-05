@@ -44,7 +44,7 @@ jobs:
       - name: Copy builds into bundle-discovery/ and bundle-discovery-demo/
         run: |
           rm -rf gh-pages/bundle-discovery gh-pages/bundle-discovery-demo
-          cp -R website/doc_build gh-pages/bundle-discovery
+          cp -R website/out gh-pages/bundle-discovery
           cp -R demo-build gh-pages/bundle-discovery-demo
 
       - name: Commit & push

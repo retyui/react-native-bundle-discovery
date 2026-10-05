@@ -1,0 +1,5 @@
+{
+  "title": "API",
+  "defaultOpen": true,
+  "pages": ["create-serializer", "create-resolve-request"]
+}

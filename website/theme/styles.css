@@ -1,4 +1,0 @@
-/* The theme underlines links only inside paragraphs; do the same in tables and lists */
-.rp-doc :is(td, li) > .rp-link {
-  border-bottom: 1px solid var(--rp-c-text-1);
-}

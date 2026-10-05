@@ -1,0 +1,59 @@
+---
+title: "Quick start"
+---
+
+This setup is for a standard **Metro** project.
+Using Re.Pack or Rozenite? See [Other setups](/docs/getting-started/other-setups).
+
+<Callout type="info" title="Using an AI coding agent?">
+Skip the manual steps below and point your agent at the
+[`setup-react-native-bundle-discovery`](/docs/guides/ai-agent) skill.
+</Callout>
+
+## 1. Install
+
+```bash
+yarn add -D react-native-bundle-discovery      # required: generates the report
+yarn add -D react-native-bundle-discovery-ui   # optional: browser UI
+yarn add -D react-native-bundle-discovery-cli  # optional: CLI
+```
+
+## 2. Configure Metro
+
+```diff title="metro.config.js"
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
++const { createSerializer } = require('react-native-bundle-discovery');
+
+-const config = {};
++const config = {
++  serializer: {
++    customSerializer: createSerializer({
++      projectRoot: __dirname, // ⚠️ In a monorepo, use the monorepo root instead
++    }),
++  },
++};
+
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+```
+
+See all options in [`createSerializer`](/docs/api/create-serializer).
+
+## 3. Build a release bundle
+
+```bash
+npx react-native bundle \
+  --entry-file index.js \
+  --platform ios \
+  --dev false \
+  --bundle-output ios/main.jsbundle \
+  --assets-dest ios/assets
+```
+
+This writes `metro-stats.json` to your project root.
+
+## 4. Explore the report
+
+```bash
+npx react-native-bundle-discovery-ui metro-stats.json   # open in the browser
+npx react-native-bundle-discovery-cli metro-stats.json  # get recommendations in the terminal
+```
