@@ -64,7 +64,7 @@ const recommendation: Recommendation = {
       .map(({ id, createdAt, ageInYears, latestVersion }) => {
         const published = `published ${createdAt.slice(0, 10)}, ${ageInYears.toFixed(1)} years ago`;
         const latest = latestVersion ? `, latest: ${latestVersion}` : "";
-        return ` - ${id} (${published}${latest})`;
+        return ` - \`${id}\` (${published}${latest})`;
       })
       .join("\n");
 

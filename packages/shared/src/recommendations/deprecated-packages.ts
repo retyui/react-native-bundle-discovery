@@ -45,7 +45,9 @@ const recommendation: Recommendation = {
     const details = deprecatedPackages
       .map(({ id, reason, latestVersion }) => {
         const latest = latestVersion ? ` (latest: ${latestVersion})` : "";
-        return reason ? ` - ${id}${latest}: ${reason}` : ` - ${id}${latest}`;
+        return reason
+          ? ` - \`${id}\`${latest}: ${reason}`
+          : ` - \`${id}\`${latest}`;
       })
       .join("\n");
 

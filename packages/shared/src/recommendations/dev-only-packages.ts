@@ -94,7 +94,7 @@ const recommendation: Recommendation = {
     }
 
     return {
-      message: `Detected dev-only packages in the production bundle: ${bundledDevPackages.join(", ")}. 
+      message: `Detected dev-only packages in the production bundle: ${bundledDevPackages.map((id) => `\`${id}\``).join(", ")}. 
 
 Move debug-only imports/usage behind \`__DEV__\` checks so Metro can exclude them from release builds, see example below:
 
