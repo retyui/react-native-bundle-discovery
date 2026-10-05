@@ -1,5 +1,13 @@
 # react-native-bundle-discovery-ui
 
+## 2.9.1
+
+### Patch Changes
+
+- [`bcd0922`](https://github.com/retyui/react-native-bundle-discovery/commit/bcd09227bd83179005e484146c527cb01ad0d589) Thanks [@retyui](https://github.com/retyui)! - Readable "Dev bundle" and "Not minified" warnings in the top bar in dark mode.
+
+- [`e3ff2b1`](https://github.com/retyui/react-native-bundle-discovery/commit/e3ff2b1546289f054a8103958698ca8b47016763) Thanks [@retyui](https://github.com/retyui)! - Package ids like `memoize-one@5.2.1` in the "Update outdated packages", "Replace deprecated packages" and "Remove dev-only packages from production bundle" recommendations are shown as code instead of being turned into `mailto:` links in the UI.
+
 ## 2.9.0
 
 ### Minor Changes
