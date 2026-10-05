@@ -765,6 +765,10 @@ a.mo-chip-link:hover {
   background: rgb(255 165 0 / 25%);
   cursor: help;
 }
+.discovery-root-darkmode .rb-chip-warn {
+  color: #ffb84d;
+  background: rgb(255 165 0 / 18%);
+}
 .rb-size {
   display: flex;
   flex: none;
