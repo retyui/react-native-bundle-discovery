@@ -1,5 +1,11 @@
 # react-native-bundle-discovery
 
+## 2.9.0
+
+### Minor Changes
+
+- [`86b7729`](https://github.com/retyui/react-native-bundle-discovery/commit/86b77297be8530b55c490f4f7130c7f0fc3fce9d) Thanks [@retyui](https://github.com/retyui)! - New `removePromisePolyfill` option for `createResolveRequest`: removes the unused `react-native/Libraries/Promise.js` module from release bundles (Hermes provides `Promise` out of the box). The "Remove Promise polyfills" recommendation already suggested this option, but `createResolveRequest` ignored it before.
+
 ## 2.8.0
 
 ### Patch Changes
