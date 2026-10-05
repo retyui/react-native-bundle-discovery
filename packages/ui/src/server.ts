@@ -8,7 +8,6 @@ import {
 } from "@react-native-bundle-discovery/shared";
 import chalk from "chalk";
 import config from "./discoveryrc";
-import { withCompare } from "./withCompare";
 
 export function serve(
   filePath: string,
@@ -71,21 +70,19 @@ export function serve(
   const transformRcdoctor = path.join(__dirname, "rsdoctor.js");
   fs.writeFileSync(
     configFile,
-    `const {transformRSDoctorData, transformEsbuildMetafile, withComparison, withRecommendations} = require("${transformRcdoctor}");
+    `const {loadReport} = require("${transformRcdoctor}");
 module.exports = ${JSON.stringify(
       { ...config, data: "<tmp>" },
       null,
       1,
     ).replace(
       `"<tmp>"`,
-      `() => ${withCompare(
-        isRsdoctorReportPath(fullJsonPath)
-          ? `withRecommendations(transformRSDoctorData(require("${fullJsonPath}")))`
-          : isEsbuildMetafilePath(fullJsonPath)
-            ? `withRecommendations(transformEsbuildMetafile(require("${fullJsonPath}"), "${fullJsonPath}"))`
-            : `withRecommendations(require("${fullJsonPath}"))`,
-        fullCompareJsonPath,
-      )}`,
+      `() => loadReport(${JSON.stringify({
+        path: fullJsonPath,
+        rsdoctor: isRsdoctorReportPath(fullJsonPath),
+        esbuild: isEsbuildMetafilePath(fullJsonPath),
+        compare: fullCompareJsonPath,
+      })})`,
     )};`,
   );
 
