@@ -39,9 +39,9 @@
     "eslint": "^8.19.0",
     "jest": "^29.6.3",
     "prettier": "2.8.8",
-    "react-native-bundle-discovery": "^2.9.1",
-    "react-native-bundle-discovery-cli": "^2.9.1",
-    "react-native-bundle-discovery-ui": "^2.9.1",
+    "react-native-bundle-discovery": "link:../../packages/serializer",
+    "react-native-bundle-discovery-cli": "link:../../packages/cli",
+    "react-native-bundle-discovery-ui": "link:../../packages/ui",
     "react-test-renderer": "19.2.3",
     "typescript": "^6.0.3"
   },

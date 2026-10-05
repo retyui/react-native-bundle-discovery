@@ -1,0 +1,56 @@
+---
+title: "Rollipop"
+---
+
+For projects bundled with [Rollipop](https://rollipop.dev/) (Rolldown) instead of Metro, use the `bundleDiscoveryRollipopPlugin` plugin.
+It creates a `metro-stats.json` file ([format](/docs/api/report-format)) that `react-native-bundle-discovery` uses to analyze your JS bundle.
+
+1. Install the package:
+
+```bash
+yarn add -D react-native-bundle-discovery
+```
+
+2. Register the plugin in `rollipop.config.ts`:
+
+```ts title="rollipop.config.ts"
+import { bundleDiscoveryRollipopPlugin } from 'react-native-bundle-discovery';
+import { defineConfig } from 'rollipop';
+
+export default defineConfig({
+  plugins: [
+    bundleDiscoveryRollipopPlugin({
+      // Default options, you can customize them if needed
+      filename: 'metro-stats.json', // resolved against the Rollipop `root`
+      includeCode: true,
+      fetchPackagesMetadata: true,
+      enabled: !!process.env.BUNDLE_ANALYZER,
+    }),
+  ],
+});
+```
+
+3. Build a minified release bundle with the `BUNDLE_ANALYZER` environment variable
+   (Rollipop doesn't minify release bundles by default):
+
+```bash
+BUNDLE_ANALYZER=1 npx react-native bundle \
+  --entry-file index.js \
+  --platform ios \
+  --dev false \
+  --minify true \
+  --bundle-output ios/main.jsbundle \
+  --assets-dest ios/assets
+```
+
+4. After the build, `metro-stats.json` is in the root of your project. Analyze it:
+
+```bash
+npx react-native-bundle-discovery-ui metro-stats.json   # UI
+npx react-native-bundle-discovery-cli metro-stats.json  # CLI
+```
+
+<Callout type="info" title="Notes">
+Rolldown minifies the bundle as a whole, so the plugin minifies every module on its own to show its output code and size.
+Module sizes are close to, but slightly larger than, their share of the real bundle.
+</Callout>

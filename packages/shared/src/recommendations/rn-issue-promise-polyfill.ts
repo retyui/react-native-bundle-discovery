@@ -65,9 +65,10 @@ const recommendation: Recommendation = {
     const reactNativeVersion = getReactNativeVersion(packages);
 
     // The `Promise.js` fix is Metro-only (`resolveRequest`); Metro reports have no `kind`
-    const deadPromiseModules = report.kind
-      ? []
-      : modules.filter((module) => module?.path?.includes(deadCode));
+    const deadPromiseModules =
+      report.kind === "metro"
+        ? modules.filter((module) => module?.path?.includes(deadCode))
+        : [];
     const hasDeadPromiseModule = deadPromiseModules.length > 0;
 
     const removablePolyfills: string[] = [];

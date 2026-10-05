@@ -1,0 +1,49 @@
+{
+  "name": "RollipopExample",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "lint": "eslint .",
+    "start": "react-native start",
+    "test": "jest",
+    "build-ios": "BUNDLE_ANALYZER=1 npx react-native bundle --platform ios --dev false --minify true --entry-file index.js --bundle-output build/ios/main.jsbundle --assets-dest build/ios",
+    "build-android": "BUNDLE_ANALYZER=1 npx react-native bundle --platform android --dev false --minify true --entry-file index.js --bundle-output build/android/index.android.bundle --assets-dest build/android",
+    "discovery": "npx react-native-bundle-discovery-ui metro-stats.json --port 8095"
+  },
+  "dependencies": {
+    "@react-native/new-app-screen": "0.87.1",
+    "react": "19.2.3",
+    "react-native": "0.87.1",
+    "react-native-safe-area-context": "^5.5.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/runtime": "^7.25.0",
+    "@react-native-community/cli": "20.2.0",
+    "@react-native-community/cli-platform-android": "20.2.0",
+    "@react-native-community/cli-platform-ios": "20.2.0",
+    "@react-native/babel-preset": "0.87.1",
+    "@react-native/eslint-config": "0.87.1",
+    "@react-native/jest-preset": "0.87.1",
+    "@react-native/metro-config": "0.87.1",
+    "@react-native/typescript-config": "0.87.1",
+    "@types/jest": "^29.5.13",
+    "@types/react": "^19.2.0",
+    "@types/react-test-renderer": "^19.1.0",
+    "eslint": "^8.19.0",
+    "jest": "^29.6.3",
+    "prettier": "2.8.8",
+    "react-native-bundle-discovery": "link:../../packages/serializer",
+    "react-native-bundle-discovery-cli": "link:../../packages/cli",
+    "react-native-bundle-discovery-ui": "link:../../packages/ui",
+    "react-test-renderer": "19.2.3",
+    "rollipop": "1.0.0-alpha.33",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">= 22.11.0"
+  }
+}

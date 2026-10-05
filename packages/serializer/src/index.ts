@@ -4,6 +4,7 @@ import { parse, resolve } from "node:path";
 import chalk from "chalk";
 import pkg from "../package.json";
 import { keepProcessAlive, withPackagesMetadata } from "./packageMetadata";
+import { bundleDiscoveryRollipopPlugin } from "./rollipop";
 import type {
   BundleReport,
   ReportModule,
@@ -213,6 +214,7 @@ async function createJsonReport({
   }
 
   const stats: BundleReport = {
+    kind: "metro",
     date: Date.now(),
     entryPoint,
     transformOptions: graph.transformOptions,
@@ -418,6 +420,7 @@ const createProcessModuleFilter =
 
 export {
   BundleDiscoveryPlugin,
+  bundleDiscoveryRollipopPlugin,
   createProcessModuleFilter,
   createResolveRequest,
   createSerializer,

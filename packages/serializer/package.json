@@ -1,7 +1,7 @@
 {
   "name": "react-native-bundle-discovery",
   "version": "2.9.1",
-  "description": "Metro serializer and Webpack/Rspack plugin that generates a JSON report of your React Native bundle",
+  "description": "Metro serializer, Webpack/Rspack and Rollipop plugins that generate a JSON report of your React Native bundle",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/retyui/react-native-bundle-discovery.git",
@@ -25,10 +25,14 @@
     "chalk": "^4.1.2"
   },
   "peerDependencies": {
-    "metro": "*"
+    "metro": "*",
+    "rollipop": "*"
   },
   "peerDependenciesMeta": {
     "metro": {
+      "optional": true
+    },
+    "rollipop": {
       "optional": true
     }
   },

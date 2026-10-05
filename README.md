@@ -21,7 +21,7 @@ dependencies, inspect every module, and catch bundle size regressions in CI.
 - [Quick start](https://retyui.github.io/bundle-discovery/docs/getting-started/quick-start)
 - [UI](https://retyui.github.io/bundle-discovery/docs/guides/ui) and [CLI](https://retyui.github.io/bundle-discovery/docs/guides/cli)
 - [Bundle size checks in CI](https://retyui.github.io/bundle-discovery/docs/guides/ci)
-- [Re.Pack](https://retyui.github.io/bundle-discovery/docs/guides/repack), [rnx-kit](https://retyui.github.io/bundle-discovery/docs/guides/rnx-kit) and [React Native DevTools](https://retyui.github.io/bundle-discovery/docs/guides/rozenite)
+- [Re.Pack](https://retyui.github.io/bundle-discovery/docs/guides/repack), [Rollipop](https://retyui.github.io/bundle-discovery/docs/guides/rollipop), [rnx-kit](https://retyui.github.io/bundle-discovery/docs/guides/rnx-kit) and [React Native DevTools](https://retyui.github.io/bundle-discovery/docs/guides/rozenite)
 - [API](https://retyui.github.io/bundle-discovery/docs/api/create-serializer)
 
 ## Support the project
