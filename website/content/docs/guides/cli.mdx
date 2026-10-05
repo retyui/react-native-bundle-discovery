@@ -1,31 +1,172 @@
 ---
 title: "CLI"
+description: "Analyze and compare bundle reports in the terminal or CI."
 ---
 
-Requires `react-native-bundle-discovery-cli`. Run any command with `--help` to see all options.
-
-| Command    | Description                                   |
-| ---------- | --------------------------------------------- |
-| _(none)_   | Show recommended optimizations for the bundle |
-| `packages` | List all packages in the bundle               |
-| `modules`  | List the heaviest modules                     |
-| `compare`  | Compare two reports                           |
+Requires `react-native-bundle-discovery-cli`:
 
 ```bash
-# Recommended optimizations, each with an estimated saving
-# (with --format json each finding also has `sizeInBytes` and the affected `modules`)
-npx react-native-bundle-discovery-cli metro-stats.json [--format json|default]
-
-# All packages
-npx react-native-bundle-discovery-cli packages metro-stats.json [--sort size|name] [--format json|table|default]
-
-# Heaviest modules (default --limit: 50, use 0 to show all)
-# --filter accepts plain text (case-insensitive) or a regexp, e.g. --filter '/\.json/i'
-npx react-native-bundle-discovery-cli modules metro-stats.json [--limit 50] [--filter <text|/regexp/>] [--sort size|name] [--format json|table|default]
-
-# Diff two reports: total size, added/removed/changed modules and packages,
-# version changes, new duplicates and new deprecated packages
-npx react-native-bundle-discovery-cli compare --before main-stats.json --after pr-stats.json [--limit 50] [--format json|markdown|default]
+yarn add -D react-native-bundle-discovery-cli
 ```
 
-To fail CI on bundle size regressions, see [Bundle size checks in CI](/docs/guides/ci).
+Every command takes a [`metro-stats.json`](/docs/api/report-format) report. An [Rsdoctor](/docs/guides/repack#json-report-from-rsdoctor) report or an [esbuild metafile](/docs/guides/rnx-kit) works too.
+
+| Command                 | Description                                   |
+| ----------------------- | --------------------------------------------- |
+| [`analyze`](#analyze)   | Show recommended optimizations for the bundle |
+| [`packages`](#packages) | List all packages in the bundle               |
+| [`modules`](#modules)   | List the heaviest modules                     |
+| [`compare`](#compare)   | Compare two reports                           |
+
+Run any command with `--help` to see all options:
+
+```bash
+npx react-native-bundle-discovery-cli --help
+```
+
+## `analyze`
+
+Shows recommended optimizations, each with an estimated saving: duplicates, deprecated, outdated and dev-only packages, React Native issues with known fixes, and more. It's the default command, so the `analyze` name can be omitted.
+
+| Option     | Values                       | Description   |
+| ---------- | ---------------------------- | ------------- |
+| `--format` | `default` (default), `json`  | Output format |
+
+```bash
+# Recommendations for the bundle
+npx react-native-bundle-discovery-cli metro-stats.json
+
+# Same, with the command name
+npx react-native-bundle-discovery-cli analyze metro-stats.json
+
+# JSON: each finding also has `sizeInBytes` and the affected `modules`
+npx react-native-bundle-discovery-cli metro-stats.json --format json > recommendations.json
+```
+
+```text title="Output"
+Found 2 recommendations:
+Report: metro-stats.json
+
+1. Remove Promise polyfills
+   Packages: react-native@0.88.0-rc.0
+   Savings: ~176 Bytes
+   Why: Bundle contains `react-native/Libraries/Promise.js`.
+        This file is dead code because Hermes already provides Promise out of the box.
+...
+```
+
+## `packages`
+
+Lists all packages in the bundle with their versions, paths and sizes. Every installed copy of a package is listed separately, so duplicates are easy to spot.
+
+| Option     | Values                               | Description                           |
+| ---------- | ------------------------------------ | ------------------------------------- |
+| `--sort`   | `size` (default, desc), `name` (asc) | Sort order                            |
+| `--format` | `default` (default), `table`, `json` | Output format                         |
+
+```bash
+# All packages, heaviest first
+npx react-native-bundle-discovery-cli packages metro-stats.json
+
+# As a table, sorted by name
+npx react-native-bundle-discovery-cli packages metro-stats.json --format table --sort name
+
+# JSON for scripts
+npx react-native-bundle-discovery-cli packages metro-stats.json --format json > packages.json
+```
+
+```text title="Output (--format table)"
+Found 18 package entries (18 unique names)
+Duplicate package names: 0
+
+#  | Package                                     | Path                                         | Size
+---+---------------------------------------------+----------------------------------------------+----------
+1  | react-native@0.88.0-rc.0                    | node_modules/react-native                    | 589.57 KB
+2  | @react-native/virtualized-lists@0.88.0-rc.0 | node_modules/@react-native/virtualized-lists | 50.15 KB
+3  | whatwg-fetch@3.6.20                         | node_modules/whatwg-fetch                    | 9.82 KB
+```
+
+## `modules`
+
+Lists the heaviest modules of the bundle.
+
+| Option     | Values                               | Description                                                                        |
+| ---------- | ------------------------------------ | ---------------------------------------------------------------------------------- |
+| `--limit`  | number, default `50`                 | Max number of modules to print. `0` prints all                                     |
+| `--filter` | `text` or `/regexp/flags`            | Keep only modules whose path matches: plain text (case-insensitive) or a regexp    |
+| `--sort`   | `size` (default, desc), `name` (asc) | Sort order                                                                         |
+| `--format` | `default` (default), `table`, `json` | Output format                                                                      |
+
+```bash
+# Top 50 heaviest modules
+npx react-native-bundle-discovery-cli modules metro-stats.json
+
+# Top 10
+npx react-native-bundle-discovery-cli modules metro-stats.json --limit 10
+
+# All modules of one package
+npx react-native-bundle-discovery-cli modules metro-stats.json --filter node_modules/lodash --limit 0
+
+# Only JSON files, using a regexp
+npx react-native-bundle-discovery-cli modules metro-stats.json --filter '/\.json$/i'
+
+# Your own code only, sorted by path
+npx react-native-bundle-discovery-cli modules metro-stats.json --filter '/^(?!.*node_modules)/' --sort name --format table
+```
+
+```text title="Output (--filter '/\.json$/i')"
+Found 1 of 516 modules matching /\.json$/i - 73 Bytes
+1. app.json - 73 Bytes
+```
+
+## `compare`
+
+Compares two reports: total size, added, removed and changed modules and packages, version changes, new duplicates and new deprecated packages. The [Compare tab](/docs/guides/ui) of the UI shows the same comparison.
+
+| Option               | Values                                  | Description                                                              |
+| -------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
+| `--before`           | file, **required**                      | Base report, for example from the main branch                            |
+| `--after`            | file, **required**                      | New report, for example from a pull request                              |
+| `--limit`            | number, default `50`                    | Max number of items per list. `0` prints all                             |
+| `--format`           | `default` (default), `markdown`, `json` | Output format. Use `markdown` for a PR comment                           |
+| `--fail-on-increase` | `50KB`, `0.5MB`, `51200`, `5%`          | Exit with code `1` if the bundle grows more than the limit               |
+| `--max-size`         | `3MB`                                   | Exit with code `1` if the "after" bundle is bigger than the limit        |
+| `--fail-on`          | `new-duplicates`, `new-deprecated`      | Exit with code `1` if new duplicate and/or deprecated packages appear    |
+
+```bash
+# Diff two reports
+npx react-native-bundle-discovery-cli compare --before main-stats.json --after pr-stats.json
+
+# Show every changed module
+npx react-native-bundle-discovery-cli compare --before main-stats.json --after pr-stats.json --limit 0
+
+# Markdown report for a PR comment
+npx react-native-bundle-discovery-cli compare --before main-stats.json --after pr-stats.json --format markdown > bundle-report.md
+
+# Fail on regressions
+npx react-native-bundle-discovery-cli compare --before main-stats.json --after pr-stats.json \
+  --fail-on-increase 5% \
+  --max-size 3MB \
+  --fail-on new-duplicates,new-deprecated
+```
+
+```text title="Output"
+Bundle size comparison
+Before: main-stats.json
+After:  pr-stats.json
+
+Summary
+  Platform:   ios
+  Total size: 852.58 KB → 706.39 KB (-146.18 KB, -17.15%)
+  Modules:    531 → 516 (-15)
+  Packages:   18 → 18 (0)
+
+Modules
+  Added (1, +634 Bytes):
+    + node_modules/@babel/runtime/helpers/interopRequireWildcard.js - 634 Bytes
+  Removed (16, -4.58 KB):
+    - node_modules/@babel/runtime/helpers/wrapNativeSuper.js - 624 Bytes
+    ... and 15 more. Use --limit <n> to show more (--limit 0 shows all).
+```
+
+On GitHub Actions the markdown report is added to the job summary automatically. See [Bundle size checks in CI](/docs/guides/ci) for a full setup.

@@ -59,7 +59,7 @@ export default function HomePage() {
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link
             href="/docs/getting-started/quick-start"
-            className={`${buttonClass} bg-fd-primary text-fd-primary-foreground hover:bg-fd-primary/90`}
+            className={`${buttonClass} bg-fd-primary text-white hover:bg-fd-primary/90 dark:text-fd-primary-foreground`}
           >
             Quick start
           </Link>
