@@ -139,6 +139,7 @@ export class BundleDiscoveryPlugin {
     }
 
     compiler.hooks.done.tap("GenerateStatsJsonPlugin", (stats) => {
+      const startTime = Date.now();
       // Extract the relevant information from the stats object
       const json = stats.toJson({
         version: true,
@@ -170,7 +171,7 @@ export class BundleDiscoveryPlugin {
       // (otherwise it can exit while metadata requests are still pending)
       const releaseKeepAlive = keepProcessAlive();
 
-      this.writeReport(statsJson, outputPath)
+      this.writeReport(statsJson, outputPath, startTime)
         .catch((error: Error) => {
           console.error(
             `${chalk.yellow(`[${NAME}]`)}: Failed to create JSON report: ${error.message}`,
@@ -183,6 +184,7 @@ export class BundleDiscoveryPlugin {
   async writeReport(
     statsJson: WebpackReport,
     outputPath: string,
+    startTime: number,
   ): Promise<void> {
     if (this.fetchPackagesMetadata) {
       statsJson.packages = await withPackagesMetadata(statsJson.packages, {
@@ -197,7 +199,7 @@ export class BundleDiscoveryPlugin {
     fs.writeFileSync(outputPath, JSON.stringify(statsJson, null, 2));
 
     console.log(
-      `${chalk.yellow(`[${NAME}]`)}: Saved stats to ${chalk.green(outputPath)}`,
+      `${chalk.yellow(`[${NAME}]`)}: Saved stats to ${chalk.green(outputPath)} in ${Date.now() - startTime}ms`,
     );
   }
 

@@ -189,6 +189,7 @@ async function createJsonReport({
   options,
   fetchPackagesMetadata,
 }: CreateJsonReportParams): Promise<void> {
+  const startTime = Date.now();
   const { processModuleFilter = () => true } = options || {};
   const dependencies = Array.from(graph.dependencies.values()).filter(
     processModuleFilter,
@@ -233,7 +234,7 @@ async function createJsonReport({
 
   if (!silent) {
     console.log(
-      `${chalk.yellow(`[${NAME}]`)}: Saved stats to ${chalk.green(outputJsonPath)}`,
+      `${chalk.yellow(`[${NAME}]`)}: Saved stats to ${chalk.green(outputJsonPath)} in ${Date.now() - startTime}ms`,
     );
   }
 }
