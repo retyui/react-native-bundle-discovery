@@ -1,4 +1,29 @@
 {
   "title": "Docs",
-  "pages": ["getting-started", "guides", "api", "similar-projects"]
+  "pages": [
+    "---Getting Started---",
+    "getting-started/introduction",
+    "getting-started/quick-start",
+    "guides/ai-agent",
+
+    "---Bundlers---",
+    "guides/expo",
+    "guides/repack",
+    "guides/rollipop",
+    "guides/rnx-kit",
+
+    "---Analyze the bundle---",
+    "guides/ui",
+    "guides/cli",
+    "guides/rozenite",
+    "guides/ci",
+
+    "---API Reference---",
+    "api/create-serializer",
+    "api/create-resolve-request",
+    "api/report-format",
+
+    "---Resources---",
+    "similar-projects"
+  ]
 }
