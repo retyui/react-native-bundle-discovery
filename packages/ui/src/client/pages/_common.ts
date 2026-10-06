@@ -129,7 +129,7 @@ function getSortableContentFilter({
           content: content(`
             $filtered: ${filtered};
             #.sortBy = 'name' ? $filtered.sort(${nameField} asc)
-            : #.sortBy = 'duplicates' ? $filtered.sort(${duplicatesCount} desc, ${sizeField} desc)
+            : #.sortBy = 'duplicates' ? $filtered.[${duplicatesCount} > 0].sort(${duplicatesCount} desc, ${sizeField} desc)
             : #.sortBy = 'size' ? $filtered.sort(${sizeField} desc)
             : ${defaultSort ? `$filtered.sort(${defaultSort})` : "$filtered"}
           `),
