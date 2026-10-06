@@ -1,5 +1,11 @@
 # react-native-bundle-discovery-ui
 
+## 2.9.2
+
+### Patch Changes
+
+- [`62c3d8e`](https://github.com/retyui/react-native-bundle-discovery/commit/62c3d8eb0534a6bd4e5d54fb99cdb4a2bb90a9d0) Thanks [@retyui](https://github.com/retyui)! - Bumped `@discoveryjs/cli` to 2.15.0 (esbuild 0.28, `@discoveryjs/json-ext` 1.1).
+
 ## 2.9.1
 
 ### Patch Changes

@@ -1,5 +1,9 @@
 # react-native-bundle-discovery
 
+## 2.9.2
+
+No changes in this release.
+
 ## 2.9.1
 
 No changes in this release.
