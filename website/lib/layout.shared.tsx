@@ -14,7 +14,6 @@ export function baseOptions(): BaseLayoutProps {
       ),
     },
     links: [
-      { text: "Docs", url: "/docs/getting-started/introduction" },
       {
         text: (
           <span className="inline-flex items-center gap-1">
