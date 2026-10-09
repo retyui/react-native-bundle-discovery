@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import Module from "node:module";
+import path from "node:path";
 import minimist from "minimist";
 import { buildHtmlPage } from "./build";
 import { serve } from "./server";
@@ -33,7 +35,23 @@ function fail(message: string): never {
   process.exit(1);
 }
 
+// `@discoveryjs/cli` resolves `@discoveryjs/discovery` from `process.cwd()`,
+// which fails when run via `npx` outside a project that has it installed.
+// Expose our own node_modules as a global lookup path so it can be found.
+function exposeDiscoveryToCli() {
+  const nodeModulesDir = path.resolve(
+    require.resolve("@discoveryjs/discovery/package.json"),
+    "../../..",
+  );
+  process.env.NODE_PATH = [nodeModulesDir, process.env.NODE_PATH]
+    .filter(Boolean)
+    .join(path.delimiter);
+  (Module as unknown as { _initPaths(): void })._initPaths();
+}
+
 function main() {
+  exposeDiscoveryToCli();
+
   const argv = minimist(process.argv.slice(2), {
     alias: {
       v: "verbose",
