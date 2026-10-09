@@ -244,7 +244,7 @@ interface CreateSerializerOptions {
   serializer?: MetroSerializer;
   /** The root directory of the project. Must exist. */
   projectRoot: string;
-  /** The path where the JSON report will be saved. Defaults to "metro-stats.json" in the project root. */
+  /** The path where the JSON report will be saved. Defaults to "metro-stats-<platform>.json" (e.g. "metro-stats-ios.json") in the project root. */
   outputJsonPath?: string;
   /** Whether to include the source and output code in the JSON report. Defaults to `true`. */
   includeCode?: boolean;
@@ -281,9 +281,6 @@ function createSerializer(
     throw new Error(`[${NAME}]: Project root does not exist: ${projectRoot}`);
   }
 
-  const myOutputJsonPath =
-    outputJsonPath ?? resolve(projectRoot, "metro-stats.json");
-
   function customSerializer(
     entryPoint: string,
     preModules: ReadonlyArray<MetroModule>,
@@ -304,7 +301,12 @@ function createSerializer(
       includeEnvs,
       preModules,
       includeCode,
-      outputJsonPath: myOutputJsonPath,
+      outputJsonPath:
+        outputJsonPath ??
+        resolve(
+          projectRoot,
+          `metro-stats-${graph.transformOptions.platform}.json`,
+        ),
       rootFolder: projectRoot,
       silent,
       options,
