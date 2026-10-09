@@ -1,5 +1,11 @@
 # react-native-bundle-discovery-cli
 
+## 2.10.0
+
+### Patch Changes
+
+- [`88cae65`](https://github.com/retyui/react-native-bundle-discovery/commit/88cae65917c4ac28e62be67d32d5ea943c237419) Thanks [@retyui](https://github.com/retyui)! - Flag mock and fixture files (`__mocks__/`, `__fixtures__/`, `mock(s).ts`, `*.mock(s).ts`) in the "dev files in production bundle" recommendation.
+
 ## 2.9.1
 
 ### Patch Changes

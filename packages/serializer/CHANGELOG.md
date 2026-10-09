@@ -1,5 +1,11 @@
 # react-native-bundle-discovery
 
+## 2.10.0
+
+### Minor Changes
+
+- [`ffe4504`](https://github.com/retyui/react-native-bundle-discovery/commit/ffe45041613d3d93ac0d13345c0a1e26d2ad1e80) Thanks [@retyui](https://github.com/retyui)! - `createSerializer` now includes the platform in the default report file name: `metro-stats-ios.json` / `metro-stats-android.json` instead of `metro-stats.json`. A custom `outputJsonPath` is used as is.
+
 ## 2.9.1
 
 No changes in this release.

@@ -1,5 +1,17 @@
 # react-native-bundle-discovery-ui
 
+## 2.10.0
+
+### Patch Changes
+
+- [`88cae65`](https://github.com/retyui/react-native-bundle-discovery/commit/88cae65917c4ac28e62be67d32d5ea943c237419) Thanks [@retyui](https://github.com/retyui)! - Flag mock and fixture files (`__mocks__/`, `__fixtures__/`, `mock(s).ts`, `*.mock(s).ts`) in the "dev files in production bundle" recommendation.
+
+- [`88cae65`](https://github.com/retyui/react-native-bundle-discovery/commit/88cae65917c4ac28e62be67d32d5ea943c237419) Thanks [@retyui](https://github.com/retyui)! - Show only duplicated packages when the "Duplicates" sort is selected.
+
+- [`88cae65`](https://github.com/retyui/react-native-bundle-discovery/commit/88cae65917c4ac28e62be67d32d5ea943c237419) Thanks [@retyui](https://github.com/retyui)! - Allow Cmd/Ctrl/Shift+Click on links to open them in a new tab or window ([discoveryjs/discovery#113](https://github.com/discoveryjs/discovery/issues/113)).
+
+- [`44d56f0`](https://github.com/retyui/react-native-bundle-discovery/commit/44d56f0dfb94c99c8f4eb689302a22674508496a) Thanks [@retyui](https://github.com/retyui)! - Fix `Cannot find module @discoveryjs/discovery` when running via `npx` outside a project that has it installed
+
 ## 2.9.1
 
 ### Patch Changes
