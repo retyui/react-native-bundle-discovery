@@ -1,5 +1,15 @@
 # react-native-bundle-discovery-cli
 
+## 2.11.0
+
+### Minor Changes
+
+- [`07bb945`](https://github.com/retyui/react-native-bundle-discovery/commit/07bb94580e59966c72f427a1da2a5212a0cdc1cc) Thanks [@retyui](https://github.com/retyui)! - Add a recommendation to put i18n libraries (`fbtee`, `i18next`, `react-intl`, `@lingui/core`, …) into Metro's `nonInlinedRequires`, as they are expected to be required in many places of the code.
+
+### Patch Changes
+
+- [`f50c377`](https://github.com/retyui/react-native-bundle-discovery/commit/f50c37761e5880f4499a6f2213d95460637768fb) Thanks [@retyui](https://github.com/retyui)! - Mention `@react-native/metro-config` alongside `@react-native/babel-preset` in the "platform-specific dead code" recommendation.
+
 ## 2.10.0
 
 ### Patch Changes
