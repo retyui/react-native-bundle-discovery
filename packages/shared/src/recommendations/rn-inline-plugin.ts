@@ -50,8 +50,8 @@ You can save bundle size by removing that code as ${report?.transformOptions?.pl
 🍏 iOS: -17.76 KB
 🤖 Android: -19.61 KB
 
-To fix the issue you can bump \`@react-native/babel-preset\` to \`0.88.x\` or \`rc\` (if \`0.88.x\` not released yet).`,
-      packages: ["@react-native/babel-preset"],
+To fix the issue you can bump \`@react-native/babel-preset\` and \`@react-native/metro-config\` to \`0.88.x\` or \`rc\` (if \`0.88.x\` not released yet).`,
+      packages: ["@react-native/babel-preset", "@react-native/metro-config"],
       docsUrl: DOCS_URL,
       sizeInBytes: SAVED_BYTES[report?.transformOptions?.platform],
       modules: [affectedModule.path],
