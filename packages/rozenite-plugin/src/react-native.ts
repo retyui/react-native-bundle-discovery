@@ -31,6 +31,8 @@ try {
 
 let outputJsonPath = defaultOutputJsonPath;
 
+const SERVER_PORT = 8071; // Also hard-coded in public/index.html
+
 function injectBundleDiscovery<T extends MetroConfigLike>(
   config: T,
   options?: BundleDiscoveryPluginOptions,
@@ -72,7 +74,24 @@ function runServer(): void {
     dev: false,
     config: configFile,
     configFile,
-  }).then((server) => server.listen(8071));
+  })
+    .then((server) => {
+      // Several Metro servers can run at once (for example one per git worktree), but the panel
+      // server always uses the same port. Without this handler, the second Metro crashes on start
+      // with EADDRINUSE. Now it keeps running without its own panel server.
+      server.listen(SERVER_PORT).on("error", (error: NodeJS.ErrnoException) => {
+        console.warn(
+          error.code === "EADDRINUSE"
+            ? `[bundle-discovery] Port ${SERVER_PORT} is already in use, probably by another Metro. The Bundle Discovery panel will show that server's bundle, not this one.`
+            : `[bundle-discovery] Could not start the panel server on port ${SERVER_PORT}: ${error.message}`,
+        );
+      });
+    })
+    .catch((error: unknown) => {
+      console.warn(
+        `[bundle-discovery] Could not start the panel server: ${String(error)}`,
+      );
+    });
 }
 
 let isServerRunning = false;
