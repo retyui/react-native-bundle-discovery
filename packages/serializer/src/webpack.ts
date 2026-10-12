@@ -60,6 +60,15 @@ interface StatsModule {
   source?: string;
   size?: number;
   reasons?: StatsReason[];
+  /** Not emitted to any chunk (tree shaken or concatenated into another module) */
+  orphan?: boolean;
+  /** Modules of a concatenated module (scope hoisting) */
+  modules?: StatsModule[];
+}
+
+/** Module emitted to the bundle (a concatenated one is split into its modules) */
+interface BundledModule extends StatsModule {
+  concatenatedIn?: StatsModule;
 }
 
 interface StatsAsset {
@@ -151,6 +160,9 @@ export class BundleDiscoveryPlugin {
         ...this.options,
         all: false,
         source: true,
+        // Required to list the modules of concatenated modules
+        nestedModules: true,
+        orphanModules: true,
       }) as StatsJson;
 
       // Format the stats into the desired structure
@@ -313,10 +325,52 @@ export class BundleDiscoveryPlugin {
       )?.nameForCondition || fallbackValue
     );
   }
+  /**
+   * Tree-shaken modules are orphans (as well as concatenated ones, which are listed in their concatenated module).
+   * A concatenated module (scope hoisting) is replaced by its modules,
+   * otherwise packages hoisted into another module are missing from the report.
+   */
+  getBundledModules(statsJson: StatsJson): BundledModule[] {
+    return statsJson.modules
+      .filter((mdl) => !mdl.orphan)
+      .flatMap((mdl): BundledModule[] =>
+        mdl.modules?.length &&
+        mdl.modules.every((nested) => nested.nameForCondition)
+          ? mdl.modules.map((nested) => ({ ...nested, concatenatedIn: mdl }))
+          : [mdl],
+      );
+  }
   getModuleOutput(
-    mdl: StatsModule,
+    mdl: BundledModule,
     bundleModules: ParsedBundle | null,
   ): CodeInfo {
+    const parent = mdl.concatenatedIn;
+    if (parent) {
+      // Concatenated modules share one code in the bundle: the root module keeps it,
+      // and the size is split in proportion to the size of each module
+      const output = this.getModuleOutput(parent, bundleModules);
+      const others = (parent.modules ?? []).filter(
+        (nested) => nested.nameForCondition !== parent.nameForCondition,
+      );
+      const totalSize = (parent.modules ?? []).reduce(
+        (sum, nested) => sum + (nested.size ?? 0),
+        0,
+      );
+      const getShare = (nested: StatsModule) =>
+        totalSize
+          ? Math.floor((output.sizeInBytes * (nested.size ?? 0)) / totalSize)
+          : 0;
+
+      if (mdl.nameForCondition !== parent.nameForCondition) {
+        return { code: "", lineCount: 0, sizeInBytes: getShare(mdl) };
+      }
+      return {
+        ...output,
+        sizeInBytes:
+          output.sizeInBytes -
+          others.reduce((sum, nested) => sum + getShare(nested), 0),
+      };
+    }
     const jsCodeStrFromJSBundle = bundleModules?.modules?.[String(mdl.id)];
     if (jsCodeStrFromJSBundle) {
       const formatted =
@@ -343,8 +397,12 @@ export class BundleDiscoveryPlugin {
     bundleModules: ParsedBundle | null,
     compilerOptions: CompilerOptions,
   ): WebpackReport {
+    const bundledStatsJson = {
+      ...statsJson,
+      modules: this.getBundledModules(statsJson),
+    };
     const modulesDeps = this.buildImportsMapFromReasons(
-      statsJson,
+      bundledStatsJson,
       compilerOptions,
     );
     const context = compilerOptions.context as string;
@@ -355,7 +413,7 @@ export class BundleDiscoveryPlugin {
       entryPoint: this.getEntryFile(statsJson, context),
       rootFolder:
         this.findCommonRoot(
-          statsJson.modules
+          bundledStatsJson.modules
             .map((m) => m.nameForCondition)
             .filter((p): p is string => Boolean(p)),
         ) || context,
@@ -368,7 +426,7 @@ export class BundleDiscoveryPlugin {
         // type: "module",
         // unstable_transformProfile: "default",
       },
-      modules: statsJson.modules
+      modules: bundledStatsJson.modules
         .map((mdl): ReportModule | null => {
           if (mdl.type === "runtime modules") {
             if (!bundleModules) {
@@ -404,7 +462,7 @@ export class BundleDiscoveryPlugin {
           };
         })
         .filter((e): e is ReportModule => e !== null && Boolean(e.path)),
-      packages: this.getPackages(statsJson),
+      packages: this.getPackages(bundledStatsJson),
     };
   }
 
