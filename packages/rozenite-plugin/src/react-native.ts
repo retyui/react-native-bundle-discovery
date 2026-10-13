@@ -82,14 +82,14 @@ function runServer(): void {
       server.listen(SERVER_PORT).on("error", (error: NodeJS.ErrnoException) => {
         console.warn(
           error.code === "EADDRINUSE"
-            ? `[bundle-discovery] Port ${SERVER_PORT} is already in use, probably by another Metro. The Bundle Discovery panel will show that server's bundle, not this one.`
-            : `[bundle-discovery] Could not start the panel server on port ${SERVER_PORT}: ${error.message}`,
+            ? `[react-native-bundle-discovery] Port ${SERVER_PORT} is already in use, probably by another Metro. The Bundle Discovery panel will show that server's bundle, not this one.`
+            : `[react-native-bundle-discovery] Could not start the panel server on port ${SERVER_PORT}: ${error.message}`,
         );
       });
     })
     .catch((error: unknown) => {
       console.warn(
-        `[bundle-discovery] Could not start the panel server: ${String(error)}`,
+        `[react-native-bundle-discovery] Could not start the panel server: ${String(error)}`,
       );
     });
 }
