@@ -1,5 +1,9 @@
 # react-native-bundle-discovery
 
+## 2.11.1
+
+No changes in this release.
+
 ## 2.11.0
 
 No changes in this release.

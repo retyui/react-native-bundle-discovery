@@ -1,5 +1,14 @@
 # react-native-bundle-discovery-rozenite-plugin
 
+## 2.11.1
+
+### Patch Changes
+
+- [#29](https://github.com/retyui/react-native-bundle-discovery/pull/29) [`c3679d5`](https://github.com/retyui/react-native-bundle-discovery/commit/c3679d50bb173435d8fc5ee5748ade2b8aa7faa3) Thanks [@Mohamed-kassim](https://github.com/Mohamed-kassim)! - Don't crash Metro when port 8071 is already in use. With two Metro servers running at once (for example one per git worktree), the second one used to exit on start with `EADDRINUSE`. It now prints a warning and keeps running without its own panel server.
+- Updated dependencies []:
+  - react-native-bundle-discovery@2.11.1
+  - react-native-bundle-discovery-ui@2.11.1
+
 ## 2.11.0
 
 ### Patch Changes
