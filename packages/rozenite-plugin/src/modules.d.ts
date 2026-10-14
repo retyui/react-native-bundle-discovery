@@ -1,6 +1,6 @@
 declare module "@discoveryjs/cli" {
   interface DiscoveryServer {
-    listen(port: number, callback?: () => void): void;
+    listen(port: number, callback?: () => void): import("node:http").Server;
   }
   export function createServer(
     options: Record<string, unknown>,
