@@ -4,6 +4,7 @@ import deprecatedPackages from "./deprecated-packages";
 import devFiles from "./dev-files";
 import devOnlyPackages from "./dev-only-packages";
 import duplicatePackages from "./duplicate-packages";
+import duplicateXmlHttpRequest from "./duplicate-xml-http-request";
 import i18nNonInlinedRequires from "./i18n-non-inlined-requires";
 import reactNativeLinearGradient from "./linear-gradient";
 import outdatedPackages from "./outdated-packages";
@@ -35,6 +36,7 @@ const recommendations: Recommendation[] = [
   workletsBundleMode,
   wrongPlatformFiles,
   i18nNonInlinedRequires,
+  duplicateXmlHttpRequest,
 ];
 
 export default recommendations;
