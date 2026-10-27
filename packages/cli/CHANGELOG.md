@@ -1,5 +1,13 @@
 # react-native-bundle-discovery-cli
 
+## 2.12.0
+
+### Minor Changes
+
+- [`bd2a5e0`](https://github.com/retyui/react-native-bundle-discovery/commit/bd2a5e08f41a2051fef7c9a1a1dedeaf89a057bc) Thanks [@retyui](https://github.com/retyui)! - Add a recommendation to remove extra `XMLHttpRequest` implementations from the bundle and use the one built into React Native (`react-native/Libraries/Network/XMLHttpRequest.js`).
+
+- [`fe3306e`](https://github.com/retyui/react-native-bundle-discovery/commit/fe3306e8f3306702a023748559838e25492f57d6) Thanks [@retyui](https://github.com/retyui)! - Add a recommendation that lists packages shipping inlined TypeScript (`__awaiter`, `__extends`, ...) or Babel (`_classCallCheck`, `_asyncToGenerator`, ...) helpers in their source code, with the files that contain them.
+
 ## 2.11.0
 
 ### Minor Changes
