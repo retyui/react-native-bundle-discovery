@@ -7,8 +7,9 @@ function getPackage(entry: string) {
   $totalSize: $.modules.sum(=>output.sizeInBytes);
   $toModule: => {
     ext:  $.path.getFileExtension(),
-    name: $.path, 
-    size: $.output.sizeInBytes.formatBytes(), 
+    name: $.path,
+    size: $.output.sizeInBytes.formatBytes(),
+    sizeInBytes: $.output.sizeInBytes,
     percent: ($.output.sizeInBytes / $totalSize).percent(3),
   };
 
@@ -196,6 +197,11 @@ function getPackageList({
   limit?: number | false;
   subLimit?: number | false;
 }): SingleViewConfig {
+  const fileConfig: SingleViewConfig = {
+    view: "tree-leaf",
+    content: getTreeModule({ hasPercent: true }),
+  };
+
   return {
     view: "list",
     data,
@@ -258,12 +264,15 @@ function getPackageList({
               latestVersion: "metadata.latestVersion",
               renderLatestVersion: true,
             }),
+            {
+              view: "files-sort",
+              className: "files-sort",
+              fileConfig,
+              limit: subLimit,
+            },
           ],
           children: `$.modules`,
-          itemConfig: {
-            view: "tree-leaf",
-            content: getTreeModule({ hasPercent: true }),
-          },
+          itemConfig: fileConfig,
         },
       },
     },
