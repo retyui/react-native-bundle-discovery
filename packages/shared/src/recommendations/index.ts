@@ -6,6 +6,7 @@ import devOnlyPackages from "./dev-only-packages";
 import duplicatePackages from "./duplicate-packages";
 import duplicateXmlHttpRequest from "./duplicate-xml-http-request";
 import i18nNonInlinedRequires from "./i18n-non-inlined-requires";
+import inlinedPackageHelpers from "./inlined-package-helpers";
 import reactNativeLinearGradient from "./linear-gradient";
 import outdatedPackages from "./outdated-packages";
 import packageJsonFiles from "./package-json-files";
@@ -37,6 +38,7 @@ const recommendations: Recommendation[] = [
   wrongPlatformFiles,
   i18nNonInlinedRequires,
   duplicateXmlHttpRequest,
+  inlinedPackageHelpers,
 ];
 
 export default recommendations;
