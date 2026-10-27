@@ -51,7 +51,14 @@ jobs:
           REPO_URL="https://github.com/$GITHUB_REPOSITORY"
           {
             echo "## What's Changed"
-            sed -n "/^## $VERSION\$/,/^## /{/^## /!p;}" packages/serializer/CHANGELOG.md
+            for DIR in serializer ui cli rozenite-plugin; do
+              NOTES=$(sed -n "/^## $VERSION\$/,/^## /{/^## /!p;}" "packages/$DIR/CHANGELOG.md" | sed -e '/^No changes in this release\.$/d' -e 's/^### /#### /')
+              if [ -n "$(echo "$NOTES" | tr -d '[:space:]')" ]; then
+                echo
+                echo "### $(node -p "require('./packages/$DIR/package.json').name")"
+                echo "$NOTES"
+              fi
+            done
             echo
             echo "---"
             echo
