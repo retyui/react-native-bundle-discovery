@@ -8,6 +8,7 @@ export const siteUrl = "https://retyui.github.io";
 export const demoUrl = "https://retyui.github.io/bundle-discovery-demo/";
 export const docsRoute = "/docs";
 export const docsContentRoute = "/llms.mdx/docs";
+export const gaMeasurementId = "G-TKH1TK5E27";
 
 export const gitConfig = {
   user: "retyui",
