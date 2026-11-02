@@ -24,7 +24,7 @@ const recommendation: Recommendation = {
       message: `Bundle contains ${xhrModules.length} \`XMLHttpRequest\` implementations.
 React Native already provides one (\`node_modules/${RN_XHR_MODULE}\`), so other XMLHttpRequest polyfills/implementations can be removed:
 
-${extraModules.map((module) => `- \`${module.path}\``).join("\n")}`,
+${extraModules.map((module) => `- \`${module.path.replace(`${report.rootFolder}/`, "")}\``).join("\n")}`,
       ...getModulesSavings(extraModules),
     };
   },
