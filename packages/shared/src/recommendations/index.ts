@@ -16,6 +16,7 @@ import abortControllerPolyfill from "./rn-issue-abort-controller";
 import babelRuntimeInlineHelpers from "./rn-issue-babel-runtime";
 import hermesTransformProfile from "./rn-issue-hermesv1-profile";
 import promisePolyfill from "./rn-issue-promise-polyfill";
+import sentryWebReplayFeedback from "./sentry-web-replay-feedback";
 import type { Recommendation, RecommendationFinding } from "./types";
 import workletsBundleMode from "./worklets-bundle-mode";
 import wrongPlatformFiles from "./wrong-platform-files";
@@ -39,6 +40,7 @@ const recommendations: Recommendation[] = [
   i18nNonInlinedRequires,
   duplicateXmlHttpRequest,
   inlinedPackageHelpers,
+  sentryWebReplayFeedback,
 ];
 
 export default recommendations;
