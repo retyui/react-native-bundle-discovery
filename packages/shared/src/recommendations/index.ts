@@ -11,6 +11,7 @@ import reactNativeLinearGradient from "./linear-gradient";
 import outdatedPackages from "./outdated-packages";
 import packageJsonFiles from "./package-json-files";
 import reactNativeRadialGradient from "./radial-gradient";
+import revenuecatHybridMappings from "./revenuecat-hybrid-mappings";
 import inlinePlatformPlugin from "./rn-inline-plugin";
 import abortControllerPolyfill from "./rn-issue-abort-controller";
 import babelRuntimeInlineHelpers from "./rn-issue-babel-runtime";
@@ -41,6 +42,7 @@ const recommendations: Recommendation[] = [
   duplicateXmlHttpRequest,
   inlinedPackageHelpers,
   sentryWebReplayFeedback,
+  revenuecatHybridMappings,
 ];
 
 export default recommendations;
