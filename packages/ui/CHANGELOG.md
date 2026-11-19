@@ -1,5 +1,17 @@
 # react-native-bundle-discovery-ui
 
+## 2.13.0
+
+### Minor Changes
+
+- [#33](https://github.com/retyui/react-native-bundle-discovery/pull/33) [`98b4264`](https://github.com/retyui/react-native-bundle-discovery/commit/98b42642afdf38c09389417c08bb2918dfdbfc76) Thanks [@retyui](https://github.com/retyui)! - Add a recommendation to replace `@revenuecat/purchases-js-hybrid-mappings` (the RevenueCat web SDK bundled by `react-native-purchases`, used only on web and in Expo Go) with an empty module in production iOS/Android bundles via Metro's `resolveRequest`.
+
+- [`1284d7a`](https://github.com/retyui/react-native-bundle-discovery/commit/1284d7a593e9935b5d497f0b2ea49d5fb4da2cc2) Thanks [@retyui](https://github.com/retyui)! - Add a recommendation to exclude the web Session Replay and User Feedback integrations of `@sentry/react-native` from native bundles with `includeWebReplay: false` and `includeWebFeedback: false` in the Metro config.
+
+### Patch Changes
+
+- [`1284d7a`](https://github.com/retyui/react-native-bundle-discovery/commit/1284d7a593e9935b5d497f0b2ea49d5fb4da2cc2) Thanks [@retyui](https://github.com/retyui)! - Show `XMLHttpRequest` module paths relative to the project root in the "duplicate `XMLHttpRequest` implementations" recommendation.
+
 ## 2.12.0
 
 ### Minor Changes
